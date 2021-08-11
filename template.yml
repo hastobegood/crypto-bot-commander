@@ -1,0 +1,158 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: >-
+  binance-trading
+
+Transform:
+  - AWS::Serverless-2016-10-31
+
+Parameters:
+  EnvironmentParameter:
+    Type: String
+    Description: Environment where the stack is deployed
+    Default: test
+    AllowedValues:
+      - test
+      - prod
+  BinanceUrlParameter:
+    Description: URL of the Binance API
+    Type: String
+    Default: https://testnet.binance.vision/api
+  BinanceSecretNameParameter:
+    Description: Name of the Binance secret stored in Secrets Manager
+    Type: String
+    Default: test-binance-trading-secret
+  BinanceSecretEncryptionKeyParameter:
+    Description: Encryption key used to encrypt the Binance secret in Secrets Manager (either a key id 'key/xxx' or an alias 'alias/xxx')
+    Type: String
+    Default: alias/aws/secretsmanager
+
+Mappings:
+  EnvironmentMap:
+    test:
+      DcaTradingConfig: '{ "baseAsset": "BTC", "quoteAsset": "BUSD", "quoteAssetQuantity": 25, "tradeAssets": [ { "asset": "ETH", "percentage": 0.50 } ] }'
+      DcaTradingSchedule: cron(0 18 ? * * *)
+      BotTradingConfig: '{ "baseAsset": "BTC", "quoteAsset": "USDT", "quoteAssetQuantity": 10, "buyPercentage": -0.03, "sellPercentage": 0.03, "dumpPercentage": -0.005 }'
+      BotTradingConfigSchedule: rate(1 minute)
+    prod:
+      DcaTradingConfig: '{ "baseAsset": "BTC", "quoteAsset": "EUR", "quoteAssetQuantity": 20, "tradeAssets": [ { "asset": "ETH", "percentage": 0.28 }, { "asset":"XRP", "percentage": 0.28 }, { "asset": "ADA", "percentage": 0.20 } ] }'
+      DcaTradingSchedule: cron(0 18 ? * 1 *)
+      BotTradingConfig: '{ "baseAsset": "BTC", "quoteAsset": "USDT", "quoteAssetQuantity": 10, "buyPercentage": -0.03, "sellPercentage": 0.03, "dumpPercentage": -0.005 }'
+      BotTradingConfigSchedule: rate(1 minute)
+
+Globals:
+  Function:
+    Runtime: nodejs14.x
+    MemorySize: 128
+    Timeout: 30
+    AutoPublishAlias: Live
+    Tracing: Active
+
+Resources:
+  DcaTradingFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Description: DCA trading function
+      CodeUri: dist/webpack/dca-trading-handler
+      Handler: app.handler
+      ReservedConcurrentExecutions: 1
+      Environment:
+        Variables:
+          ENV: !Ref EnvironmentParameter
+          REGION: !Ref AWS::Region
+          BINANCE_URL: !Ref BinanceUrlParameter
+          BINANCE_SECRET_NAME: !Ref BinanceSecretNameParameter
+          TRADING_TABLE_NAME: !Ref TradingTable
+          DCA_TRADING_CONFIG: !FindInMap [ EnvironmentMap, !Ref EnvironmentParameter, DcaTradingConfig ]
+      Events:
+        ScheduleEvent:
+          Type: Schedule
+          Properties:
+            Enabled: true
+            Schedule: !FindInMap [ EnvironmentMap, !Ref EnvironmentParameter, DcaTradingSchedule ]
+      Policies:
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Sub arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${BinanceSecretNameParameter}*
+        - Version: 2012-10-17
+          Statement:
+            - Effect: Allow
+              Action:
+                - kms:Decrypt
+              Resource: !Sub arn:aws:kms:${AWS::Region}:${AWS::AccountId}:${BinanceSecretEncryptionKeyParameter}
+        - DynamoDBReadPolicy:
+            TableName: !Ref TradingTable
+        - DynamoDBWritePolicy:
+            TableName: !Ref TradingTable
+
+  BotTradingFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Description: BOT trading function
+      CodeUri: dist/webpack/bot-trading-handler
+      Handler: app.handler
+      ReservedConcurrentExecutions: 1
+      Environment:
+        Variables:
+          ENV: !Ref EnvironmentParameter
+          REGION: !Ref AWS::Region
+          BINANCE_URL: !Ref BinanceUrlParameter
+          BINANCE_SECRET_NAME: !Ref BinanceSecretNameParameter
+          TRADING_TABLE_NAME: !Ref TradingTable
+          BOT_TRADING_CONFIG: !FindInMap [ EnvironmentMap, !Ref EnvironmentParameter, BotTradingConfig ]
+      Events:
+        ScheduleEvent:
+          Type: Schedule
+          Properties:
+            Enabled: false
+            Schedule: !FindInMap [ EnvironmentMap, !Ref EnvironmentParameter, BotTradingConfigSchedule ]
+      Policies:
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Sub arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${BinanceSecretNameParameter}*
+        - Version: 2012-10-17
+          Statement:
+            - Effect: Allow
+              Action:
+                - kms:Decrypt
+              Resource: !Sub arn:aws:kms:${AWS::Region}:${AWS::AccountId}:${BinanceSecretEncryptionKeyParameter}
+        - DynamoDBReadPolicy:
+            TableName: !Ref TradingTable
+        - DynamoDBWritePolicy:
+            TableName: !Ref TradingTable
+
+  TradingTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      BillingMode: PAY_PER_REQUEST
+      SSESpecification:
+        SSEEnabled: true
+      KeySchema:
+        - AttributeName: pk
+          KeyType: HASH
+        - AttributeName: sk
+          KeyType: RANGE
+      AttributeDefinitions:
+        - AttributeName: pk
+          AttributeType: S
+        - AttributeName: sk
+          AttributeType: S
+
+Outputs:
+  DcaTradingFunctionName:
+    Description: DCA trading function name
+    Value: !Ref DcaTradingFunction
+  DcaTradingFunctionArn:
+    Description: DCA trading function ARN
+    Value: !GetAtt DcaTradingFunction.Arn
+
+  BotTradingFunctionName:
+    Description: BOT trading function name
+    Value: !Ref BotTradingFunction
+  BotTradingFunctionArn:
+    Description: DCA trading function ARN
+    Value: !GetAtt BotTradingFunction.Arn
+
+  TradingTableName:
+    Description: Trading table name
+    Value: !Ref TradingTable
+  TradingTableArn:
+    Description: Trading table ARN
+    Value: !GetAtt TradingTable.Arn

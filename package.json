@@ -1,0 +1,57 @@
+{
+  "name": "aws-sam-binance-trading",
+  "version": "0.1.0",
+  "license": "MIT",
+  "private": true,
+  "engines": {
+    "node": "^14"
+  },
+  "scripts": {
+    "clean": "rm -rf dist .aws-sam coverage node_modules",
+    "build": "yarn tsc",
+    "bundle": "yarn webpack",
+    "deploy:test": "sam build && sam deploy --config-env test",
+    "deploy:prod": "sam build && sam deploy --config-env prod",
+    "test": "jest",
+    "lint": "yarn eslint . --ext .ts",
+    "lint:fix": "yarn eslint . --ext .ts --fix"
+  },
+  "dependencies": {
+    "aws-sdk": "^2.966.0",
+    "aws-xray-sdk": "^3.3.3",
+    "axios": "^0.21.1",
+    "lodash": "^4.17.21",
+    "pino": "^6.13.0",
+    "source-map-support": "^0.5.19"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.82",
+    "@types/copy-webpack-plugin": "^8.0.1",
+    "@types/fs-extra": "^9.0.12",
+    "@types/jest": "^27.0.0",
+    "@types/lodash": "^4.14.172",
+    "@types/node": "^16.4.14",
+    "@types/pino": "^6.3.11",
+    "@types/randomstring": "^1.1.7",
+    "@types/source-map-support": "^0.5.4",
+    "@types/webpack-node-externals": "^2.5.2",
+    "@typescript-eslint/eslint-plugin": "^4.29.1",
+    "@typescript-eslint/parser": "^4.29.1",
+    "copy-webpack-plugin": "^9.0.1",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-prettier": "^3.4.0",
+    "fs-extra": "^10.0.0",
+    "jest": "^27.0.6",
+    "mockdate": "^3.0.5",
+    "prettier": "^2.3.2",
+    "randomstring": "^1.2.1",
+    "ts-jest": "^27.0.4",
+    "ts-loader": "^9.2.5",
+    "ts-node": "^10.2.0",
+    "typescript": "^4.3.5",
+    "webpack": "^5.50.0",
+    "webpack-cli": "^4.7.2",
+    "webpack-node-externals": "^3.0.0"
+  }
+}
