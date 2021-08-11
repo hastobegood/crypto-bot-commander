@@ -7,7 +7,7 @@
     "node": "^14"
   },
   "scripts": {
-    "clean": "rm -rf dist .aws-sam coverage node_modules",
+    "clean": "rm -rf dist .aws-sam coverage",
     "build": "yarn tsc",
     "bundle": "yarn webpack",
     "deploy:test": "sam build && sam deploy --config-env test",
