@@ -34,7 +34,7 @@ Mappings:
       BotTradingConfig: '{ "baseAsset": "BTC", "quoteAsset": "USDT", "quoteAssetQuantity": 10, "buyPercentage": -0.03, "sellPercentage": 0.03, "dumpPercentage": -0.005 }'
       BotTradingConfigSchedule: rate(1 minute)
     prod:
-      DcaTradingConfig: '{ "baseAsset": "BTC", "quoteAsset": "EUR", "quoteAssetQuantity": 20, "tradeAssets": [ { "asset": "ETH", "percentage": 0.28 }, { "asset":"XRP", "percentage": 0.28 }, { "asset": "ADA|MATIC", "percentage": 0.20 } ] }'
+      DcaTradingConfig: '{ "baseAsset": "BTC", "quoteAsset": "EUR", "quoteAssetQuantity": 25, "tradeAssets": [ { "asset": "ETH", "percentage": 0.28 }, { "asset":"XRP", "percentage": 0.28 }, { "asset": "ADA|MATIC", "percentage": 0.20 } ] }'
       DcaTradingSchedule: cron(0 18 ? * 1 *)
       BotTradingConfig: '{ "baseAsset": "BTC", "quoteAsset": "USDT", "quoteAssetQuantity": 10, "buyPercentage": -0.03, "sellPercentage": 0.03, "dumpPercentage": -0.005 }'
       BotTradingConfigSchedule: rate(1 minute)
