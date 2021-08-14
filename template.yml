@@ -147,7 +147,7 @@ Outputs:
     Description: BOT trading function name
     Value: !Ref BotTradingFunction
   BotTradingFunctionArn:
-    Description: DCA trading function ARN
+    Description: BOT trading function ARN
     Value: !GetAtt BotTradingFunction.Arn
 
   TradingTableName:
