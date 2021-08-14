@@ -47,4 +47,61 @@ describe('DdbDcaTradingRepository', () => {
       });
     });
   });
+
+  describe('Given the last DCA trading to retrieve', () => {
+    describe('When item is not found', () => {
+      beforeEach(() => {
+        ddbClientMock.get = jest.fn().mockReturnValue({
+          promise: jest.fn().mockResolvedValue({
+            Item: undefined,
+          }),
+        });
+      });
+
+      afterEach(() => {
+        expect(ddbClientMock.get).toHaveBeenCalledTimes(1);
+        const getParams = ddbClientMock.get.mock.calls[0];
+        expect(getParams).toBeDefined();
+        expect(getParams[0]).toBeDefined();
+        expect(getParams[0].TableName).toEqual('my-table');
+        expect(getParams[0].Key).toEqual({ pk: 'DcaTrading::Last', sk: 'Details' });
+      });
+
+      it('Then null is returned', async () => {
+        const result = await dcaTradingRepository.getLast();
+        expect(result).toBeDefined();
+        expect(result).toEqual(null);
+      });
+    });
+
+    describe('When item is found', () => {
+      let dcaTrading: DcaTrading;
+
+      beforeEach(() => {
+        dcaTrading = buildDefaultDcaTrading();
+        ddbClientMock.get = jest.fn().mockReturnValue({
+          promise: jest.fn().mockResolvedValue({
+            Item: {
+              data: { ...dcaTrading, creationDate: dcaTrading.creationDate.toISOString() },
+            },
+          }),
+        });
+      });
+
+      afterEach(() => {
+        expect(ddbClientMock.get).toHaveBeenCalledTimes(1);
+        const getParams = ddbClientMock.get.mock.calls[0];
+        expect(getParams).toBeDefined();
+        expect(getParams[0]).toBeDefined();
+        expect(getParams[0].TableName).toEqual('my-table');
+        expect(getParams[0].Key).toEqual({ pk: 'DcaTrading::Last', sk: 'Details' });
+      });
+
+      it('Then last DCA trading is returned', async () => {
+        const result = await dcaTradingRepository.getLast();
+        expect(result).toBeDefined();
+        expect(result).toEqual(dcaTrading);
+      });
+    });
+  });
 });

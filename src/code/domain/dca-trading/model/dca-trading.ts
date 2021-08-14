@@ -21,6 +21,8 @@ export interface DcaTradingOrder {
   id?: string;
   success: boolean;
   message?: string;
+  baseAsset: string;
+  quoteAsset: string;
   symbol: string;
   requestedQuantity: number;
   executedQuantity?: number;

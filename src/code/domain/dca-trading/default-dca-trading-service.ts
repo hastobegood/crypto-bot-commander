@@ -27,13 +27,14 @@ export class DefaultDcaTradingService implements DcaTradingService {
   async #trade(dcaTradingConfig: DcaTradingConfig, symbol: string): Promise<DcaTradingOrder[]> {
     const orders = [];
 
-    const baseOrder = await this.#order(symbol, dcaTradingConfig.quoteAssetQuantity);
+    const baseOrder = await this.#order(dcaTradingConfig.baseAsset, dcaTradingConfig.quoteAsset, symbol, dcaTradingConfig.quoteAssetQuantity);
     orders.push(baseOrder);
 
     if (baseOrder.success) {
       const tradeOrders = await Promise.all(
-        dcaTradingConfig.tradeAssets.map((tradeAsset) => {
-          return this.#order(`${tradeAsset.asset}${dcaTradingConfig.baseAsset}`, tradeAsset.percentage * baseOrder.executedQuantity!);
+        dcaTradingConfig.tradeAssets.map(async (tradeAsset) => {
+          const chosenAsset = await this.#chooseAsset(tradeAsset.asset);
+          return this.#order(chosenAsset, dcaTradingConfig.baseAsset, `${chosenAsset}${dcaTradingConfig.baseAsset}`, tradeAsset.percentage * baseOrder.executedQuantity!);
         }),
       );
       orders.push(...tradeOrders);
@@ -42,7 +43,27 @@ export class DefaultDcaTradingService implements DcaTradingService {
     return orders;
   }
 
-  async #order(symbol: string, quantity: number): Promise<DcaTradingOrder> {
+  async #chooseAsset(asset: string): Promise<string> {
+    if (!asset.includes('|')) {
+      return asset;
+    }
+
+    const assetParts = asset.split('|');
+    const lastDcaTrading = await this.dcaTradingRepository.getLast();
+    const lastOrder = lastDcaTrading?.orders.find((order) => assetParts.indexOf(order.baseAsset) !== -1);
+    if (!lastOrder) {
+      return assetParts[0];
+    }
+
+    const assetIndex = assetParts.indexOf(lastOrder.baseAsset);
+    if (assetIndex + 1 >= assetParts.length) {
+      return assetParts[0];
+    }
+
+    return assetParts[assetIndex + 1];
+  }
+
+  async #order(baseAsset: string, quoteAsset: string, symbol: string, quantity: number): Promise<DcaTradingOrder> {
     const createOrder = {
       symbol: symbol,
       side: OrderSide.BUY,
@@ -63,6 +84,8 @@ export class DefaultDcaTradingService implements DcaTradingService {
       id: order?.id,
       success: !!order,
       message: message,
+      baseAsset: baseAsset,
+      quoteAsset: quoteAsset,
       symbol: symbol,
       requestedQuantity: quantity,
       executedQuantity: order?.executedAssetQuantity,

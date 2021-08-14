@@ -30,10 +30,31 @@ export class DdbDcaTradingRepository implements DcaTradingRepository {
     };
   }
 
+  async getLast(): Promise<DcaTrading | null> {
+    const getItemInput = {
+      TableName: this.tableName,
+      Key: {
+        pk: 'DcaTrading::Last',
+        sk: 'Details',
+      },
+    };
+
+    const getItemOutput = await this.ddbClient.get(getItemInput).promise();
+
+    return getItemOutput.Item ? this.#convertFromItemFormat(getItemOutput.Item.data) : null;
+  }
+
   #convertToItemFormat(dcaTrading: DcaTrading): any {
     return {
       ...dcaTrading,
       creationDate: dcaTrading.creationDate.toISOString(),
+    };
+  }
+
+  #convertFromItemFormat(dcaTrading: any): DcaTrading {
+    return {
+      ...dcaTrading,
+      creationDate: new Date(dcaTrading.creationDate),
     };
   }
 }

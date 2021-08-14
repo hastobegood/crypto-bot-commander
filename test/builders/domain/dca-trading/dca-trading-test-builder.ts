@@ -53,6 +53,8 @@ export const buildDefaultDcaTradingOrder = (success: boolean): DcaTradingOrder =
     id: success ? randomString(10) : undefined,
     success: success,
     message: success ? undefined : randomString(10),
+    baseAsset: randomString(5),
+    quoteAsset: randomString(5),
     symbol: randomString(5),
     requestedQuantity: randomNumber(1, 1_000),
     executedQuantity: success ? randomNumber(1, 1_000) : undefined,

@@ -20,7 +20,7 @@ Parameters:
   BinanceSecretNameParameter:
     Description: Name of the Binance secret stored in Secrets Manager
     Type: String
-    Default: test-binance-trading-secret
+    Default: test-BinanceTrading-Secret
   BinanceSecretEncryptionKeyParameter:
     Description: Encryption key used to encrypt the Binance secret in Secrets Manager (either a key id 'key/xxx' or an alias 'alias/xxx')
     Type: String
@@ -29,12 +29,12 @@ Parameters:
 Mappings:
   EnvironmentMap:
     test:
-      DcaTradingConfig: '{ "baseAsset": "BTC", "quoteAsset": "BUSD", "quoteAssetQuantity": 25, "tradeAssets": [ { "asset": "ETH", "percentage": 0.50 } ] }'
+      DcaTradingConfig: '{ "baseAsset": "BTC", "quoteAsset": "BUSD", "quoteAssetQuantity": 25, "tradeAssets": [ { "asset": "ETH|BNB", "percentage": 0.50 } ] }'
       DcaTradingSchedule: cron(0 18 ? * * *)
       BotTradingConfig: '{ "baseAsset": "BTC", "quoteAsset": "USDT", "quoteAssetQuantity": 10, "buyPercentage": -0.03, "sellPercentage": 0.03, "dumpPercentage": -0.005 }'
       BotTradingConfigSchedule: rate(1 minute)
     prod:
-      DcaTradingConfig: '{ "baseAsset": "BTC", "quoteAsset": "EUR", "quoteAssetQuantity": 20, "tradeAssets": [ { "asset": "ETH", "percentage": 0.28 }, { "asset":"XRP", "percentage": 0.28 }, { "asset": "ADA", "percentage": 0.20 } ] }'
+      DcaTradingConfig: '{ "baseAsset": "BTC", "quoteAsset": "EUR", "quoteAssetQuantity": 20, "tradeAssets": [ { "asset": "ETH", "percentage": 0.28 }, { "asset":"XRP", "percentage": 0.28 }, { "asset": "ADA|MATIC", "percentage": 0.20 } ] }'
       DcaTradingSchedule: cron(0 18 ? * 1 *)
       BotTradingConfig: '{ "baseAsset": "BTC", "quoteAsset": "USDT", "quoteAssetQuantity": 10, "buyPercentage": -0.03, "sellPercentage": 0.03, "dumpPercentage": -0.005 }'
       BotTradingConfigSchedule: rate(1 minute)
