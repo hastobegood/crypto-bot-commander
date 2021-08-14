@@ -11,6 +11,7 @@ export class HttpOrderRepository implements OrderRepository {
 
     return {
       ...order,
+      externalId: binanceOrder.orderId.toString(),
       executedAssetQuantity: +binanceOrder.executedQty > 0 ? +binanceOrder.executedQty : undefined,
       executedPrice: binanceOrder.fills.length ? +binanceOrder.fills.reduce((prev, current) => (prev.price > current.price ? prev : current)).price : undefined,
       transactionDate: new Date(binanceOrder.transactTime),

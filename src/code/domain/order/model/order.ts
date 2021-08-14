@@ -19,6 +19,7 @@ export interface CreateOrder {
 
 export interface Order {
   id: string;
+  externalId?: string;
   symbol: string;
   side: OrderSide;
   type: OrderType;

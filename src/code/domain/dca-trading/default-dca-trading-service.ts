@@ -82,6 +82,7 @@ export class DefaultDcaTradingService implements DcaTradingService {
 
     return {
       id: order?.id,
+      externalId: order?.externalId,
       success: !!order,
       message: message,
       baseAsset: baseAsset,

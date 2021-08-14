@@ -48,6 +48,7 @@ describe('HttpOrderRepository', () => {
         const result = await orderRepository.save(order);
         expect(result).toBeDefined();
         expect(result.id).toEqual(order.id);
+        expect(result.externalId).toEqual(binanceOrder.orderId.toString());
         expect(result.symbol).toEqual(order.symbol);
         expect(result.side).toEqual(order.side);
         expect(result.type).toEqual(order.type);
@@ -112,6 +113,7 @@ describe('HttpOrderRepository', () => {
         const result = await orderRepository.save(order);
         expect(result).toBeDefined();
         expect(result.id).toEqual(order.id);
+        expect(result.externalId).toEqual(binanceOrder.orderId.toString());
         expect(result.symbol).toEqual(order.symbol);
         expect(result.side).toEqual(order.side);
         expect(result.type).toEqual(order.type);

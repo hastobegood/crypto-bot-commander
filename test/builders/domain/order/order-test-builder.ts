@@ -15,6 +15,7 @@ export const buildDefaultCreateOrder = (): CreateOrder => {
 export const buildDefaultOrder = (): Order => {
   return {
     id: randomString(20),
+    externalId: randomString(20),
     symbol: randomString(10).toUpperCase(),
     side: OrderSide.BUY,
     type: randomFromList([OrderType.MARKET, OrderType.TAKE_PROFIT]),

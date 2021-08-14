@@ -19,6 +19,7 @@ export interface DcaTrading {
 
 export interface DcaTradingOrder {
   id?: string;
+  externalId?: string;
   success: boolean;
   message?: string;
   baseAsset: string;

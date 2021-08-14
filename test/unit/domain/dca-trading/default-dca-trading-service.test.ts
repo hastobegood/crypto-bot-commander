@@ -54,6 +54,7 @@ describe('DefaultDcaTradingService', () => {
         expect(result.orders).toBeDefined();
         expect(result.orders).toHaveLength(1);
         expect(result.orders[0].id).toBeUndefined();
+        expect(result.orders[0].externalId).toBeUndefined();
         expect(result.orders[0].success).toEqual(false);
         expect(result.orders[0].message).toEqual('Base order error !');
         expect(result.orders[0].baseAsset).toEqual('BASE');
@@ -107,6 +108,7 @@ describe('DefaultDcaTradingService', () => {
         let resultOrder = getDcaTradingOrder(result.orders, 'BASEQUOTE');
         expect(resultOrder).toBeDefined();
         expect(resultOrder!.id).toEqual(baseOrder.id);
+        expect(resultOrder!.externalId).toEqual(baseOrder.externalId);
         expect(resultOrder!.success).toEqual(true);
         expect(resultOrder!.message).toBeUndefined();
         expect(resultOrder!.baseAsset).toEqual('BASE');
@@ -118,6 +120,7 @@ describe('DefaultDcaTradingService', () => {
         resultOrder = getDcaTradingOrder(result.orders, 'ASSET1BASE');
         expect(resultOrder).toBeDefined();
         expect(resultOrder!.id).toBeUndefined();
+        expect(resultOrder!.externalId).toBeUndefined();
         expect(resultOrder!.success).toEqual(false);
         expect(resultOrder!.message).toEqual('Error on ASSET1BASE');
         expect(resultOrder!.baseAsset).toEqual('ASSET1');
@@ -129,6 +132,7 @@ describe('DefaultDcaTradingService', () => {
         resultOrder = getDcaTradingOrder(result.orders, 'ASSET2BASE');
         expect(resultOrder).toBeDefined();
         expect(resultOrder!.id).toBeUndefined();
+        expect(resultOrder!.externalId).toBeUndefined();
         expect(resultOrder!.success).toEqual(false);
         expect(resultOrder!.message).toEqual('Error on ASSET2BASE');
         expect(resultOrder!.baseAsset).toEqual('ASSET2');
@@ -140,6 +144,7 @@ describe('DefaultDcaTradingService', () => {
         resultOrder = getDcaTradingOrder(result.orders, 'ASSET3BASE');
         expect(resultOrder).toBeDefined();
         expect(resultOrder!.id).toBeUndefined();
+        expect(resultOrder!.externalId).toBeUndefined();
         expect(resultOrder!.success).toEqual(false);
         expect(resultOrder!.message).toEqual('Error on ASSET3BASE');
         expect(resultOrder!.baseAsset).toEqual('ASSET3');
@@ -223,6 +228,7 @@ describe('DefaultDcaTradingService', () => {
         let resultOrder = getDcaTradingOrder(result.orders, 'BASEQUOTE');
         expect(resultOrder).toBeDefined();
         expect(resultOrder!.id).toEqual(baseOrder.id);
+        expect(resultOrder!.externalId).toEqual(baseOrder.externalId);
         expect(resultOrder!.success).toEqual(true);
         expect(resultOrder!.message).toBeUndefined();
         expect(resultOrder!.baseAsset).toEqual('BASE');
@@ -234,6 +240,7 @@ describe('DefaultDcaTradingService', () => {
         resultOrder = getDcaTradingOrder(result.orders, 'ASSET1BASE');
         expect(resultOrder).toBeDefined();
         expect(resultOrder!.id).toEqual(tradeOrder1.id);
+        expect(resultOrder!.externalId).toEqual(tradeOrder1.externalId);
         expect(resultOrder!.success).toEqual(true);
         expect(resultOrder!.message).toBeUndefined();
         expect(resultOrder!.baseAsset).toEqual('ASSET1');
@@ -245,6 +252,7 @@ describe('DefaultDcaTradingService', () => {
         resultOrder = getDcaTradingOrder(result.orders, 'ASSET2BASE');
         expect(resultOrder).toBeDefined();
         expect(resultOrder!.id).toBeUndefined();
+        expect(resultOrder!.externalId).toBeUndefined();
         expect(resultOrder!.success).toEqual(false);
         expect(resultOrder!.message).toEqual('Error on ASSET2BASE');
         expect(resultOrder!.baseAsset).toEqual('ASSET2');
@@ -256,6 +264,7 @@ describe('DefaultDcaTradingService', () => {
         resultOrder = getDcaTradingOrder(result.orders, 'ASSET3BASE');
         expect(resultOrder).toBeDefined();
         expect(resultOrder!.id).toEqual(tradeOrder3.id);
+        expect(resultOrder!.externalId).toEqual(tradeOrder3.externalId);
         expect(resultOrder!.success).toEqual(true);
         expect(resultOrder!.message).toBeUndefined();
         expect(resultOrder!.baseAsset).toEqual('ASSET3');
@@ -342,6 +351,7 @@ describe('DefaultDcaTradingService', () => {
         let resultOrder = getDcaTradingOrder(result.orders, 'BASEQUOTE');
         expect(resultOrder).toBeDefined();
         expect(resultOrder!.id).toEqual(baseOrder.id);
+        expect(resultOrder!.externalId).toEqual(baseOrder.externalId);
         expect(resultOrder!.success).toEqual(true);
         expect(resultOrder!.message).toBeUndefined();
         expect(resultOrder!.baseAsset).toEqual('BASE');
@@ -353,6 +363,7 @@ describe('DefaultDcaTradingService', () => {
         resultOrder = getDcaTradingOrder(result.orders, 'ASSET1BASE');
         expect(resultOrder).toBeDefined();
         expect(resultOrder!.id).toEqual(tradeOrder1.id);
+        expect(resultOrder!.externalId).toEqual(tradeOrder1.externalId);
         expect(resultOrder!.success).toEqual(true);
         expect(resultOrder!.message).toBeUndefined();
         expect(resultOrder!.baseAsset).toEqual('ASSET1');
@@ -364,6 +375,7 @@ describe('DefaultDcaTradingService', () => {
         resultOrder = getDcaTradingOrder(result.orders, 'ASSET2BASE');
         expect(resultOrder).toBeDefined();
         expect(resultOrder!.id).toEqual(tradeOrder2.id);
+        expect(resultOrder!.externalId).toEqual(tradeOrder2.externalId);
         expect(resultOrder!.success).toEqual(true);
         expect(resultOrder!.message).toBeUndefined();
         expect(resultOrder!.baseAsset).toEqual('ASSET2');
@@ -375,6 +387,7 @@ describe('DefaultDcaTradingService', () => {
         resultOrder = getDcaTradingOrder(result.orders, 'ASSET3BASE');
         expect(resultOrder).toBeDefined();
         expect(resultOrder!.id).toEqual(tradeOrder3.id);
+        expect(resultOrder!.externalId).toEqual(tradeOrder3.externalId);
         expect(resultOrder!.success).toEqual(true);
         expect(resultOrder!.message).toBeUndefined();
         expect(resultOrder!.baseAsset).toEqual('ASSET3');
@@ -469,6 +482,7 @@ describe('DefaultDcaTradingService', () => {
         let resultOrder = getDcaTradingOrder(result.orders, 'BASEQUOTE');
         expect(resultOrder).toBeDefined();
         expect(resultOrder!.id).toEqual(baseOrder.id);
+        expect(resultOrder!.externalId).toEqual(baseOrder.externalId);
         expect(resultOrder!.success).toEqual(true);
         expect(resultOrder!.message).toBeUndefined();
         expect(resultOrder!.baseAsset).toEqual('BASE');
@@ -480,6 +494,7 @@ describe('DefaultDcaTradingService', () => {
         resultOrder = getDcaTradingOrder(result.orders, 'ASSET1BASE');
         expect(resultOrder).toBeDefined();
         expect(resultOrder!.id).toEqual(tradeOrder.id);
+        expect(resultOrder!.externalId).toEqual(tradeOrder.externalId);
         expect(resultOrder!.success).toEqual(true);
         expect(resultOrder!.message).toBeUndefined();
         expect(resultOrder!.baseAsset).toEqual('ASSET1');
@@ -551,6 +566,7 @@ describe('DefaultDcaTradingService', () => {
         let resultOrder = getDcaTradingOrder(result.orders, 'BASEQUOTE');
         expect(resultOrder).toBeDefined();
         expect(resultOrder!.id).toEqual(baseOrder.id);
+        expect(resultOrder!.externalId).toEqual(baseOrder.externalId);
         expect(resultOrder!.success).toEqual(true);
         expect(resultOrder!.message).toBeUndefined();
         expect(resultOrder!.baseAsset).toEqual('BASE');
@@ -562,6 +578,7 @@ describe('DefaultDcaTradingService', () => {
         resultOrder = getDcaTradingOrder(result.orders, 'ASSET1BASE');
         expect(resultOrder).toBeDefined();
         expect(resultOrder!.id).toEqual(tradeOrder.id);
+        expect(resultOrder!.externalId).toEqual(tradeOrder.externalId);
         expect(resultOrder!.success).toEqual(true);
         expect(resultOrder!.message).toBeUndefined();
         expect(resultOrder!.baseAsset).toEqual('ASSET1');
@@ -634,6 +651,7 @@ describe('DefaultDcaTradingService', () => {
         let resultOrder = getDcaTradingOrder(result.orders, 'BASEQUOTE');
         expect(resultOrder).toBeDefined();
         expect(resultOrder!.id).toEqual(baseOrder.id);
+        expect(resultOrder!.externalId).toEqual(baseOrder.externalId);
         expect(resultOrder!.success).toEqual(true);
         expect(resultOrder!.message).toBeUndefined();
         expect(resultOrder!.baseAsset).toEqual('BASE');
@@ -645,6 +663,7 @@ describe('DefaultDcaTradingService', () => {
         resultOrder = getDcaTradingOrder(result.orders, 'ASSET2BASE');
         expect(resultOrder).toBeDefined();
         expect(resultOrder!.id).toEqual(tradeOrder.id);
+        expect(resultOrder!.externalId).toEqual(tradeOrder.externalId);
         expect(resultOrder!.success).toEqual(true);
         expect(resultOrder!.message).toBeUndefined();
         expect(resultOrder!.baseAsset).toEqual('ASSET2');
@@ -717,6 +736,7 @@ describe('DefaultDcaTradingService', () => {
         let resultOrder = getDcaTradingOrder(result.orders, 'BASEQUOTE');
         expect(resultOrder).toBeDefined();
         expect(resultOrder!.id).toEqual(baseOrder.id);
+        expect(resultOrder!.externalId).toEqual(baseOrder.externalId);
         expect(resultOrder!.success).toEqual(true);
         expect(resultOrder!.message).toBeUndefined();
         expect(resultOrder!.baseAsset).toEqual('BASE');
@@ -728,6 +748,7 @@ describe('DefaultDcaTradingService', () => {
         resultOrder = getDcaTradingOrder(result.orders, 'ASSET3BASE');
         expect(resultOrder).toBeDefined();
         expect(resultOrder!.id).toEqual(tradeOrder.id);
+        expect(resultOrder!.externalId).toEqual(tradeOrder.externalId);
         expect(resultOrder!.success).toEqual(true);
         expect(resultOrder!.message).toBeUndefined();
         expect(resultOrder!.baseAsset).toEqual('ASSET3');
@@ -800,6 +821,7 @@ describe('DefaultDcaTradingService', () => {
         let resultOrder = getDcaTradingOrder(result.orders, 'BASEQUOTE');
         expect(resultOrder).toBeDefined();
         expect(resultOrder!.id).toEqual(baseOrder.id);
+        expect(resultOrder!.externalId).toEqual(baseOrder.externalId);
         expect(resultOrder!.success).toEqual(true);
         expect(resultOrder!.message).toBeUndefined();
         expect(resultOrder!.baseAsset).toEqual('BASE');
@@ -811,6 +833,7 @@ describe('DefaultDcaTradingService', () => {
         resultOrder = getDcaTradingOrder(result.orders, 'ASSET1BASE');
         expect(resultOrder).toBeDefined();
         expect(resultOrder!.id).toEqual(tradeOrder.id);
+        expect(resultOrder!.externalId).toEqual(tradeOrder.externalId);
         expect(resultOrder!.success).toEqual(true);
         expect(resultOrder!.message).toBeUndefined();
         expect(resultOrder!.baseAsset).toEqual('ASSET1');
