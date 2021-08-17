@@ -1,0 +1,20 @@
+import { BinanceClient } from '../binance/binance-client';
+import { CandlestickRepository } from '../../domain/candlestick/candlestick-repository';
+import { Candlestick, CandlestickInterval } from '../../domain/candlestick/model/candlestick';
+
+export class HttpCandlestickRepository implements CandlestickRepository {
+  constructor(private binanceClient: BinanceClient) {}
+
+  async getAllBySymbol(symbol: string, period: number, interval: CandlestickInterval): Promise<Candlestick[]> {
+    const symbolCandlesticks = await this.binanceClient.getSymbolCandlesticks(symbol, interval, period);
+
+    return symbolCandlesticks.map((symbolCandlestick) => ({
+      openingDate: new Date(symbolCandlestick.openingDate),
+      closingDate: new Date(symbolCandlestick.closingDate),
+      openingPrice: +symbolCandlestick.openingPrice,
+      closingPrice: +symbolCandlestick.closingPrice,
+      lowestPrice: +symbolCandlestick.lowestPrice,
+      highestPrice: +symbolCandlestick.highestPrice,
+    }));
+  }
+}

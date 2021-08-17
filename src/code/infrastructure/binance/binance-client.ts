@@ -6,8 +6,10 @@ import { BinanceAccount } from './model/binance-account';
 import { BinanceOrder } from './model/binance-order';
 import * as crypto from 'crypto';
 import { BinanceSymbolPrice } from './model/binance-price';
+import { BinanceSymbolCandlestick } from './model/binance-candlestick';
 
 const accountInformationEndpoint = '/v3/account';
+const symbolCandlesticksEndpoint = '/v3/klines';
 const symbolCurrentPriceEndpoint = '/v3/ticker/price';
 const symbolAveragePriceEndpoint = '/v3/avgPrice';
 const orderEndpoint = '/v3/order';
@@ -29,6 +31,26 @@ export class BinanceClient {
     const account = await axiosInstance.get<BinanceAccount>(queryUrl, queryConfig);
 
     return account.data;
+  }
+
+  async getSymbolCandlesticks(symbol: string, interval: string, limit: number): Promise<BinanceSymbolCandlestick[]> {
+    if (!this.secrets) {
+      this.secrets = await this.#getSecrets();
+    }
+
+    const queryParameters = `symbol=${symbol}&interval=${interval}&limit=${limit}`;
+    const queryUrl = `${symbolCandlesticksEndpoint}?${queryParameters}`;
+    const queryConfig = this.#getQueryConfig();
+    const response = await axiosInstance.get<[string | number[]]>(queryUrl, queryConfig);
+
+    return response.data.map((element) => ({
+      openingDate: element[0] as number,
+      closingDate: element[6] as number,
+      openingPrice: element[1] as string,
+      closingPrice: element[4] as string,
+      lowestPrice: element[3] as string,
+      highestPrice: element[2] as string,
+    }));
   }
 
   async getSymbolCurrentPrice(symbol: string): Promise<BinanceSymbolPrice> {
