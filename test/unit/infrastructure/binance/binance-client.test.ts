@@ -11,6 +11,8 @@ import { BinanceOrder } from '../../../../src/code/infrastructure/binance/model/
 import { buildDefaultBinanceOrder } from '../../../builders/infrastructure/binance/binance-order-test-builder';
 import { BinanceSymbolPrice } from '../../../../src/code/infrastructure/binance/model/binance-price';
 import { buildDefaultBinanceSymbolPrice } from '../../../builders/infrastructure/binance/binance-symbol-price-test-builder';
+import { BinanceSymbolCandlestick } from '../../../../src/code/infrastructure/binance/model/binance-candlestick';
+import { buildDefaultBinanceSymbolCandlesticks } from '../../../builders/infrastructure/binance/binance-symbol-candlestick-test-builder';
 
 jest.mock('../../../../src/code/configuration/http/axios');
 
@@ -81,6 +83,67 @@ describe('BinanceClient', () => {
       it('Then error is thrown', async () => {
         try {
           await binanceClient.getAccount();
+          fail('An error should have been thrown');
+        } catch (error) {
+          expect(error).toBeDefined();
+          expect(error.message).toEqual('Error');
+        }
+      });
+    });
+  });
+
+  describe('Given a Binance symbol candlesticks to retrieve', () => {
+    describe('When symbol candlesticks retrieval has succeeded', () => {
+      let symbolCandlesticks: BinanceSymbolCandlestick[];
+
+      beforeEach(() => {
+        symbolCandlesticks = buildDefaultBinanceSymbolCandlesticks();
+        axiosInstanceMock.get.mockResolvedValue({
+          data: symbolCandlesticks.map((symbolCandlestick) => [
+            symbolCandlestick.openingDate,
+            symbolCandlestick.openingPrice,
+            symbolCandlestick.highestPrice,
+            symbolCandlestick.lowestPrice,
+            symbolCandlestick.closingPrice,
+            'baseAssetVolume',
+            symbolCandlestick.closingDate,
+            'quoteAssetVolume',
+            'numberOfTrades',
+            'takerBuyBaseAssetVolume',
+            'takerBuyQuoteAssetVolume',
+            undefined,
+          ]),
+        });
+      });
+
+      it('Then secrets are loaded only once', async () => {
+        await binanceClient.getSymbolCandlesticks('A', 'IA', 1);
+        await binanceClient.getSymbolCandlesticks('B', 'IB', 2);
+        await binanceClient.getSymbolCandlesticks('C', 'IC', 3);
+
+        expect(smClientMock.getSecretValue).toHaveBeenCalledTimes(1);
+      });
+
+      it('Then symbol candlesticks are returned', async () => {
+        const result = await binanceClient.getSymbolCandlesticks('A', 'I', 1);
+        expect(result).toBeDefined();
+        expect(result).toEqual(symbolCandlesticks);
+
+        expect(axiosInstanceMock.get).toHaveBeenCalledTimes(1);
+        const axiosGetParams = axiosInstanceMock.get.mock.calls[0];
+        expect(axiosGetParams).toBeDefined();
+        expect(axiosGetParams[0]).toEqual('/v3/klines?symbol=A&interval=I&limit=1');
+      });
+    });
+
+    describe('When symbol symbol candlesticks retrieval has failed', () => {
+      beforeEach(() => {
+        axiosInstanceMock.get.mockRejectedValue(new Error('Error'));
+      });
+
+      it('Then error is thrown', async () => {
+        try {
+          await binanceClient.getSymbolCandlesticks('A', 'I', 1);
           fail('An error should have been thrown');
         } catch (error) {
           expect(error).toBeDefined();
