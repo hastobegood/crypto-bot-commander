@@ -23,6 +23,12 @@ describe('DefaultMovingAverageService', () => {
     ];
   });
 
+  describe('Given the service type to retrieve', () => {
+    it('Then moving average type is returned', async () => {
+      expect(movingAverageService.getType()).toEqual('MovingAverage');
+    });
+  });
+
   describe('Given a simple moving average to calculate', () => {
     describe('When period is smaller than number of points', () => {
       beforeEach(() => {

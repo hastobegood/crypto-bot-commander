@@ -2,15 +2,18 @@ import { MovingAverageService } from './moving-average-service';
 import { Point } from './model/point';
 import { CalculateMovingAverage, MovingAverage, MovingAverageType } from './model/moving-average';
 import { roundNumber } from '../../configuration/util/math';
+import { sortPoints, TechnicalAnalysisType } from './technical-analysis-service';
 
 export class DefaultMovingAverageService implements MovingAverageService {
-  calculate(calculateMovingAverage: CalculateMovingAverage): MovingAverage {
-    const sortedPoints = calculateMovingAverage.points.slice().sort((firstPoint, secondPoint) => secondPoint.timestamp - firstPoint.timestamp);
+  getType(): TechnicalAnalysisType {
+    return 'MovingAverage';
+  }
 
+  calculate(calculateMovingAverage: CalculateMovingAverage): MovingAverage {
     return {
       type: calculateMovingAverage.type,
       period: calculateMovingAverage.period,
-      value: roundNumber(this.#calculate(calculateMovingAverage.type, calculateMovingAverage.period, sortedPoints), 8),
+      value: roundNumber(this.#calculate(calculateMovingAverage.type, calculateMovingAverage.period, sortPoints(calculateMovingAverage.points)), 8),
     };
   }
 
