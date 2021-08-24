@@ -1,12 +1,14 @@
 import { Configuration, Entry } from 'webpack';
 import { readdirSync } from 'fs-extra';
+import { resolve } from 'path';
 import CopyPlugin from 'copy-webpack-plugin';
+import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
 
 const handlers: Entry = {};
 readdirSync('./src/handlers')
   .filter((file) => file.endsWith('-handler.ts'))
   .forEach(function (handler) {
-    handlers[handler.split('.ts')[0]] = './src/handlers/' + handler;
+    handlers[handler.split('.ts')[0]] = './handlers/' + handler;
   });
 
 const config: Configuration = {
@@ -14,6 +16,7 @@ const config: Configuration = {
   target: 'node',
   devtool: 'source-map',
 
+  context: resolve(__dirname, 'src'),
   entry: handlers,
 
   externals: [
@@ -21,9 +24,10 @@ const config: Configuration = {
   ],
 
   output: {
-    filename: 'dist/webpack/[name]/app.js',
-    path: __dirname,
+    path: resolve(__dirname, 'dist/webpack'),
+    filename: '[name]/app.js',
     libraryTarget: 'commonjs',
+    clean: true,
   },
 
   resolve: {
@@ -41,7 +45,11 @@ const config: Configuration = {
 
   plugins: [
     new CopyPlugin({
-      patterns: Object.keys(handlers).map((handler) => ({ from: 'package-empty.json', to: `dist/webpack/${handler}/package.json` })),
+      patterns: Object.keys(handlers).map((handler) => ({ from: '../package-empty.json', to: `${handler}/package.json` })),
+    }),
+    new BundleAnalyzerPlugin({
+      analyzerMode: 'disabled',
+      generateStatsFile: true,
     }),
   ],
 };
