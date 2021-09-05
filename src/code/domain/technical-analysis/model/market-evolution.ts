@@ -6,6 +6,7 @@ export interface CalculateMarketEvolution {
 }
 
 export interface MarketEvolution {
-  period: number;
+  lastValue: number;
+  currentValue: number;
   percentage: number;
 }

@@ -3,15 +3,12 @@ import { AxiosRequestConfig } from 'axios';
 import SecretsManager from 'aws-sdk/clients/secretsmanager';
 import { BinanceSecrets } from './model/binance-secret';
 import { BinanceAccount } from './model/binance-account';
-import { BinanceOrder } from './model/binance-order';
+import { BinanceOrder, BinanceOrderSide } from './model/binance-order';
 import * as crypto from 'crypto';
-import { BinanceSymbolPrice } from './model/binance-price';
 import { BinanceSymbolCandlestick } from './model/binance-candlestick';
 
 const accountInformationEndpoint = '/v3/account';
 const symbolCandlesticksEndpoint = '/v3/klines';
-const symbolCurrentPriceEndpoint = '/v3/ticker/price';
-const symbolAveragePriceEndpoint = '/v3/avgPrice';
 const orderEndpoint = '/v3/order';
 
 export class BinanceClient {
@@ -53,39 +50,14 @@ export class BinanceClient {
     }));
   }
 
-  async getSymbolCurrentPrice(symbol: string): Promise<BinanceSymbolPrice> {
-    if (!this.secrets) {
-      this.secrets = await this.#getSecrets();
-    }
-
-    const queryParameters = `symbol=${symbol}`;
-    const queryUrl = `${symbolCurrentPriceEndpoint}?${queryParameters}`;
-    const queryConfig = this.#getQueryConfig();
-    const account = await axiosInstance.get<BinanceSymbolPrice>(queryUrl, queryConfig);
-
-    return account.data;
-  }
-
-  async getSymbolAveragePrice(symbol: string): Promise<BinanceSymbolPrice> {
-    if (!this.secrets) {
-      this.secrets = await this.#getSecrets();
-    }
-
-    const queryParameters = `symbol=${symbol}`;
-    const queryUrl = `${symbolAveragePriceEndpoint}?${queryParameters}`;
-    const queryConfig = this.#getQueryConfig();
-    const account = await axiosInstance.get<BinanceSymbolPrice>(queryUrl, queryConfig);
-
-    return account.data;
-  }
-
-  async sendMarketOrder(symbol: string, side: string, quantity: number): Promise<BinanceOrder> {
-    const queryParameters = `symbol=${symbol}&side=${side}&type=MARKET&quoteOrderQty=${quantity}&newOrderRespType=FULL&timestamp=${new Date().valueOf()}`;
+  async sendMarketOrder(symbol: string, side: BinanceOrderSide, quantity: number, asset: 'BASE' | 'QUOTE'): Promise<BinanceOrder> {
+    const quantityParameter = asset === 'BASE' ? `quantity=${quantity}` : `quoteOrderQty=${quantity}`;
+    const queryParameters = `symbol=${symbol}&side=${side}&type=MARKET&${quantityParameter}&newOrderRespType=FULL&timestamp=${new Date().valueOf()}`;
 
     return await this.#sendOrder(queryParameters);
   }
 
-  async sendTakeProfitOrder(symbol: string, side: string, quantity: number, price: number): Promise<BinanceOrder> {
+  async sendTakeProfitOrder(symbol: string, side: BinanceOrderSide, quantity: number, price: number): Promise<BinanceOrder> {
     const queryParameters = `symbol=${symbol}&side=${side}&type=TAKE_PROFIT_LIMIT&quantity=${quantity}&stopPrice=${price}&price=${price}&timeInForce=GTC&newOrderRespType=FULL&timestamp=${new Date().valueOf()}`;
 
     return await this.#sendOrder(queryParameters);

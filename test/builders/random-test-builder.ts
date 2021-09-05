@@ -15,6 +15,12 @@ export const randomPercentage = (): number => {
   return Math.round((Math.random() + Number.EPSILON) * 10_000) / 10_000;
 };
 
+export const randomSymbol = (): string => {
+  const baseAsset = randomString(4);
+  const quoteAsset = randomString(4);
+  return `${baseAsset}#${quoteAsset}`;
+};
+
 export const randomBoolean = (): boolean => {
   return randomFromList(['true', 'false']) === 'true';
 };

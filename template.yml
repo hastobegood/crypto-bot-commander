@@ -31,13 +31,10 @@ Mappings:
     test:
       DcaTradingConfig: '{ "baseAsset": "BTC", "quoteAsset": "BUSD", "quoteAssetQuantity": 25, "tradeAssets": [ { "asset": "ETH|BNB", "percentage": 0.50 } ] }'
       DcaTradingSchedule: cron(0 18 ? * * *)
-      BotTradingConfig: '{ "baseAsset": "BTC", "quoteAsset": "USDT", "quoteAssetQuantity": 10, "buyPercentage": -0.03, "sellPercentage": 0.03, "dumpPercentage": -0.005 }'
-      BotTradingConfigSchedule: rate(1 minute)
+      PublishAllActiveStrategiesSchedule: rate(1 minute)
     prod:
       DcaTradingConfig: '{ "baseAsset": "BTC", "quoteAsset": "EUR", "quoteAssetQuantity": 25, "tradeAssets": [ { "asset": "ETH", "percentage": 0.28 }, { "asset":"XRP", "percentage": 0.28 }, { "asset": "ADA|MATIC", "percentage": 0.20 } ] }'
       DcaTradingSchedule: cron(0 18 ? * 1 *)
-      BotTradingConfig: '{ "baseAsset": "BTC", "quoteAsset": "USDT", "quoteAssetQuantity": 10, "buyPercentage": -0.03, "sellPercentage": 0.03, "dumpPercentage": -0.005 }'
-      BotTradingConfigSchedule: rate(1 minute)
 
 Globals:
   Function:
@@ -83,27 +80,55 @@ Resources:
         - DynamoDBWritePolicy:
             TableName: !Ref TradingTable
 
-  BotTradingFunction:
+  PublishAllActiveStrategiesFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Description: BOT trading function
-      CodeUri: dist/webpack/bot-trading-handler
+      Description: Publish all active strategies function
+      CodeUri: dist/webpack/publish-all-active-strategies-handler
       Handler: app.handler
       ReservedConcurrentExecutions: 1
+      EventInvokeConfig:
+        MaximumRetryAttempts: 0
+      Environment:
+        Variables:
+          ENV: !Ref EnvironmentParameter
+          REGION: !Ref AWS::Region
+          STRATEGY_TABLE_NAME: !Ref StrategyTable
+          ACTIVE_STRATEGIES_QUEUE_URL: !Ref ActiveStrategiesQueue
+      Events:
+        ScheduleEvent:
+          Type: Schedule
+          Properties:
+            Enabled: true
+            Schedule: !FindInMap [ EnvironmentMap, !Ref EnvironmentParameter, PublishAllActiveStrategiesSchedule ]
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref StrategyTable
+        - SQSSendMessagePolicy:
+            QueueName: !GetAtt ActiveStrategiesQueue.QueueName
+
+  EvaluateStrategyFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Description: Evaluate strategy function
+      CodeUri: dist/webpack/evaluate-strategy-handler
+      Handler: app.handler
+      EventInvokeConfig:
+        MaximumRetryAttempts: 0
       Environment:
         Variables:
           ENV: !Ref EnvironmentParameter
           REGION: !Ref AWS::Region
           BINANCE_URL: !Ref BinanceUrlParameter
           BINANCE_SECRET_NAME: !Ref BinanceSecretNameParameter
-          TRADING_TABLE_NAME: !Ref TradingTable
-          BOT_TRADING_CONFIG: !FindInMap [ EnvironmentMap, !Ref EnvironmentParameter, BotTradingConfig ]
+          STRATEGY_TABLE_NAME: !Ref StrategyTable
       Events:
-        ScheduleEvent:
-          Type: Schedule
+        SqsEvent:
+          Type: SQS
           Properties:
-            Enabled: false
-            Schedule: !FindInMap [ EnvironmentMap, !Ref EnvironmentParameter, BotTradingConfigSchedule ]
+            Enabled: true
+            Queue: !GetAtt ActiveStrategiesQueue.Arn
+            BatchSize: 1
       Policies:
         - AWSSecretsManagerGetSecretValuePolicy:
             SecretArn: !Sub arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${BinanceSecretNameParameter}*
@@ -114,9 +139,11 @@ Resources:
                 - kms:Decrypt
               Resource: !Sub arn:aws:kms:${AWS::Region}:${AWS::AccountId}:${BinanceSecretEncryptionKeyParameter}
         - DynamoDBReadPolicy:
-            TableName: !Ref TradingTable
+            TableName: !Ref StrategyTable
         - DynamoDBWritePolicy:
-            TableName: !Ref TradingTable
+            TableName: !Ref StrategyTable
+        - SQSPollerPolicy:
+            QueueName: !GetAtt ActiveStrategiesQueue.QueueName
 
   TradingTable:
     Type: AWS::DynamoDB::Table
@@ -135,6 +162,45 @@ Resources:
         - AttributeName: sk
           AttributeType: S
 
+  StrategyTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      BillingMode: PAY_PER_REQUEST
+      SSESpecification:
+        SSEEnabled: true
+      KeySchema:
+        - AttributeName: pk
+          KeyType: HASH
+        - AttributeName: sk
+          KeyType: RANGE
+      AttributeDefinitions:
+        - AttributeName: pk
+          AttributeType: S
+        - AttributeName: sk
+          AttributeType: S
+        - AttributeName: activeStrategiesPk
+          AttributeType: S
+        - AttributeName: activeStrategiesSk
+          AttributeType: S
+      GlobalSecondaryIndexes:
+        - IndexName: ActiveStrategies-Index
+          KeySchema:
+            - AttributeName: activeStrategiesPk
+              KeyType: HASH
+            - AttributeName: activeStrategiesSk
+              KeyType: RANGE
+          Projection:
+            ProjectionType: KEYS_ONLY
+
+  ActiveStrategiesQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      FifoQueue: true
+      VisibilityTimeout: 90
+      MessageRetentionPeriod: 60
+      DeduplicationScope: messageGroup
+      FifoThroughputLimit: perMessageGroupId
+
 Outputs:
   DcaTradingFunctionName:
     Description: DCA trading function name
@@ -143,12 +209,12 @@ Outputs:
     Description: DCA trading function ARN
     Value: !GetAtt DcaTradingFunction.Arn
 
-  BotTradingFunctionName:
-    Description: BOT trading function name
-    Value: !Ref BotTradingFunction
-  BotTradingFunctionArn:
-    Description: BOT trading function ARN
-    Value: !GetAtt BotTradingFunction.Arn
+  PublishAllActiveStrategiesFunctionName:
+    Description: Publish all active strategies function name
+    Value: !Ref PublishAllActiveStrategiesFunction
+  PublishAllActiveStrategiesFunctionArn:
+    Description: Publish all active strategies function ARN
+    Value: !GetAtt PublishAllActiveStrategiesFunction.Arn
 
   TradingTableName:
     Description: Trading table name
@@ -156,3 +222,20 @@ Outputs:
   TradingTableArn:
     Description: Trading table ARN
     Value: !GetAtt TradingTable.Arn
+
+  StrategyTableName:
+    Description: Strategy table name
+    Value: !Ref StrategyTable
+  StrategyTableArn:
+    Description: Strategy table ARN
+    Value: !GetAtt StrategyTable.Arn
+
+  ActiveStrategiesQueueName:
+    Description: Active strategies queue name
+    Value: !GetAtt ActiveStrategiesQueue.QueueName
+  ActiveStrategiesQueueArn:
+    Description: Active strategies queue ARN
+    Value: !GetAtt ActiveStrategiesQueue.Arn
+  ActiveStrategiesQueueUrl:
+    Description: Active strategies queue URL
+    Value: !Ref ActiveStrategiesQueue

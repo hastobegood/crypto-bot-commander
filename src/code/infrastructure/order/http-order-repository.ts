@@ -1,7 +1,8 @@
 import { BinanceClient } from '../binance/binance-client';
 import { OrderRepository } from '../../domain/order/order-repository';
-import { Order, OrderType } from '../../domain/order/model/order';
+import { Order } from '../../domain/order/model/order';
 import { BinanceOrder } from '../binance/model/binance-order';
+import { convertToBinanceFormat } from '../../configuration/util/symbol';
 
 export class HttpOrderRepository implements OrderRepository {
   constructor(private binanceClient: BinanceClient) {}
@@ -28,13 +29,17 @@ export class HttpOrderRepository implements OrderRepository {
   }
 
   async #sendOrder(order: Order): Promise<BinanceOrder> {
+    const symbol = convertToBinanceFormat(order.symbol);
+    const side = order.side === 'Buy' ? 'BUY' : 'SELL';
+    const asset = order.baseAssetQuantity ? 'BASE' : 'QUOTE';
+
     switch (order.type) {
-      case OrderType.MARKET:
-        return await this.binanceClient.sendMarketOrder(order.symbol, order.side, order.quoteAssetQuantity!);
-      case OrderType.TAKE_PROFIT:
-        return await this.binanceClient.sendTakeProfitOrder(order.symbol, order.side, order.baseAssetQuantity!, order.priceThreshold!);
+      case 'Market':
+        return await this.binanceClient.sendMarketOrder(symbol, side, order.baseAssetQuantity || order.quoteAssetQuantity!, asset);
+      case 'TakeProfit':
+        return await this.binanceClient.sendTakeProfitOrder(symbol, side, order.baseAssetQuantity!, order.priceThreshold!);
       default:
-        throw new Error(`Unsupported ${order.type} order type`);
+        throw new Error(`Unsupported '${order.type}' order type`);
     }
   }
 }

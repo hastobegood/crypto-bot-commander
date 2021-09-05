@@ -6,11 +6,15 @@ export const buildDefaultCandlesticks = (): Candlestick[] => {
 };
 
 export const buildDefaultCandlestick = (): Candlestick => {
+  return buildCandlestick(randomNumber(1_000, 100_000));
+};
+
+export const buildCandlestick = (closingPrice: number): Candlestick => {
   return {
     openingDate: new Date(),
     closingDate: new Date(),
     openingPrice: randomNumber(1_000, 100_000),
-    closingPrice: randomNumber(1_000, 100_000),
+    closingPrice: closingPrice,
     lowestPrice: randomNumber(1_000, 100_000),
     highestPrice: randomNumber(1_000, 100_000),
   };

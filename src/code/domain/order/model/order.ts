@@ -1,12 +1,5 @@
-export enum OrderSide {
-  BUY = 'BUY',
-  SELL = 'SELL',
-}
-
-export enum OrderType {
-  MARKET = 'MARKET',
-  TAKE_PROFIT = 'TAKE_PROFIT',
-}
+export type OrderSide = 'Buy' | 'Sell';
+export type OrderType = 'Market' | 'TakeProfit';
 
 export interface CreateOrder {
   symbol: string;
