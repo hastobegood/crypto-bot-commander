@@ -35,9 +35,9 @@ export class HttpOrderRepository implements OrderRepository {
 
     switch (order.type) {
       case 'Market':
-        return await this.binanceClient.sendMarketOrder(symbol, side, order.baseAssetQuantity || order.quoteAssetQuantity!, asset);
+        return this.binanceClient.sendMarketOrder(symbol, side, order.baseAssetQuantity || order.quoteAssetQuantity!, asset);
       case 'TakeProfit':
-        return await this.binanceClient.sendTakeProfitOrder(symbol, side, order.baseAssetQuantity!, order.priceThreshold!);
+        return this.binanceClient.sendTakeProfitOrder(symbol, side, order.baseAssetQuantity!, order.priceThreshold!);
       default:
         throw new Error(`Unsupported '${order.type}' order type`);
     }

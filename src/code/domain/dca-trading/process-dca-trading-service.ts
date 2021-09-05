@@ -20,7 +20,7 @@ export class ProcessDcaTradingService {
       orders: orders,
     };
 
-    return await this.dcaTradingRepository.save(dcaTrading);
+    return this.dcaTradingRepository.save(dcaTrading);
   }
 
   async #process(dcaTradingConfig: DcaTradingConfig, symbol: string): Promise<DcaTradingOrder[]> {

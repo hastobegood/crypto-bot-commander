@@ -54,13 +54,13 @@ export class BinanceClient {
     const quantityParameter = asset === 'BASE' ? `quantity=${quantity}` : `quoteOrderQty=${quantity}`;
     const queryParameters = `symbol=${symbol}&side=${side}&type=MARKET&${quantityParameter}&newOrderRespType=FULL&timestamp=${new Date().valueOf()}`;
 
-    return await this.#sendOrder(queryParameters);
+    return this.#sendOrder(queryParameters);
   }
 
   async sendTakeProfitOrder(symbol: string, side: BinanceOrderSide, quantity: number, price: number): Promise<BinanceOrder> {
     const queryParameters = `symbol=${symbol}&side=${side}&type=TAKE_PROFIT_LIMIT&quantity=${quantity}&stopPrice=${price}&price=${price}&timeInForce=GTC&newOrderRespType=FULL&timestamp=${new Date().valueOf()}`;
 
-    return await this.#sendOrder(queryParameters);
+    return this.#sendOrder(queryParameters);
   }
 
   async #sendOrder(queryParameters: string): Promise<BinanceOrder> {
@@ -81,7 +81,7 @@ export class BinanceClient {
       SecretId: this.secretName,
     };
 
-    return await this.smClient
+    return this.smClient
       .getSecretValue(getSecretValueRequest)
       .promise()
       .then((getSecretValueResponse) => JSON.parse(getSecretValueResponse.SecretString!));
