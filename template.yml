@@ -216,6 +216,13 @@ Outputs:
     Description: Publish all active strategies function ARN
     Value: !GetAtt PublishAllActiveStrategiesFunction.Arn
 
+  EvaluateStrategyFunctionName:
+    Description: Evaluate strategy function name
+    Value: !Ref EvaluateStrategyFunction
+  EvaluateStrategyFunctionArn:
+    Description: Evaluate strategy function ARN
+    Value: !GetAtt EvaluateStrategyFunction.Arn
+
   TradingTableName:
     Description: Trading table name
     Value: !Ref TradingTable
