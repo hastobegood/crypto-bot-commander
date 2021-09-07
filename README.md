@@ -64,3 +64,259 @@ $ yarn bundle
 ```shell
 $ yarn deploy:{test|prod}
 ```
+
+## Usage
+
+### Trading BOT
+
+TODO
+
+#### Market evolution step
+
+This step check the price evolution for a specific period. It is evaluated as a success as soon as the evolution percentage reach the provided threshold.
+
+###### Input
+
+```json
+{
+  "source": "string",
+  "interval": "string",
+  "period": "number",
+  "percentageThreshold": "number"
+}
+```
+
+###### Source
+
+This is the source from where the evolution percentage is calculated. It can be either `Market` or `LastOrder`.
+
+For `Market`, the percentage is calculated based on the market evolution specified by the `interval` and `period` attributes.
+
+For `LastOrder`, the percentage is calculated based on the last sent order.
+
+###### Interval
+
+This is the interval to retrieve candlesticks. It can be either `1m`, `5m`, `15m`, `30m`, `1h`, `6h`, `12h` or `1d`.
+
+It is a mandatory attribute for `Market` source.
+
+###### Period
+
+This is the number of periods for the `interval` attribute.
+
+It is a mandatory attribute for `Market` source.
+
+###### Percentage threshold
+
+This is the percentage threshold to reach in order to evaluate the step as a success.
+
+###### Examples
+
+Market down by 1% during the last 24 hours.
+
+```json
+{
+  "source": "Market",
+  "interval": "1h",
+  "period": 24,
+  "percentageThreshold": -0.01
+}
+```
+
+Market up by 5% during the last 60 minutes.
+
+```json
+{
+  "source": "Market",
+  "interval": "1m",
+  "period": 60,
+  "percentageThreshold": 0.05
+}
+```
+
+Market up by 10% since the last order.
+
+```json
+{
+  "source": "LastOrder",
+  "percentageThreshold": 0.1
+}
+```
+
+###### Output
+
+```json
+{
+  "success": "boolean",
+  "lastPrice": "number",
+  "currentPrice": "number",
+  "percentage": "number"
+}
+```
+
+###### Last price
+
+This is the last price used for the percentage evolution.
+
+###### Current price
+
+This is the current price used for the percentage evolution.
+
+###### Percentage
+
+This is the calculated percentage evolution.
+
+###### Examples
+
+Percentage threshold reached.
+
+```json
+{
+  "success": true,
+  "lastPrice": 500,
+  "currentPrice": 494.3,
+  "percentage": -0.0114
+}
+```
+
+Percentage threshold not reached.
+
+```json
+{
+  "success": false,
+  "lastPrice": 497.8,
+  "currentPrice": 426.5,
+  "percentage": -0.1432
+}
+```
+
+#### Send order step
+
+This step send a buy or sell order. It is evaluated as a success as soon as the sent order is successfully executed by the exchange.
+
+###### Input
+
+```json
+{
+  "source": "string",
+  "side": "string",
+  "type": "string",
+  "percentage": "number"
+}
+```
+
+###### Source
+
+This is the source to use to calculate the amount to buy or sell depending on the provided percentage. It can be either `Account` or `LastOrder`.
+
+For `Account`, the amount is calculated based on the available quantity.
+
+For `LastOrder`, the amount is calculated based on the last sent order quantity.
+
+###### Side
+
+This is the order side. It can be either `Buy` or `Sell`.
+
+Note: currently only `Buy` side is supported using the `LastOrder` source.
+
+###### Type
+
+This is the order type. Only `Market` is supported at the moment.
+
+###### Percentage
+
+This is the percentage to apply on the quantity available from the account or the last order.
+
+###### Examples
+
+Market buy order with 10% of account available quantity.
+
+```json
+{
+  "source": "Account",
+  "side": "Buy",
+  "type": "Market",
+  "percentage": 0.1
+}
+```
+
+Market sell order with 30% of account available quantity.
+
+```json
+{
+  "source": "Account",
+  "side": "Sell",
+  "type": "Market",
+  "percentage": 0.3
+}
+```
+
+Market sell order with 100% of last order quantity.
+
+```json
+{
+  "source": "LastOrder",
+  "side": "Sell",
+  "type": "Market",
+  "percentage": 1
+}
+```
+
+###### Output
+
+```json
+{
+  "success": "boolean",
+  "id": "string",
+  "externalId": "string",
+  "status": "string",
+  "quantity": "number",
+  "price": "number"
+}
+```
+
+###### ID
+
+This is the last price used for the percentage evolution.
+
+###### External ID
+
+This is the last price used for the percentage evolution.
+
+###### Status
+
+This is the last price used for the percentage evolution.
+
+###### Quantity
+
+This is the last price used for the percentage evolution.
+
+###### Price
+
+This is the last price used for the percentage evolution.
+
+###### Examples
+
+Successful order.
+
+```json
+{
+  "success": true,
+  "id": "BNB#USDT/Buy/Market/1630920397742",
+  "externalId": "549617",
+  "status": "FILLED",
+  "quantity": 1.3,
+  "price": 503.59
+}
+```
+
+Unsuccessful order.
+
+```json
+{
+  "success": false,
+  "id": "BNB#USDT/Buy/Market/1630920397742",
+  "externalId": "549617",
+  "status": "EXPIRED"
+}
+```

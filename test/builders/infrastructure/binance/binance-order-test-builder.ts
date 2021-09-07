@@ -1,4 +1,4 @@
-import { randomNumber, randomString } from '../../random-test-builder';
+import { randomNumber, randomString, randomSymbol } from '../../random-test-builder';
 import { BinanceOrder, BinanceOrderFill } from '../../../../src/code/infrastructure/binance/model/binance-order';
 
 export const buildDefaultBinanceOrder = (): BinanceOrder => {
@@ -7,7 +7,7 @@ export const buildDefaultBinanceOrder = (): BinanceOrder => {
 
 export const buildBinanceOrder = (fills: BinanceOrderFill[]): BinanceOrder => {
   return {
-    symbol: randomString(5).toUpperCase(),
+    symbol: randomSymbol(),
     orderId: randomNumber(),
     clientOrderId: randomString(),
     transactTime: new Date().valueOf(),

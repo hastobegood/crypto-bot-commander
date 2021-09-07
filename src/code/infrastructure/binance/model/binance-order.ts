@@ -1,3 +1,6 @@
+export type BinanceOrderSide = 'BUY' | 'SELL';
+export type BinanceOrderType = 'MARKET' | 'TAKE_PROFIT';
+
 export interface BinanceOrder {
   symbol: string;
   orderId: number;
@@ -6,8 +9,8 @@ export interface BinanceOrder {
   price: string;
   executedQty: string;
   status: string;
-  side: string;
-  type: string;
+  side: BinanceOrderSide;
+  type: BinanceOrderType;
   fills: BinanceOrderFill[];
 }
 

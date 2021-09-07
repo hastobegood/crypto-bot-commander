@@ -9,7 +9,5 @@ export interface CalculateMovingAverage {
 }
 
 export interface MovingAverage {
-  type: MovingAverageType;
-  period: number;
   value: number;
 }

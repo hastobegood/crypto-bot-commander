@@ -1,28 +1,31 @@
 import { mocked } from 'ts-jest/utils';
 import { BinanceClient } from '../../../../src/code/infrastructure/binance/binance-client';
 import { BinanceOrder, BinanceOrderFill } from '../../../../src/code/infrastructure/binance/model/binance-order';
-import { Order, OrderFill, OrderType } from '../../../../src/code/domain/order/model/order';
+import { Order } from '../../../../src/code/domain/order/model/order';
 import { buildDefaultOrder } from '../../../builders/domain/order/order-test-builder';
 import { buildBinanceOrder, buildDefaultBinanceFill } from '../../../builders/infrastructure/binance/binance-order-test-builder';
 import { HttpOrderRepository } from '../../../../src/code/infrastructure/order/http-order-repository';
+import { convertToBinanceFormat } from '../../../../src/code/configuration/util/symbol';
 
 const binanceClientMock = mocked(jest.genMockFromModule<BinanceClient>('../../../../src/code/infrastructure/binance/binance-client'), true);
 
 let orderRepository: HttpOrderRepository;
 beforeEach(() => {
+  binanceClientMock.sendMarketOrder = jest.fn();
+  binanceClientMock.sendTakeProfitOrder = jest.fn();
+
   orderRepository = new HttpOrderRepository(binanceClientMock);
 });
 
 describe('HttpOrderRepository', () => {
-  describe('Given a market order to save', () => {
-    let order: Order;
+  let order: Order;
 
+  describe('Given a market order to save', () => {
     beforeEach(() => {
-      order = { ...buildDefaultOrder(), type: OrderType.MARKET };
-      binanceClientMock.sendMarketOrder = jest.fn();
+      order = { ...buildDefaultOrder(), type: 'Market' };
     });
 
-    describe('When order transaction has succeeded', () => {
+    describe('When Binance order is sent', () => {
       let binanceFill1: BinanceOrderFill;
       let binanceFill2: BinanceOrderFill;
       let binanceOrder: BinanceOrder;
@@ -31,49 +34,43 @@ describe('HttpOrderRepository', () => {
         binanceFill1 = { ...buildDefaultBinanceFill(), price: '666' };
         binanceFill2 = { ...buildDefaultBinanceFill(), price: '777' };
         binanceOrder = buildBinanceOrder([binanceFill1, binanceFill2]);
-
         binanceClientMock.sendMarketOrder.mockResolvedValue(binanceOrder);
       });
 
-      afterEach(() => {
+      it('Then saved order is returned', async () => {
+        const result = await orderRepository.save(order);
+        expect(result).toEqual({
+          ...order,
+          externalId: binanceOrder.orderId.toString(),
+          executedAssetQuantity: +binanceOrder.executedQty,
+          executedPrice: 777,
+          transactionDate: new Date(binanceOrder.transactTime),
+          status: binanceOrder.status,
+          fills: [
+            {
+              price: +binanceFill1.price,
+              quantity: +binanceFill1.qty,
+              commission: +binanceFill1.commission,
+              commissionAsset: binanceFill1.commissionAsset,
+            },
+            {
+              price: +binanceFill2.price,
+              quantity: +binanceFill2.qty,
+              commission: +binanceFill2.commission,
+              commissionAsset: binanceFill2.commissionAsset,
+            },
+          ],
+        });
+
         expect(binanceClientMock.sendMarketOrder).toHaveBeenCalledTimes(1);
         const sendOrderParams = binanceClientMock.sendMarketOrder.mock.calls[0];
-        expect(sendOrderParams).toBeDefined();
-        expect(sendOrderParams[0]).toEqual(order.symbol);
-        expect(sendOrderParams[1]).toEqual(order.side);
-        expect(sendOrderParams[2]).toEqual(order.quoteAssetQuantity);
-      });
+        expect(sendOrderParams.length).toEqual(4);
+        expect(sendOrderParams[0]).toEqual(convertToBinanceFormat(order.symbol));
+        expect(sendOrderParams[1]).toEqual(order.side.toUpperCase());
+        expect(sendOrderParams[2]).toEqual(order.baseAssetQuantity || order.quoteAssetQuantity);
+        expect(sendOrderParams[3]).toEqual(order.baseAssetQuantity ? 'BASE' : 'QUOTE');
 
-      it('Then order is returned data updated', async () => {
-        const result = await orderRepository.save(order);
-        expect(result).toBeDefined();
-        expect(result.id).toEqual(order.id);
-        expect(result.externalId).toEqual(binanceOrder.orderId.toString());
-        expect(result.symbol).toEqual(order.symbol);
-        expect(result.side).toEqual(order.side);
-        expect(result.type).toEqual(order.type);
-        expect(result.creationDate).toEqual(order.creationDate);
-        expect(result.transactionDate).toEqual(new Date(binanceOrder.transactTime));
-        expect(result.baseAssetQuantity).toEqual(order.baseAssetQuantity);
-        expect(result.quoteAssetQuantity).toEqual(order.quoteAssetQuantity);
-        expect(result.priceThreshold).toEqual(order.priceThreshold);
-        expect(result.executedAssetQuantity).toEqual(+binanceOrder.executedQty);
-        expect(result.executedPrice).toEqual(+binanceFill2.price);
-        expect(result.status).toEqual(binanceOrder.status);
-        expect(result.fills).toBeDefined();
-        expect(result.fills!.length).toEqual(binanceOrder.fills.length);
-
-        let fill = getFillByCommissionAsset(result.fills!, binanceFill1.commissionAsset);
-        expect(fill).toBeDefined();
-        expect(fill!.price).toEqual(+binanceFill1.price);
-        expect(fill!.quantity).toEqual(+binanceFill1.qty);
-        expect(fill!.commission).toEqual(+binanceFill1.commission);
-
-        fill = getFillByCommissionAsset(result.fills!, binanceFill2.commissionAsset);
-        expect(fill).toBeDefined();
-        expect(fill!.price).toEqual(+binanceFill2.price);
-        expect(fill!.quantity).toEqual(+binanceFill2.qty);
-        expect(fill!.commission).toEqual(+binanceFill2.commission);
+        expect(binanceClientMock.sendTakeProfitOrder).toHaveBeenCalledTimes(0);
       });
     });
   });
@@ -82,68 +79,39 @@ describe('HttpOrderRepository', () => {
     let order: Order;
 
     beforeEach(() => {
-      order = { ...buildDefaultOrder(), type: OrderType.TAKE_PROFIT };
-      binanceClientMock.sendTakeProfitOrder = jest.fn();
+      order = { ...buildDefaultOrder(), type: 'TakeProfit' };
     });
 
-    describe('When order transaction has succeeded', () => {
-      let binanceFill1: BinanceOrderFill;
-      let binanceFill2: BinanceOrderFill;
+    describe('When Binance order is sent', () => {
       let binanceOrder: BinanceOrder;
 
       beforeEach(() => {
-        binanceFill1 = { ...buildDefaultBinanceFill(), price: '777' };
-        binanceFill2 = { ...buildDefaultBinanceFill(), price: '666' };
-        binanceOrder = buildBinanceOrder([binanceFill1, binanceFill2]);
-
+        binanceOrder = { ...buildBinanceOrder([]), executedQty: '', fills: [] };
         binanceClientMock.sendTakeProfitOrder.mockResolvedValue(binanceOrder);
       });
 
-      afterEach(() => {
-        expect(binanceClientMock.sendTakeProfitOrder).toHaveBeenCalledTimes(1);
-        const sendOrderParams = binanceClientMock.sendTakeProfitOrder.mock.calls[0];
-        expect(sendOrderParams).toBeDefined();
-        expect(sendOrderParams[0]).toEqual(order.symbol);
-        expect(sendOrderParams[1]).toEqual(order.side);
-        expect(sendOrderParams[2]).toEqual(order.baseAssetQuantity);
-        expect(sendOrderParams[3]).toEqual(order.priceThreshold);
-      });
-
-      it('Then order is returned data updated', async () => {
+      it('Then saved order is returned', async () => {
         const result = await orderRepository.save(order);
-        expect(result).toBeDefined();
-        expect(result.id).toEqual(order.id);
-        expect(result.externalId).toEqual(binanceOrder.orderId.toString());
-        expect(result.symbol).toEqual(order.symbol);
-        expect(result.side).toEqual(order.side);
-        expect(result.type).toEqual(order.type);
-        expect(result.creationDate).toEqual(order.creationDate);
-        expect(result.transactionDate).toEqual(new Date(binanceOrder.transactTime));
-        expect(result.baseAssetQuantity).toEqual(order.baseAssetQuantity);
-        expect(result.quoteAssetQuantity).toEqual(order.quoteAssetQuantity);
-        expect(result.priceThreshold).toEqual(order.priceThreshold);
-        expect(result.executedAssetQuantity).toEqual(+binanceOrder.executedQty);
-        expect(result.executedPrice).toEqual(+binanceFill1.price);
-        expect(result.status).toEqual(binanceOrder.status);
-        expect(result.fills).toBeDefined();
-        expect(result.fills!.length).toEqual(binanceOrder.fills.length);
+        expect(result).toEqual({
+          ...order,
+          externalId: binanceOrder.orderId.toString(),
+          executedAssetQuantity: undefined,
+          executedPrice: undefined,
+          transactionDate: new Date(binanceOrder.transactTime),
+          status: binanceOrder.status,
+          fills: [],
+        });
 
-        let fill = getFillByCommissionAsset(result.fills!, binanceFill1.commissionAsset);
-        expect(fill).toBeDefined();
-        expect(fill!.price).toEqual(+binanceFill1.price);
-        expect(fill!.quantity).toEqual(+binanceFill1.qty);
-        expect(fill!.commission).toEqual(+binanceFill1.commission);
+        expect(binanceClientMock.sendTakeProfitOrder).toHaveBeenCalledTimes(1);
+        const sendTakeProfitOrderParams = binanceClientMock.sendTakeProfitOrder.mock.calls[0];
+        expect(sendTakeProfitOrderParams.length).toEqual(4);
+        expect(sendTakeProfitOrderParams[0]).toEqual(convertToBinanceFormat(order.symbol));
+        expect(sendTakeProfitOrderParams[1]).toEqual(order.side.toUpperCase());
+        expect(sendTakeProfitOrderParams[2]).toEqual(order.baseAssetQuantity);
+        expect(sendTakeProfitOrderParams[3]).toEqual(order.priceThreshold);
 
-        fill = getFillByCommissionAsset(result.fills!, binanceFill2.commissionAsset);
-        expect(fill).toBeDefined();
-        expect(fill!.price).toEqual(+binanceFill2.price);
-        expect(fill!.quantity).toEqual(+binanceFill2.qty);
-        expect(fill!.commission).toEqual(+binanceFill2.commission);
+        expect(binanceClientMock.sendMarketOrder).toHaveBeenCalledTimes(0);
       });
     });
   });
 });
-
-const getFillByCommissionAsset = (fills: OrderFill[], commissionAsset: string): OrderFill | undefined => {
-  return fills.find((fill) => fill.commissionAsset === commissionAsset);
-};

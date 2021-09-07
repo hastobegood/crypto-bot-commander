@@ -1,53 +1,78 @@
 import { mocked } from 'ts-jest/utils';
 import { BinanceClient } from '../../../../src/code/infrastructure/binance/binance-client';
 import { HttpCandlestickRepository } from '../../../../src/code/infrastructure/candlestick/http-candlestick-repository';
-import { Candlestick } from '../../../../src/code/domain/candlestick/model/candlestick';
 import { BinanceSymbolCandlestick } from '../../../../src/code/infrastructure/binance/model/binance-candlestick';
-import { buildDefaultBinanceSymbolCandlesticks } from '../../../builders/infrastructure/binance/binance-symbol-candlestick-test-builder';
+import { buildDefaultBinanceSymbolCandlestick } from '../../../builders/infrastructure/binance/binance-symbol-candlestick-test-builder';
 
 const binanceClientMock = mocked(jest.genMockFromModule<BinanceClient>('../../../../src/code/infrastructure/binance/binance-client'), true);
 
 let candlestickRepository: HttpCandlestickRepository;
 beforeEach(() => {
   binanceClientMock.getSymbolCandlesticks = jest.fn();
+
   candlestickRepository = new HttpCandlestickRepository(binanceClientMock);
 });
 
 describe('HttpCandlestickRepository', () => {
-  describe('Given a symbol candlesticks to retrieve', () => {
+  describe('Given all candlesticks to retrieve for a specific symbol', () => {
+    let binanceSymbolCandlestick1: BinanceSymbolCandlestick;
+    let binanceSymbolCandlestick2: BinanceSymbolCandlestick;
     let binanceSymbolCandlesticks: BinanceSymbolCandlestick[];
 
-    beforeEach(() => {
-      binanceSymbolCandlesticks = buildDefaultBinanceSymbolCandlesticks();
-    });
-
-    describe('When symbol candlesticks retrieval has succeeded', () => {
+    describe('When Binance candlesticks are found', () => {
       beforeEach(() => {
+        binanceSymbolCandlestick1 = buildDefaultBinanceSymbolCandlestick();
+        binanceSymbolCandlestick2 = buildDefaultBinanceSymbolCandlestick();
+        binanceSymbolCandlesticks = [binanceSymbolCandlestick1, binanceSymbolCandlestick2];
         binanceClientMock.getSymbolCandlesticks.mockResolvedValue(binanceSymbolCandlesticks);
       });
 
-      it('Then symbol candlesticks are returned', async () => {
-        const result = await candlestickRepository.getAllBySymbol('ABC', 1, '1d');
-        expect(result).toBeDefined();
-        expect(result.length).toEqual(binanceSymbolCandlesticks.length);
-        binanceSymbolCandlesticks.forEach((binanceSymbolCandlestick) => expect(result).toContainEqual(convertBinanceSymbolCandlestick(binanceSymbolCandlestick)));
+      it('Then candlesticks are returned', async () => {
+        const result = await candlestickRepository.getAllBySymbol('ABC#DEF', 1, '1d');
+        expect(result).toEqual([
+          {
+            openingDate: new Date(binanceSymbolCandlestick1.openingDate),
+            closingDate: new Date(binanceSymbolCandlestick1.closingDate),
+            openingPrice: +binanceSymbolCandlestick1.openingPrice,
+            closingPrice: +binanceSymbolCandlestick1.closingPrice,
+            lowestPrice: +binanceSymbolCandlestick1.lowestPrice,
+            highestPrice: +binanceSymbolCandlestick1.highestPrice,
+          },
+          {
+            openingDate: new Date(binanceSymbolCandlestick2.openingDate),
+            closingDate: new Date(binanceSymbolCandlestick2.closingDate),
+            openingPrice: +binanceSymbolCandlestick2.openingPrice,
+            closingPrice: +binanceSymbolCandlestick2.closingPrice,
+            lowestPrice: +binanceSymbolCandlestick2.lowestPrice,
+            highestPrice: +binanceSymbolCandlestick2.highestPrice,
+          },
+        ]);
 
         expect(binanceClientMock.getSymbolCandlesticks).toHaveBeenCalledTimes(1);
         const getSymbolCandlesticksParams = binanceClientMock.getSymbolCandlesticks.mock.calls[0];
-        expect(getSymbolCandlesticksParams).toBeDefined();
-        expect(getSymbolCandlesticksParams[0]).toEqual('ABC');
+        expect(getSymbolCandlesticksParams.length).toEqual(3);
+        expect(getSymbolCandlesticksParams[0]).toEqual('ABCDEF');
+        expect(getSymbolCandlesticksParams[1]).toEqual('1d');
+        expect(getSymbolCandlesticksParams[2]).toEqual(1);
+      });
+    });
+
+    describe('When Binance candlesticks are not found', () => {
+      beforeEach(() => {
+        binanceClientMock.getSymbolCandlesticks.mockResolvedValue([]);
+      });
+
+      it('Then empty list is returned', async () => {
+        const result = await candlestickRepository.getAllBySymbol('ABC#DEF', 1, '1d');
+        expect(result).toEqual([]);
+
+        expect(binanceClientMock.getSymbolCandlesticks).toHaveBeenCalledTimes(1);
+        const getSymbolCandlesticksParams = binanceClientMock.getSymbolCandlesticks.mock.calls[0];
+        expect(getSymbolCandlesticksParams.length).toEqual(3);
+        expect(getSymbolCandlesticksParams[0]).toEqual('ABCDEF');
+        expect(getSymbolCandlesticksParams[1]).toEqual('1d');
+        expect(getSymbolCandlesticksParams[2]).toEqual(1);
       });
     });
   });
 });
-
-const convertBinanceSymbolCandlestick = (binanceSymbolCandlestick: BinanceSymbolCandlestick): Candlestick => {
-  return {
-    openingDate: new Date(binanceSymbolCandlestick.openingDate),
-    closingDate: new Date(binanceSymbolCandlestick.closingDate),
-    openingPrice: +binanceSymbolCandlestick.openingPrice,
-    closingPrice: +binanceSymbolCandlestick.closingPrice,
-    lowestPrice: +binanceSymbolCandlestick.lowestPrice,
-    highestPrice: +binanceSymbolCandlestick.highestPrice,
-  };
-};

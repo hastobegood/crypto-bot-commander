@@ -5,7 +5,7 @@ import { BinanceClient } from '../binance/binance-client';
 export class HttpAccountRepository implements AccountRepository {
   constructor(private binanceClient: BinanceClient) {}
 
-  async getAccount(): Promise<Account> {
+  async get(): Promise<Account> {
     const binanceAccount = await this.binanceClient.getAccount();
 
     return {

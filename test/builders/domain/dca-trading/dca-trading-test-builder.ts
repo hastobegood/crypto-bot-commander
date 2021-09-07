@@ -1,5 +1,5 @@
 import { DcaTrading, DcaTradingConfig, DcaTradingConfigTradeAsset, DcaTradingOrder } from '../../../../src/code/domain/dca-trading/model/dca-trading';
-import { randomBoolean, randomNumber, randomPercentage, randomString } from '../../random-test-builder';
+import { randomBoolean, randomNumber, randomPercentage, randomString, randomSymbol } from '../../random-test-builder';
 
 export const buildDefaultDcaTradingConfig = (): DcaTradingConfig => {
   return {
@@ -55,7 +55,7 @@ export const buildDefaultDcaTradingOrder = (success: boolean): DcaTradingOrder =
     message: success ? undefined : randomString(10),
     baseAsset: randomString(5),
     quoteAsset: randomString(5),
-    symbol: randomString(5),
+    symbol: randomSymbol(),
     requestedQuantity: randomNumber(1, 1_000),
     executedQuantity: success ? randomNumber(1, 1_000) : undefined,
     executedPrice: success ? randomNumber(1, 1_000) : undefined,
