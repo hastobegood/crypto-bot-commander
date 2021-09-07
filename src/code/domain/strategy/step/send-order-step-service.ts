@@ -27,7 +27,7 @@ export class SendOrderStepService implements StrategyStepService {
     const order = await this.createOrderService.create(createOrder);
 
     return {
-      success: order.status === 'FILLED',
+      success: order.status === 'Filled',
       id: order.id,
       externalId: order.externalId!,
       status: order.status,

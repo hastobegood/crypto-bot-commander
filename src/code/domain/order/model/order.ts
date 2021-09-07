@@ -1,5 +1,6 @@
 export type OrderSide = 'Buy' | 'Sell';
 export type OrderType = 'Market' | 'TakeProfit';
+export type OrderStatus = 'Waiting' | 'Filled' | 'Canceled' | 'Error' | 'Unknown';
 
 export interface CreateOrder {
   symbol: string;
@@ -23,7 +24,8 @@ export interface Order {
   priceThreshold?: number;
   executedAssetQuantity?: number;
   executedPrice?: number;
-  status: string;
+  status: OrderStatus;
+  externalStatus?: string;
   fills?: OrderFill[];
 }
 
