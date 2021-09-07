@@ -51,7 +51,7 @@ describe('CreateOrderService', () => {
           creationDate: creationDate,
           baseAssetQuantity: createOrder.baseAssetQuantity,
           quoteAssetQuantity: createOrder.quoteAssetQuantity,
-          status: 'WAITING',
+          status: 'Waiting',
         });
       });
 
@@ -155,7 +155,7 @@ describe('CreateOrderService', () => {
           creationDate: creationDate,
           baseAssetQuantity: createOrder.baseAssetQuantity,
           priceThreshold: createOrder.priceThreshold,
-          status: 'WAITING',
+          status: 'Waiting',
         });
       });
 

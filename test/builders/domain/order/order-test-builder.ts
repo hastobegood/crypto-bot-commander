@@ -34,7 +34,8 @@ export const buildDefaultOrder = (): Order => {
     priceThreshold: randomPercentage(),
     executedAssetQuantity: randomNumber(1, 100),
     executedPrice: randomNumber(10, 1_000),
-    status: 'FILLED',
+    status: 'Filled',
+    externalStatus: 'FILLED',
     fills: [
       {
         price: randomNumber(1_000, 1_000_000),

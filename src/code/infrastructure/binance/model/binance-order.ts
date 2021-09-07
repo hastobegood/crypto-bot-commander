@@ -1,5 +1,6 @@
 export type BinanceOrderSide = 'BUY' | 'SELL';
 export type BinanceOrderType = 'MARKET' | 'TAKE_PROFIT';
+export type BinanceOrderStatus = 'NEW' | 'PARTIALLY_FILLED' | 'FILLED' | 'CANCELED' | 'PENDING_CANCEL' | 'REJECTED' | 'EXPIRED';
 
 export interface BinanceOrder {
   symbol: string;
@@ -8,7 +9,7 @@ export interface BinanceOrder {
   transactTime: number;
   price: string;
   executedQty: string;
-  status: string;
+  status: BinanceOrderStatus;
   side: BinanceOrderSide;
   type: BinanceOrderType;
   fills: BinanceOrderFill[];

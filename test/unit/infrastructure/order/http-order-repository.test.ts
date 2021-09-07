@@ -5,7 +5,7 @@ import { Order } from '../../../../src/code/domain/order/model/order';
 import { buildDefaultOrder } from '../../../builders/domain/order/order-test-builder';
 import { buildBinanceOrder, buildDefaultBinanceFill } from '../../../builders/infrastructure/binance/binance-order-test-builder';
 import { HttpOrderRepository } from '../../../../src/code/infrastructure/order/http-order-repository';
-import { convertToBinanceFormat } from '../../../../src/code/configuration/util/symbol';
+import { fromBinanceOrderStatus, toBinanceSymbol } from '../../../../src/code/infrastructure/binance/binance-converter';
 
 const binanceClientMock = mocked(jest.genMockFromModule<BinanceClient>('../../../../src/code/infrastructure/binance/binance-client'), true);
 
@@ -43,9 +43,10 @@ describe('HttpOrderRepository', () => {
           ...order,
           externalId: binanceOrder.orderId.toString(),
           executedAssetQuantity: +binanceOrder.executedQty,
-          executedPrice: 777,
+          executedPrice: (+binanceFill1.qty / +binanceOrder.executedQty) * 666 + (+binanceFill2.qty / +binanceOrder.executedQty) * 777,
           transactionDate: new Date(binanceOrder.transactTime),
-          status: binanceOrder.status,
+          status: fromBinanceOrderStatus(binanceOrder.status),
+          externalStatus: binanceOrder.status,
           fills: [
             {
               price: +binanceFill1.price,
@@ -65,7 +66,7 @@ describe('HttpOrderRepository', () => {
         expect(binanceClientMock.sendMarketOrder).toHaveBeenCalledTimes(1);
         const sendOrderParams = binanceClientMock.sendMarketOrder.mock.calls[0];
         expect(sendOrderParams.length).toEqual(4);
-        expect(sendOrderParams[0]).toEqual(convertToBinanceFormat(order.symbol));
+        expect(sendOrderParams[0]).toEqual(toBinanceSymbol(order.symbol));
         expect(sendOrderParams[1]).toEqual(order.side.toUpperCase());
         expect(sendOrderParams[2]).toEqual(order.baseAssetQuantity || order.quoteAssetQuantity);
         expect(sendOrderParams[3]).toEqual(order.baseAssetQuantity ? 'BASE' : 'QUOTE');
@@ -98,14 +99,15 @@ describe('HttpOrderRepository', () => {
           executedAssetQuantity: undefined,
           executedPrice: undefined,
           transactionDate: new Date(binanceOrder.transactTime),
-          status: binanceOrder.status,
+          status: fromBinanceOrderStatus(binanceOrder.status),
+          externalStatus: binanceOrder.status,
           fills: [],
         });
 
         expect(binanceClientMock.sendTakeProfitOrder).toHaveBeenCalledTimes(1);
         const sendTakeProfitOrderParams = binanceClientMock.sendTakeProfitOrder.mock.calls[0];
         expect(sendTakeProfitOrderParams.length).toEqual(4);
-        expect(sendTakeProfitOrderParams[0]).toEqual(convertToBinanceFormat(order.symbol));
+        expect(sendTakeProfitOrderParams[0]).toEqual(toBinanceSymbol(order.symbol));
         expect(sendTakeProfitOrderParams[1]).toEqual(order.side.toUpperCase());
         expect(sendTakeProfitOrderParams[2]).toEqual(order.baseAssetQuantity);
         expect(sendTakeProfitOrderParams[3]).toEqual(order.priceThreshold);

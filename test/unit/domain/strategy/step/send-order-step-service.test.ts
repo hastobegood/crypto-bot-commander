@@ -94,7 +94,7 @@ describe('SendOrderStepService', () => {
         beforeEach(() => {
           sendOrderStepInput = buildSendOrderStepInput('Account', 0.8, 'Buy', 'Market');
 
-          order = { ...buildDefaultOrder(), externalId: undefined, status: 'EXPIRED', executedAssetQuantity: undefined, executedPrice: undefined };
+          order = { ...buildDefaultOrder(), externalId: undefined, status: 'Error', executedAssetQuantity: undefined, executedPrice: undefined };
           createOrderServiceMock.create.mockResolvedValue(order);
         });
 
@@ -167,7 +167,7 @@ describe('SendOrderStepService', () => {
         beforeEach(() => {
           sendOrderStepInput = buildSendOrderStepInput('Account', 0.5, 'Sell', 'Market');
 
-          order = { ...buildDefaultOrder(), externalId: undefined, status: 'EXPIRED', executedAssetQuantity: undefined, executedPrice: undefined };
+          order = { ...buildDefaultOrder(), externalId: undefined, status: 'Error', executedAssetQuantity: undefined, executedPrice: undefined };
           createOrderServiceMock.create.mockResolvedValue(order);
         });
 

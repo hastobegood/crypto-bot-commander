@@ -6,10 +6,6 @@ export const extractAssets = (symbol: string): { baseAsset: string; quoteAsset: 
   };
 };
 
-export const convertToBinanceFormat = (symbol: string): string => {
-  return splitSymbol(symbol).join('');
-};
-
 const splitSymbol = (symbol: string): string[] => {
   const assets = symbol.split('#');
   if (assets.length != 2) {

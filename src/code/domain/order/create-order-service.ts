@@ -43,7 +43,7 @@ export class CreateOrderService {
       baseAssetQuantity: createOrder.baseAssetQuantity ? roundNumber(createOrder.baseAssetQuantity, 8) : undefined,
       quoteAssetQuantity: createOrder.quoteAssetQuantity ? roundNumber(createOrder.quoteAssetQuantity, 8) : undefined,
       priceThreshold: createOrder.priceThreshold ? createOrder.priceThreshold : undefined,
-      status: 'WAITING',
+      status: 'Waiting',
     };
   }
 }
