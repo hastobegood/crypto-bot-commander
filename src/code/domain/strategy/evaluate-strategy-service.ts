@@ -38,7 +38,8 @@ export class EvaluateStrategyService {
       output: { success: false },
       error: undefined,
       creationDate: !lastStep || lastStep.output.success ? stepDate : lastStep.creationDate,
-      lastExecutionDate: stepDate,
+      executionStartDate: stepDate,
+      executionEndDate: stepDate,
     };
 
     try {
@@ -50,6 +51,8 @@ export class EvaluateStrategyService {
       step.error = { message: (error as Error).message, details: JSON.stringify(serializeError(error)) };
       logger.error(step, 'Unable to process strategy step');
       return step;
+    } finally {
+      step.executionEndDate = new Date();
     }
   }
 

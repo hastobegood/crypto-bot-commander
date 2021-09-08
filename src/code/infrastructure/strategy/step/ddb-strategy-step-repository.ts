@@ -80,7 +80,8 @@ export class DdbStrategyStepRepository implements StrategyStepRepository {
     return {
       ...step,
       creationDate: step.creationDate.toISOString(),
-      lastExecutionDate: step.lastExecutionDate.toISOString(),
+      executionStartDate: step.executionStartDate.toISOString(),
+      executionEndDate: step.executionEndDate.toISOString(),
     };
   }
 
@@ -88,7 +89,8 @@ export class DdbStrategyStepRepository implements StrategyStepRepository {
     return {
       ...step,
       creationDate: new Date(step.creationDate),
-      lastExecutionDate: new Date(step.lastExecutionDate),
+      executionStartDate: new Date(step.executionStartDate),
+      executionEndDate: new Date(step.executionEndDate),
     };
   }
 }

@@ -44,7 +44,7 @@ describe('DdbStrategyStepRepository', () => {
                     pk: `Strategy::${step.strategyId}::Step::${step.creationDate.valueOf()}-${step.id}`,
                     sk: 'Details',
                     type: 'StrategyStep',
-                    data: { ...step, creationDate: step.creationDate.toISOString(), lastExecutionDate: step.lastExecutionDate.toISOString() },
+                    data: { ...step, creationDate: step.creationDate.toISOString(), executionStartDate: step.executionStartDate.toISOString(), executionEndDate: step.executionEndDate.toISOString() },
                   },
                 },
               },
@@ -54,7 +54,7 @@ describe('DdbStrategyStepRepository', () => {
                     pk: `Strategy::${step.strategyId}::Step::Last`,
                     sk: 'Details',
                     type: 'StrategyStep',
-                    data: { ...step, creationDate: step.creationDate.toISOString(), lastExecutionDate: step.lastExecutionDate.toISOString() },
+                    data: { ...step, creationDate: step.creationDate.toISOString(), executionStartDate: step.executionStartDate.toISOString(), executionEndDate: step.executionEndDate.toISOString() },
                   },
                 },
               },
@@ -64,7 +64,7 @@ describe('DdbStrategyStepRepository', () => {
                     pk: `Strategy::${step.strategyId}::Step::Last::MarketEvolution`,
                     sk: 'Details',
                     type: 'StrategyStep',
-                    data: { ...step, creationDate: step.creationDate.toISOString(), lastExecutionDate: step.lastExecutionDate.toISOString() },
+                    data: { ...step, creationDate: step.creationDate.toISOString(), executionStartDate: step.executionStartDate.toISOString(), executionEndDate: step.executionEndDate.toISOString() },
                   },
                 },
               },
@@ -101,7 +101,7 @@ describe('DdbStrategyStepRepository', () => {
                     pk: `Strategy::${step.strategyId}::Step::${step.creationDate.valueOf()}-${step.id}`,
                     sk: 'Details',
                     type: 'StrategyStep',
-                    data: { ...step, creationDate: step.creationDate.toISOString(), lastExecutionDate: step.lastExecutionDate.toISOString() },
+                    data: { ...step, creationDate: step.creationDate.toISOString(), executionStartDate: step.executionStartDate.toISOString(), executionEndDate: step.executionEndDate.toISOString() },
                   },
                 },
               },
@@ -111,7 +111,7 @@ describe('DdbStrategyStepRepository', () => {
                     pk: `Strategy::${step.strategyId}::Step::Last`,
                     sk: 'Details',
                     type: 'StrategyStep',
-                    data: { ...step, creationDate: step.creationDate.toISOString(), lastExecutionDate: step.lastExecutionDate.toISOString() },
+                    data: { ...step, creationDate: step.creationDate.toISOString(), executionStartDate: step.executionStartDate.toISOString(), executionEndDate: step.executionEndDate.toISOString() },
                   },
                 },
               },
@@ -121,7 +121,7 @@ describe('DdbStrategyStepRepository', () => {
                     pk: `Strategy::${step.strategyId}::Step::Last::SendOrder`,
                     sk: 'Details',
                     type: 'StrategyStep',
-                    data: { ...step, creationDate: step.creationDate.toISOString(), lastExecutionDate: step.lastExecutionDate.toISOString() },
+                    data: { ...step, creationDate: step.creationDate.toISOString(), executionStartDate: step.executionStartDate.toISOString(), executionEndDate: step.executionEndDate.toISOString() },
                   },
                 },
               },
@@ -131,7 +131,7 @@ describe('DdbStrategyStepRepository', () => {
                     pk: `Strategy::${step.strategyId}::Step::Last::SendOrder::${(step.input as SendOrderStepInput).side}`,
                     sk: 'Details',
                     type: 'StrategyStep',
-                    data: { ...step, creationDate: step.creationDate.toISOString(), lastExecutionDate: step.lastExecutionDate.toISOString() },
+                    data: { ...step, creationDate: step.creationDate.toISOString(), executionStartDate: step.executionStartDate.toISOString(), executionEndDate: step.executionEndDate.toISOString() },
                   },
                 },
               },
@@ -178,7 +178,7 @@ describe('DdbStrategyStepRepository', () => {
         ddbClientMock.get = jest.fn().mockReturnValue({
           promise: jest.fn().mockResolvedValue({
             Item: {
-              data: { ...step, creationDate: step.creationDate.toISOString(), lastExecutionDate: step.lastExecutionDate.toISOString() },
+              data: { ...step, creationDate: step.creationDate.toISOString(), executionStartDate: step.executionStartDate.toISOString(), executionEndDate: step.executionEndDate.toISOString() },
             },
           }),
         });
@@ -238,7 +238,7 @@ describe('DdbStrategyStepRepository', () => {
         ddbClientMock.get = jest.fn().mockReturnValue({
           promise: jest.fn().mockResolvedValue({
             Item: {
-              data: { ...step, creationDate: step.creationDate.toISOString(), lastExecutionDate: step.lastExecutionDate.toISOString() },
+              data: { ...step, creationDate: step.creationDate.toISOString(), executionStartDate: step.executionStartDate.toISOString(), executionEndDate: step.executionEndDate.toISOString() },
             },
           }),
         });
@@ -298,7 +298,7 @@ describe('DdbStrategyStepRepository', () => {
         ddbClientMock.get = jest.fn().mockReturnValue({
           promise: jest.fn().mockResolvedValue({
             Item: {
-              data: { ...step, creationDate: step.creationDate.toISOString(), lastExecutionDate: step.lastExecutionDate.toISOString() },
+              data: { ...step, creationDate: step.creationDate.toISOString(), executionStartDate: step.executionStartDate.toISOString(), executionEndDate: step.executionEndDate.toISOString() },
             },
           }),
         });

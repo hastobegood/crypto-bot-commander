@@ -48,7 +48,7 @@ describe('ProcessDcaTradingService', () => {
 
         const result = await processDcaTradingService.process(dcaTradingConfig);
         expect(result).toBeDefined();
-        expect(result.id).toEqual(`${dcaTradingConfig.baseAsset}${dcaTradingConfig.quoteAsset}/${creationDate.valueOf()}`);
+        expect(result.id).toEqual(`${dcaTradingConfig.baseAsset}#${dcaTradingConfig.quoteAsset}/${creationDate.valueOf()}`);
         expect(result.success).toEqual(false);
         expect(result.creationDate).toEqual(creationDate);
         expect(result.orders).toBeDefined();
@@ -59,7 +59,7 @@ describe('ProcessDcaTradingService', () => {
         expect(result.orders[0].message).toEqual('Base order error !');
         expect(result.orders[0].baseAsset).toEqual('BASE');
         expect(result.orders[0].quoteAsset).toEqual('QUOTE');
-        expect(result.orders[0].symbol).toEqual('BASEQUOTE');
+        expect(result.orders[0].symbol).toEqual('BASE#QUOTE');
         expect(result.orders[0].requestedQuantity).toEqual(dcaTradingConfig.quoteAssetQuantity);
         expect(result.orders[0].executedQuantity).toBeUndefined();
         expect(result.orders[0].executedPrice).toBeUndefined();
@@ -67,7 +67,7 @@ describe('ProcessDcaTradingService', () => {
         expect(createOrderServiceMock.create).toHaveBeenCalledTimes(1);
         const createOrderParams = createOrderServiceMock.create.mock.calls[0][0];
         expect(createOrderParams).toBeDefined();
-        expect(createOrderParams.symbol).toEqual('BASEQUOTE');
+        expect(createOrderParams.symbol).toEqual('BASE#QUOTE');
         expect(createOrderParams.side).toEqual('Buy');
         expect(createOrderParams.type).toEqual('Market');
         expect(createOrderParams.baseAssetQuantity).toBeUndefined();
@@ -88,7 +88,7 @@ describe('ProcessDcaTradingService', () => {
         const baseOrder = buildDefaultOrder();
 
         createOrderServiceMock.create = jest.fn().mockImplementation((createOrder: CreateOrder) => {
-          if (createOrder.symbol === 'BASEQUOTE') {
+          if (createOrder.symbol === 'BASE#QUOTE') {
             return baseOrder;
           } else {
             throw new Error(`Error on ${createOrder.symbol}`);
@@ -99,13 +99,13 @@ describe('ProcessDcaTradingService', () => {
 
         const result = await processDcaTradingService.process(dcaTradingConfig);
         expect(result).toBeDefined();
-        expect(result.id).toEqual(`${dcaTradingConfig.baseAsset}${dcaTradingConfig.quoteAsset}/${creationDate.valueOf()}`);
+        expect(result.id).toEqual(`${dcaTradingConfig.baseAsset}#${dcaTradingConfig.quoteAsset}/${creationDate.valueOf()}`);
         expect(result.success).toEqual(false);
         expect(result.creationDate).toEqual(creationDate);
         expect(result.orders).toBeDefined();
         expect(result.orders).toHaveLength(4);
 
-        let resultOrder = getDcaTradingOrder(result.orders, 'BASEQUOTE');
+        let resultOrder = getDcaTradingOrder(result.orders, 'BASE#QUOTE');
         expect(resultOrder).toBeDefined();
         expect(resultOrder!.id).toEqual(baseOrder.id);
         expect(resultOrder!.externalId).toEqual(baseOrder.externalId);
@@ -117,36 +117,36 @@ describe('ProcessDcaTradingService', () => {
         expect(resultOrder!.executedQuantity).toEqual(baseOrder.executedAssetQuantity);
         expect(resultOrder!.executedPrice).toEqual(baseOrder.executedPrice);
 
-        resultOrder = getDcaTradingOrder(result.orders, 'ASSET1BASE');
+        resultOrder = getDcaTradingOrder(result.orders, 'ASSET1#BASE');
         expect(resultOrder).toBeDefined();
         expect(resultOrder!.id).toBeUndefined();
         expect(resultOrder!.externalId).toBeUndefined();
         expect(resultOrder!.success).toEqual(false);
-        expect(resultOrder!.message).toEqual('Error on ASSET1BASE');
+        expect(resultOrder!.message).toEqual('Error on ASSET1#BASE');
         expect(resultOrder!.baseAsset).toEqual('ASSET1');
         expect(resultOrder!.quoteAsset).toEqual('BASE');
         expect(resultOrder!.requestedQuantity).toEqual(dcaTradingConfigTradeAsset1.percentage * baseOrder.executedAssetQuantity!);
         expect(resultOrder!.executedQuantity).toBeUndefined();
         expect(resultOrder!.executedPrice).toBeUndefined();
 
-        resultOrder = getDcaTradingOrder(result.orders, 'ASSET2BASE');
+        resultOrder = getDcaTradingOrder(result.orders, 'ASSET2#BASE');
         expect(resultOrder).toBeDefined();
         expect(resultOrder!.id).toBeUndefined();
         expect(resultOrder!.externalId).toBeUndefined();
         expect(resultOrder!.success).toEqual(false);
-        expect(resultOrder!.message).toEqual('Error on ASSET2BASE');
+        expect(resultOrder!.message).toEqual('Error on ASSET2#BASE');
         expect(resultOrder!.baseAsset).toEqual('ASSET2');
         expect(resultOrder!.quoteAsset).toEqual('BASE');
         expect(resultOrder!.requestedQuantity).toEqual(dcaTradingConfigTradeAsset2.percentage * baseOrder.executedAssetQuantity!);
         expect(resultOrder!.executedQuantity).toBeUndefined();
         expect(resultOrder!.executedPrice).toBeUndefined();
 
-        resultOrder = getDcaTradingOrder(result.orders, 'ASSET3BASE');
+        resultOrder = getDcaTradingOrder(result.orders, 'ASSET3#BASE');
         expect(resultOrder).toBeDefined();
         expect(resultOrder!.id).toBeUndefined();
         expect(resultOrder!.externalId).toBeUndefined();
         expect(resultOrder!.success).toEqual(false);
-        expect(resultOrder!.message).toEqual('Error on ASSET3BASE');
+        expect(resultOrder!.message).toEqual('Error on ASSET3#BASE');
         expect(resultOrder!.baseAsset).toEqual('ASSET3');
         expect(resultOrder!.quoteAsset).toEqual('BASE');
         expect(resultOrder!.requestedQuantity).toEqual(dcaTradingConfigTradeAsset3.percentage * baseOrder.executedAssetQuantity!);
@@ -156,7 +156,7 @@ describe('ProcessDcaTradingService', () => {
         expect(createOrderServiceMock.create).toHaveBeenCalledTimes(4);
         const createOrdersParams = createOrderServiceMock.create.mock.calls.map((call) => call[0]);
 
-        let createOrderParams = getCreateOrder(createOrdersParams, 'BASEQUOTE');
+        let createOrderParams = getCreateOrder(createOrdersParams, 'BASE#QUOTE');
         expect(createOrderParams).toBeDefined();
         expect(createOrderParams!.side).toEqual('Buy');
         expect(createOrderParams!.type).toEqual('Market');
@@ -164,7 +164,7 @@ describe('ProcessDcaTradingService', () => {
         expect(createOrderParams!.quoteAssetQuantity).toEqual(dcaTradingConfig.quoteAssetQuantity);
         expect(createOrderParams!.priceThreshold).toBeUndefined();
 
-        createOrderParams = getCreateOrder(createOrdersParams, 'ASSET1BASE');
+        createOrderParams = getCreateOrder(createOrdersParams, 'ASSET1#BASE');
         expect(createOrderParams).toBeDefined();
         expect(createOrderParams!.side).toEqual('Buy');
         expect(createOrderParams!.type).toEqual('Market');
@@ -172,7 +172,7 @@ describe('ProcessDcaTradingService', () => {
         expect(createOrderParams!.quoteAssetQuantity).toEqual(dcaTradingConfigTradeAsset1.percentage * baseOrder.executedAssetQuantity!);
         expect(createOrderParams!.priceThreshold).toBeUndefined();
 
-        createOrderParams = getCreateOrder(createOrdersParams, 'ASSET2BASE');
+        createOrderParams = getCreateOrder(createOrdersParams, 'ASSET2#BASE');
         expect(createOrderParams).toBeDefined();
         expect(createOrderParams!.side).toEqual('Buy');
         expect(createOrderParams!.type).toEqual('Market');
@@ -180,7 +180,7 @@ describe('ProcessDcaTradingService', () => {
         expect(createOrderParams!.quoteAssetQuantity).toEqual(dcaTradingConfigTradeAsset2.percentage * baseOrder.executedAssetQuantity!);
         expect(createOrderParams!.priceThreshold).toBeUndefined();
 
-        createOrderParams = getCreateOrder(createOrdersParams, 'ASSET3BASE');
+        createOrderParams = getCreateOrder(createOrdersParams, 'ASSET3#BASE');
         expect(createOrderParams).toBeDefined();
         expect(createOrderParams!.side).toEqual('Buy');
         expect(createOrderParams!.type).toEqual('Market');
@@ -204,11 +204,11 @@ describe('ProcessDcaTradingService', () => {
         const tradeOrder3 = buildDefaultOrder();
 
         createOrderServiceMock.create = jest.fn().mockImplementation((createOrder: CreateOrder) => {
-          if (createOrder.symbol === 'BASEQUOTE') {
+          if (createOrder.symbol === 'BASE#QUOTE') {
             return baseOrder;
-          } else if (createOrder.symbol === 'ASSET1BASE') {
+          } else if (createOrder.symbol === 'ASSET1#BASE') {
             return tradeOrder1;
-          } else if (createOrder.symbol === 'ASSET3BASE') {
+          } else if (createOrder.symbol === 'ASSET3#BASE') {
             return tradeOrder3;
           } else {
             throw new Error(`Error on ${createOrder.symbol}`);
@@ -219,13 +219,13 @@ describe('ProcessDcaTradingService', () => {
 
         const result = await processDcaTradingService.process(dcaTradingConfig);
         expect(result).toBeDefined();
-        expect(result.id).toEqual(`${dcaTradingConfig.baseAsset}${dcaTradingConfig.quoteAsset}/${creationDate.valueOf()}`);
+        expect(result.id).toEqual(`${dcaTradingConfig.baseAsset}#${dcaTradingConfig.quoteAsset}/${creationDate.valueOf()}`);
         expect(result.success).toEqual(false);
         expect(result.creationDate).toEqual(creationDate);
         expect(result.orders).toBeDefined();
         expect(result.orders).toHaveLength(4);
 
-        let resultOrder = getDcaTradingOrder(result.orders, 'BASEQUOTE');
+        let resultOrder = getDcaTradingOrder(result.orders, 'BASE#QUOTE');
         expect(resultOrder).toBeDefined();
         expect(resultOrder!.id).toEqual(baseOrder.id);
         expect(resultOrder!.externalId).toEqual(baseOrder.externalId);
@@ -237,7 +237,7 @@ describe('ProcessDcaTradingService', () => {
         expect(resultOrder!.executedQuantity).toEqual(baseOrder.executedAssetQuantity);
         expect(resultOrder!.executedPrice).toEqual(baseOrder.executedPrice);
 
-        resultOrder = getDcaTradingOrder(result.orders, 'ASSET1BASE');
+        resultOrder = getDcaTradingOrder(result.orders, 'ASSET1#BASE');
         expect(resultOrder).toBeDefined();
         expect(resultOrder!.id).toEqual(tradeOrder1.id);
         expect(resultOrder!.externalId).toEqual(tradeOrder1.externalId);
@@ -249,19 +249,19 @@ describe('ProcessDcaTradingService', () => {
         expect(resultOrder!.executedQuantity).toEqual(tradeOrder1.executedAssetQuantity);
         expect(resultOrder!.executedPrice).toEqual(tradeOrder1.executedPrice);
 
-        resultOrder = getDcaTradingOrder(result.orders, 'ASSET2BASE');
+        resultOrder = getDcaTradingOrder(result.orders, 'ASSET2#BASE');
         expect(resultOrder).toBeDefined();
         expect(resultOrder!.id).toBeUndefined();
         expect(resultOrder!.externalId).toBeUndefined();
         expect(resultOrder!.success).toEqual(false);
-        expect(resultOrder!.message).toEqual('Error on ASSET2BASE');
+        expect(resultOrder!.message).toEqual('Error on ASSET2#BASE');
         expect(resultOrder!.baseAsset).toEqual('ASSET2');
         expect(resultOrder!.quoteAsset).toEqual('BASE');
         expect(resultOrder!.requestedQuantity).toEqual(dcaTradingConfigTradeAsset2.percentage * baseOrder.executedAssetQuantity!);
         expect(resultOrder!.executedQuantity).toBeUndefined();
         expect(resultOrder!.executedPrice).toBeUndefined();
 
-        resultOrder = getDcaTradingOrder(result.orders, 'ASSET3BASE');
+        resultOrder = getDcaTradingOrder(result.orders, 'ASSET3#BASE');
         expect(resultOrder).toBeDefined();
         expect(resultOrder!.id).toEqual(tradeOrder3.id);
         expect(resultOrder!.externalId).toEqual(tradeOrder3.externalId);
@@ -276,7 +276,7 @@ describe('ProcessDcaTradingService', () => {
         expect(createOrderServiceMock.create).toHaveBeenCalledTimes(4);
         const createOrdersParams = createOrderServiceMock.create.mock.calls.map((call) => call[0]);
 
-        let createOrderParams = getCreateOrder(createOrdersParams, 'BASEQUOTE');
+        let createOrderParams = getCreateOrder(createOrdersParams, 'BASE#QUOTE');
         expect(createOrderParams).toBeDefined();
         expect(createOrderParams!.side).toEqual('Buy');
         expect(createOrderParams!.type).toEqual('Market');
@@ -284,7 +284,7 @@ describe('ProcessDcaTradingService', () => {
         expect(createOrderParams!.quoteAssetQuantity).toEqual(dcaTradingConfig.quoteAssetQuantity);
         expect(createOrderParams!.priceThreshold).toBeUndefined();
 
-        createOrderParams = getCreateOrder(createOrdersParams, 'ASSET1BASE');
+        createOrderParams = getCreateOrder(createOrdersParams, 'ASSET1#BASE');
         expect(createOrderParams).toBeDefined();
         expect(createOrderParams!.side).toEqual('Buy');
         expect(createOrderParams!.type).toEqual('Market');
@@ -292,7 +292,7 @@ describe('ProcessDcaTradingService', () => {
         expect(createOrderParams!.quoteAssetQuantity).toEqual(dcaTradingConfigTradeAsset1.percentage * baseOrder.executedAssetQuantity!);
         expect(createOrderParams!.priceThreshold).toBeUndefined();
 
-        createOrderParams = getCreateOrder(createOrdersParams, 'ASSET2BASE');
+        createOrderParams = getCreateOrder(createOrdersParams, 'ASSET2#BASE');
         expect(createOrderParams).toBeDefined();
         expect(createOrderParams!.side).toEqual('Buy');
         expect(createOrderParams!.type).toEqual('Market');
@@ -300,7 +300,7 @@ describe('ProcessDcaTradingService', () => {
         expect(createOrderParams!.quoteAssetQuantity).toEqual(dcaTradingConfigTradeAsset2.percentage * baseOrder.executedAssetQuantity!);
         expect(createOrderParams!.priceThreshold).toBeUndefined();
 
-        createOrderParams = getCreateOrder(createOrdersParams, 'ASSET3BASE');
+        createOrderParams = getCreateOrder(createOrdersParams, 'ASSET3#BASE');
         expect(createOrderParams).toBeDefined();
         expect(createOrderParams!.side).toEqual('Buy');
         expect(createOrderParams!.type).toEqual('Market');
@@ -325,13 +325,13 @@ describe('ProcessDcaTradingService', () => {
         const tradeOrder3 = buildDefaultOrder();
 
         createOrderServiceMock.create = jest.fn().mockImplementation((createOrder: CreateOrder) => {
-          if (createOrder.symbol === 'BASEQUOTE') {
+          if (createOrder.symbol === 'BASE#QUOTE') {
             return baseOrder;
-          } else if (createOrder.symbol === 'ASSET1BASE') {
+          } else if (createOrder.symbol === 'ASSET1#BASE') {
             return tradeOrder1;
-          } else if (createOrder.symbol === 'ASSET2BASE') {
+          } else if (createOrder.symbol === 'ASSET2#BASE') {
             return tradeOrder2;
-          } else if (createOrder.symbol === 'ASSET3BASE') {
+          } else if (createOrder.symbol === 'ASSET3#BASE') {
             return tradeOrder3;
           } else {
             throw new Error(`Error on ${createOrder.symbol}`);
@@ -342,13 +342,13 @@ describe('ProcessDcaTradingService', () => {
 
         const result = await processDcaTradingService.process(dcaTradingConfig);
         expect(result).toBeDefined();
-        expect(result.id).toEqual(`${dcaTradingConfig.baseAsset}${dcaTradingConfig.quoteAsset}/${creationDate.valueOf()}`);
+        expect(result.id).toEqual(`${dcaTradingConfig.baseAsset}#${dcaTradingConfig.quoteAsset}/${creationDate.valueOf()}`);
         expect(result.success).toEqual(true);
         expect(result.creationDate).toEqual(creationDate);
         expect(result.orders).toBeDefined();
         expect(result.orders).toHaveLength(4);
 
-        let resultOrder = getDcaTradingOrder(result.orders, 'BASEQUOTE');
+        let resultOrder = getDcaTradingOrder(result.orders, 'BASE#QUOTE');
         expect(resultOrder).toBeDefined();
         expect(resultOrder!.id).toEqual(baseOrder.id);
         expect(resultOrder!.externalId).toEqual(baseOrder.externalId);
@@ -360,7 +360,7 @@ describe('ProcessDcaTradingService', () => {
         expect(resultOrder!.executedQuantity).toEqual(baseOrder.executedAssetQuantity);
         expect(resultOrder!.executedPrice).toEqual(baseOrder.executedPrice);
 
-        resultOrder = getDcaTradingOrder(result.orders, 'ASSET1BASE');
+        resultOrder = getDcaTradingOrder(result.orders, 'ASSET1#BASE');
         expect(resultOrder).toBeDefined();
         expect(resultOrder!.id).toEqual(tradeOrder1.id);
         expect(resultOrder!.externalId).toEqual(tradeOrder1.externalId);
@@ -372,7 +372,7 @@ describe('ProcessDcaTradingService', () => {
         expect(resultOrder!.executedQuantity).toEqual(tradeOrder1.executedAssetQuantity);
         expect(resultOrder!.executedPrice).toEqual(tradeOrder1.executedPrice);
 
-        resultOrder = getDcaTradingOrder(result.orders, 'ASSET2BASE');
+        resultOrder = getDcaTradingOrder(result.orders, 'ASSET2#BASE');
         expect(resultOrder).toBeDefined();
         expect(resultOrder!.id).toEqual(tradeOrder2.id);
         expect(resultOrder!.externalId).toEqual(tradeOrder2.externalId);
@@ -384,7 +384,7 @@ describe('ProcessDcaTradingService', () => {
         expect(resultOrder!.executedQuantity).toEqual(tradeOrder2.executedAssetQuantity);
         expect(resultOrder!.executedPrice).toEqual(tradeOrder2.executedPrice);
 
-        resultOrder = getDcaTradingOrder(result.orders, 'ASSET3BASE');
+        resultOrder = getDcaTradingOrder(result.orders, 'ASSET3#BASE');
         expect(resultOrder).toBeDefined();
         expect(resultOrder!.id).toEqual(tradeOrder3.id);
         expect(resultOrder!.externalId).toEqual(tradeOrder3.externalId);
@@ -399,7 +399,7 @@ describe('ProcessDcaTradingService', () => {
         expect(createOrderServiceMock.create).toHaveBeenCalledTimes(4);
         const createOrdersParams = createOrderServiceMock.create.mock.calls.map((call) => call[0]);
 
-        let createOrderParams = getCreateOrder(createOrdersParams, 'BASEQUOTE');
+        let createOrderParams = getCreateOrder(createOrdersParams, 'BASE#QUOTE');
         expect(createOrderParams).toBeDefined();
         expect(createOrderParams!.side).toEqual('Buy');
         expect(createOrderParams!.type).toEqual('Market');
@@ -407,7 +407,7 @@ describe('ProcessDcaTradingService', () => {
         expect(createOrderParams!.quoteAssetQuantity).toEqual(dcaTradingConfig.quoteAssetQuantity);
         expect(createOrderParams!.priceThreshold).toBeUndefined();
 
-        createOrderParams = getCreateOrder(createOrdersParams, 'ASSET1BASE');
+        createOrderParams = getCreateOrder(createOrdersParams, 'ASSET1#BASE');
         expect(createOrderParams).toBeDefined();
         expect(createOrderParams!.side).toEqual('Buy');
         expect(createOrderParams!.type).toEqual('Market');
@@ -415,7 +415,7 @@ describe('ProcessDcaTradingService', () => {
         expect(createOrderParams!.quoteAssetQuantity).toEqual(dcaTradingConfigTradeAsset1.percentage * baseOrder.executedAssetQuantity!);
         expect(createOrderParams!.priceThreshold).toBeUndefined();
 
-        createOrderParams = getCreateOrder(createOrdersParams, 'ASSET2BASE');
+        createOrderParams = getCreateOrder(createOrdersParams, 'ASSET2#BASE');
         expect(createOrderParams).toBeDefined();
         expect(createOrderParams!.side).toEqual('Buy');
         expect(createOrderParams!.type).toEqual('Market');
@@ -423,7 +423,7 @@ describe('ProcessDcaTradingService', () => {
         expect(createOrderParams!.quoteAssetQuantity).toEqual(dcaTradingConfigTradeAsset2.percentage * baseOrder.executedAssetQuantity!);
         expect(createOrderParams!.priceThreshold).toBeUndefined();
 
-        createOrderParams = getCreateOrder(createOrdersParams, 'ASSET3BASE');
+        createOrderParams = getCreateOrder(createOrdersParams, 'ASSET3#BASE');
         expect(createOrderParams).toBeDefined();
         expect(createOrderParams!.side).toEqual('Buy');
         expect(createOrderParams!.type).toEqual('Market');
@@ -460,9 +460,9 @@ describe('ProcessDcaTradingService', () => {
         const tradeOrder = buildDefaultOrder();
 
         createOrderServiceMock.create = jest.fn().mockImplementation((createOrder: CreateOrder) => {
-          if (createOrder.symbol === 'BASEQUOTE') {
+          if (createOrder.symbol === 'BASE#QUOTE') {
             return baseOrder;
-          } else if (createOrder.symbol === 'ASSET1BASE') {
+          } else if (createOrder.symbol === 'ASSET1#BASE') {
             return tradeOrder;
           } else {
             throw new Error(`Error on ${createOrder.symbol}`);
@@ -473,13 +473,13 @@ describe('ProcessDcaTradingService', () => {
 
         const result = await processDcaTradingService.process(dcaTradingConfig);
         expect(result).toBeDefined();
-        expect(result.id).toEqual(`${dcaTradingConfig.baseAsset}${dcaTradingConfig.quoteAsset}/${creationDate.valueOf()}`);
+        expect(result.id).toEqual(`${dcaTradingConfig.baseAsset}#${dcaTradingConfig.quoteAsset}/${creationDate.valueOf()}`);
         expect(result.success).toEqual(true);
         expect(result.creationDate).toEqual(creationDate);
         expect(result.orders).toBeDefined();
         expect(result.orders).toHaveLength(2);
 
-        let resultOrder = getDcaTradingOrder(result.orders, 'BASEQUOTE');
+        let resultOrder = getDcaTradingOrder(result.orders, 'BASE#QUOTE');
         expect(resultOrder).toBeDefined();
         expect(resultOrder!.id).toEqual(baseOrder.id);
         expect(resultOrder!.externalId).toEqual(baseOrder.externalId);
@@ -491,7 +491,7 @@ describe('ProcessDcaTradingService', () => {
         expect(resultOrder!.executedQuantity).toEqual(baseOrder.executedAssetQuantity);
         expect(resultOrder!.executedPrice).toEqual(baseOrder.executedPrice);
 
-        resultOrder = getDcaTradingOrder(result.orders, 'ASSET1BASE');
+        resultOrder = getDcaTradingOrder(result.orders, 'ASSET1#BASE');
         expect(resultOrder).toBeDefined();
         expect(resultOrder!.id).toEqual(tradeOrder.id);
         expect(resultOrder!.externalId).toEqual(tradeOrder.externalId);
@@ -506,7 +506,7 @@ describe('ProcessDcaTradingService', () => {
         expect(createOrderServiceMock.create).toHaveBeenCalledTimes(2);
         const createOrdersParams = createOrderServiceMock.create.mock.calls.map((call) => call[0]);
 
-        let createOrderParams = getCreateOrder(createOrdersParams, 'BASEQUOTE');
+        let createOrderParams = getCreateOrder(createOrdersParams, 'BASE#QUOTE');
         expect(createOrderParams).toBeDefined();
         expect(createOrderParams!.side).toEqual('Buy');
         expect(createOrderParams!.type).toEqual('Market');
@@ -514,7 +514,7 @@ describe('ProcessDcaTradingService', () => {
         expect(createOrderParams!.quoteAssetQuantity).toEqual(dcaTradingConfig.quoteAssetQuantity);
         expect(createOrderParams!.priceThreshold).toBeUndefined();
 
-        createOrderParams = getCreateOrder(createOrdersParams, 'ASSET1BASE');
+        createOrderParams = getCreateOrder(createOrdersParams, 'ASSET1#BASE');
         expect(createOrderParams).toBeDefined();
         expect(createOrderParams!.side).toEqual('Buy');
         expect(createOrderParams!.type).toEqual('Market');
@@ -544,9 +544,9 @@ describe('ProcessDcaTradingService', () => {
         const tradeOrder = buildDefaultOrder();
 
         createOrderServiceMock.create = jest.fn().mockImplementation((createOrder: CreateOrder) => {
-          if (createOrder.symbol === 'BASEQUOTE') {
+          if (createOrder.symbol === 'BASE#QUOTE') {
             return baseOrder;
-          } else if (createOrder.symbol === 'ASSET1BASE') {
+          } else if (createOrder.symbol === 'ASSET1#BASE') {
             return tradeOrder;
           } else {
             throw new Error(`Error on ${createOrder.symbol}`);
@@ -557,13 +557,13 @@ describe('ProcessDcaTradingService', () => {
 
         const result = await processDcaTradingService.process(dcaTradingConfig);
         expect(result).toBeDefined();
-        expect(result.id).toEqual(`${dcaTradingConfig.baseAsset}${dcaTradingConfig.quoteAsset}/${creationDate.valueOf()}`);
+        expect(result.id).toEqual(`${dcaTradingConfig.baseAsset}#${dcaTradingConfig.quoteAsset}/${creationDate.valueOf()}`);
         expect(result.success).toEqual(true);
         expect(result.creationDate).toEqual(creationDate);
         expect(result.orders).toBeDefined();
         expect(result.orders).toHaveLength(2);
 
-        let resultOrder = getDcaTradingOrder(result.orders, 'BASEQUOTE');
+        let resultOrder = getDcaTradingOrder(result.orders, 'BASE#QUOTE');
         expect(resultOrder).toBeDefined();
         expect(resultOrder!.id).toEqual(baseOrder.id);
         expect(resultOrder!.externalId).toEqual(baseOrder.externalId);
@@ -575,7 +575,7 @@ describe('ProcessDcaTradingService', () => {
         expect(resultOrder!.executedQuantity).toEqual(baseOrder.executedAssetQuantity);
         expect(resultOrder!.executedPrice).toEqual(baseOrder.executedPrice);
 
-        resultOrder = getDcaTradingOrder(result.orders, 'ASSET1BASE');
+        resultOrder = getDcaTradingOrder(result.orders, 'ASSET1#BASE');
         expect(resultOrder).toBeDefined();
         expect(resultOrder!.id).toEqual(tradeOrder.id);
         expect(resultOrder!.externalId).toEqual(tradeOrder.externalId);
@@ -590,7 +590,7 @@ describe('ProcessDcaTradingService', () => {
         expect(createOrderServiceMock.create).toHaveBeenCalledTimes(2);
         const createOrdersParams = createOrderServiceMock.create.mock.calls.map((call) => call[0]);
 
-        let createOrderParams = getCreateOrder(createOrdersParams, 'BASEQUOTE');
+        let createOrderParams = getCreateOrder(createOrdersParams, 'BASE#QUOTE');
         expect(createOrderParams).toBeDefined();
         expect(createOrderParams!.side).toEqual('Buy');
         expect(createOrderParams!.type).toEqual('Market');
@@ -598,7 +598,7 @@ describe('ProcessDcaTradingService', () => {
         expect(createOrderParams!.quoteAssetQuantity).toEqual(dcaTradingConfig.quoteAssetQuantity);
         expect(createOrderParams!.priceThreshold).toBeUndefined();
 
-        createOrderParams = getCreateOrder(createOrdersParams, 'ASSET1BASE');
+        createOrderParams = getCreateOrder(createOrdersParams, 'ASSET1#BASE');
         expect(createOrderParams).toBeDefined();
         expect(createOrderParams!.side).toEqual('Buy');
         expect(createOrderParams!.type).toEqual('Market');
@@ -629,9 +629,9 @@ describe('ProcessDcaTradingService', () => {
         const tradeOrder = buildDefaultOrder();
 
         createOrderServiceMock.create = jest.fn().mockImplementation((createOrder: CreateOrder) => {
-          if (createOrder.symbol === 'BASEQUOTE') {
+          if (createOrder.symbol === 'BASE#QUOTE') {
             return baseOrder;
-          } else if (createOrder.symbol === 'ASSET2BASE') {
+          } else if (createOrder.symbol === 'ASSET2#BASE') {
             return tradeOrder;
           } else {
             throw new Error(`Error on ${createOrder.symbol}`);
@@ -642,13 +642,13 @@ describe('ProcessDcaTradingService', () => {
 
         const result = await processDcaTradingService.process(dcaTradingConfig);
         expect(result).toBeDefined();
-        expect(result.id).toEqual(`${dcaTradingConfig.baseAsset}${dcaTradingConfig.quoteAsset}/${creationDate.valueOf()}`);
+        expect(result.id).toEqual(`${dcaTradingConfig.baseAsset}#${dcaTradingConfig.quoteAsset}/${creationDate.valueOf()}`);
         expect(result.success).toEqual(true);
         expect(result.creationDate).toEqual(creationDate);
         expect(result.orders).toBeDefined();
         expect(result.orders).toHaveLength(2);
 
-        let resultOrder = getDcaTradingOrder(result.orders, 'BASEQUOTE');
+        let resultOrder = getDcaTradingOrder(result.orders, 'BASE#QUOTE');
         expect(resultOrder).toBeDefined();
         expect(resultOrder!.id).toEqual(baseOrder.id);
         expect(resultOrder!.externalId).toEqual(baseOrder.externalId);
@@ -660,7 +660,7 @@ describe('ProcessDcaTradingService', () => {
         expect(resultOrder!.executedQuantity).toEqual(baseOrder.executedAssetQuantity);
         expect(resultOrder!.executedPrice).toEqual(baseOrder.executedPrice);
 
-        resultOrder = getDcaTradingOrder(result.orders, 'ASSET2BASE');
+        resultOrder = getDcaTradingOrder(result.orders, 'ASSET2#BASE');
         expect(resultOrder).toBeDefined();
         expect(resultOrder!.id).toEqual(tradeOrder.id);
         expect(resultOrder!.externalId).toEqual(tradeOrder.externalId);
@@ -675,7 +675,7 @@ describe('ProcessDcaTradingService', () => {
         expect(createOrderServiceMock.create).toHaveBeenCalledTimes(2);
         const createOrdersParams = createOrderServiceMock.create.mock.calls.map((call) => call[0]);
 
-        let createOrderParams = getCreateOrder(createOrdersParams, 'BASEQUOTE');
+        let createOrderParams = getCreateOrder(createOrdersParams, 'BASE#QUOTE');
         expect(createOrderParams).toBeDefined();
         expect(createOrderParams!.side).toEqual('Buy');
         expect(createOrderParams!.type).toEqual('Market');
@@ -683,7 +683,7 @@ describe('ProcessDcaTradingService', () => {
         expect(createOrderParams!.quoteAssetQuantity).toEqual(dcaTradingConfig.quoteAssetQuantity);
         expect(createOrderParams!.priceThreshold).toBeUndefined();
 
-        createOrderParams = getCreateOrder(createOrdersParams, 'ASSET2BASE');
+        createOrderParams = getCreateOrder(createOrdersParams, 'ASSET2#BASE');
         expect(createOrderParams).toBeDefined();
         expect(createOrderParams!.side).toEqual('Buy');
         expect(createOrderParams!.type).toEqual('Market');
@@ -714,9 +714,9 @@ describe('ProcessDcaTradingService', () => {
         const tradeOrder = buildDefaultOrder();
 
         createOrderServiceMock.create = jest.fn().mockImplementation((createOrder: CreateOrder) => {
-          if (createOrder.symbol === 'BASEQUOTE') {
+          if (createOrder.symbol === 'BASE#QUOTE') {
             return baseOrder;
-          } else if (createOrder.symbol === 'ASSET3BASE') {
+          } else if (createOrder.symbol === 'ASSET3#BASE') {
             return tradeOrder;
           } else {
             throw new Error(`Error on ${createOrder.symbol}`);
@@ -727,13 +727,13 @@ describe('ProcessDcaTradingService', () => {
 
         const result = await processDcaTradingService.process(dcaTradingConfig);
         expect(result).toBeDefined();
-        expect(result.id).toEqual(`${dcaTradingConfig.baseAsset}${dcaTradingConfig.quoteAsset}/${creationDate.valueOf()}`);
+        expect(result.id).toEqual(`${dcaTradingConfig.baseAsset}#${dcaTradingConfig.quoteAsset}/${creationDate.valueOf()}`);
         expect(result.success).toEqual(true);
         expect(result.creationDate).toEqual(creationDate);
         expect(result.orders).toBeDefined();
         expect(result.orders).toHaveLength(2);
 
-        let resultOrder = getDcaTradingOrder(result.orders, 'BASEQUOTE');
+        let resultOrder = getDcaTradingOrder(result.orders, 'BASE#QUOTE');
         expect(resultOrder).toBeDefined();
         expect(resultOrder!.id).toEqual(baseOrder.id);
         expect(resultOrder!.externalId).toEqual(baseOrder.externalId);
@@ -745,7 +745,7 @@ describe('ProcessDcaTradingService', () => {
         expect(resultOrder!.executedQuantity).toEqual(baseOrder.executedAssetQuantity);
         expect(resultOrder!.executedPrice).toEqual(baseOrder.executedPrice);
 
-        resultOrder = getDcaTradingOrder(result.orders, 'ASSET3BASE');
+        resultOrder = getDcaTradingOrder(result.orders, 'ASSET3#BASE');
         expect(resultOrder).toBeDefined();
         expect(resultOrder!.id).toEqual(tradeOrder.id);
         expect(resultOrder!.externalId).toEqual(tradeOrder.externalId);
@@ -760,7 +760,7 @@ describe('ProcessDcaTradingService', () => {
         expect(createOrderServiceMock.create).toHaveBeenCalledTimes(2);
         const createOrdersParams = createOrderServiceMock.create.mock.calls.map((call) => call[0]);
 
-        let createOrderParams = getCreateOrder(createOrdersParams, 'BASEQUOTE');
+        let createOrderParams = getCreateOrder(createOrdersParams, 'BASE#QUOTE');
         expect(createOrderParams).toBeDefined();
         expect(createOrderParams!.side).toEqual('Buy');
         expect(createOrderParams!.type).toEqual('Market');
@@ -768,7 +768,7 @@ describe('ProcessDcaTradingService', () => {
         expect(createOrderParams!.quoteAssetQuantity).toEqual(dcaTradingConfig.quoteAssetQuantity);
         expect(createOrderParams!.priceThreshold).toBeUndefined();
 
-        createOrderParams = getCreateOrder(createOrdersParams, 'ASSET3BASE');
+        createOrderParams = getCreateOrder(createOrdersParams, 'ASSET3#BASE');
         expect(createOrderParams).toBeDefined();
         expect(createOrderParams!.side).toEqual('Buy');
         expect(createOrderParams!.type).toEqual('Market');
@@ -799,9 +799,9 @@ describe('ProcessDcaTradingService', () => {
         const tradeOrder = buildDefaultOrder();
 
         createOrderServiceMock.create = jest.fn().mockImplementation((createOrder: CreateOrder) => {
-          if (createOrder.symbol === 'BASEQUOTE') {
+          if (createOrder.symbol === 'BASE#QUOTE') {
             return baseOrder;
-          } else if (createOrder.symbol === 'ASSET1BASE') {
+          } else if (createOrder.symbol === 'ASSET1#BASE') {
             return tradeOrder;
           } else {
             throw new Error(`Error on ${createOrder.symbol}`);
@@ -812,13 +812,13 @@ describe('ProcessDcaTradingService', () => {
 
         const result = await processDcaTradingService.process(dcaTradingConfig);
         expect(result).toBeDefined();
-        expect(result.id).toEqual(`${dcaTradingConfig.baseAsset}${dcaTradingConfig.quoteAsset}/${creationDate.valueOf()}`);
+        expect(result.id).toEqual(`${dcaTradingConfig.baseAsset}#${dcaTradingConfig.quoteAsset}/${creationDate.valueOf()}`);
         expect(result.success).toEqual(true);
         expect(result.creationDate).toEqual(creationDate);
         expect(result.orders).toBeDefined();
         expect(result.orders).toHaveLength(2);
 
-        let resultOrder = getDcaTradingOrder(result.orders, 'BASEQUOTE');
+        let resultOrder = getDcaTradingOrder(result.orders, 'BASE#QUOTE');
         expect(resultOrder).toBeDefined();
         expect(resultOrder!.id).toEqual(baseOrder.id);
         expect(resultOrder!.externalId).toEqual(baseOrder.externalId);
@@ -830,7 +830,7 @@ describe('ProcessDcaTradingService', () => {
         expect(resultOrder!.executedQuantity).toEqual(baseOrder.executedAssetQuantity);
         expect(resultOrder!.executedPrice).toEqual(baseOrder.executedPrice);
 
-        resultOrder = getDcaTradingOrder(result.orders, 'ASSET1BASE');
+        resultOrder = getDcaTradingOrder(result.orders, 'ASSET1#BASE');
         expect(resultOrder).toBeDefined();
         expect(resultOrder!.id).toEqual(tradeOrder.id);
         expect(resultOrder!.externalId).toEqual(tradeOrder.externalId);
@@ -845,7 +845,7 @@ describe('ProcessDcaTradingService', () => {
         expect(createOrderServiceMock.create).toHaveBeenCalledTimes(2);
         const createOrdersParams = createOrderServiceMock.create.mock.calls.map((call) => call[0]);
 
-        let createOrderParams = getCreateOrder(createOrdersParams, 'BASEQUOTE');
+        let createOrderParams = getCreateOrder(createOrdersParams, 'BASE#QUOTE');
         expect(createOrderParams).toBeDefined();
         expect(createOrderParams!.side).toEqual('Buy');
         expect(createOrderParams!.type).toEqual('Market');
@@ -853,7 +853,7 @@ describe('ProcessDcaTradingService', () => {
         expect(createOrderParams!.quoteAssetQuantity).toEqual(dcaTradingConfig.quoteAssetQuantity);
         expect(createOrderParams!.priceThreshold).toBeUndefined();
 
-        createOrderParams = getCreateOrder(createOrdersParams, 'ASSET1BASE');
+        createOrderParams = getCreateOrder(createOrdersParams, 'ASSET1#BASE');
         expect(createOrderParams).toBeDefined();
         expect(createOrderParams!.side).toEqual('Buy');
         expect(createOrderParams!.type).toEqual('Market');

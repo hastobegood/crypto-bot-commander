@@ -67,6 +67,7 @@ describe('SendOrderStepService', () => {
             id: order.id,
             status: order.status,
             externalId: order.externalId!,
+            externalStatus: order.externalStatus!,
             quantity: order.executedAssetQuantity,
             price: order.executedPrice,
           });
@@ -104,6 +105,7 @@ describe('SendOrderStepService', () => {
             success: false,
             id: order.id,
             status: order.status,
+            externalStatus: order.externalStatus!,
           });
 
           expect(getAccountServiceMock.get).toHaveBeenCalledTimes(1);
@@ -140,6 +142,7 @@ describe('SendOrderStepService', () => {
             id: order.id,
             status: order.status,
             externalId: order.externalId!,
+            externalStatus: order.externalStatus!,
             quantity: order.executedAssetQuantity,
             price: order.executedPrice,
           });
@@ -177,6 +180,7 @@ describe('SendOrderStepService', () => {
             success: false,
             id: order.id,
             status: order.status,
+            externalStatus: order.externalStatus!,
           });
 
           expect(getAccountServiceMock.get).toHaveBeenCalledTimes(1);
@@ -268,6 +272,7 @@ describe('SendOrderStepService', () => {
               id: order.id,
               status: order.status,
               externalId: order.externalId!,
+              externalStatus: order.externalStatus!,
               quantity: order.executedAssetQuantity,
               price: order.executedPrice,
             });

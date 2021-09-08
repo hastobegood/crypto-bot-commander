@@ -64,7 +64,8 @@ export const buildStrategyStep = (template: StrategyStepTemplate, strategyId: st
     strategyId: strategyId,
     output: output,
     creationDate: new Date(),
-    lastExecutionDate: new Date(),
+    executionStartDate: new Date(),
+    executionEndDate: new Date(),
   };
 };
 
@@ -113,6 +114,7 @@ export const buildDefaultSendOrderStepOutput = (success: boolean): SendOrderStep
     id: randomString(),
     status: randomString(),
     externalId: randomString(),
+    externalStatus: randomString(),
     quantity: randomNumber(100, 500),
     price: randomNumber(1_000, 10_000),
   };

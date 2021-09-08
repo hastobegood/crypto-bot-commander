@@ -12,7 +12,8 @@ export interface StrategyStep extends StrategyStepTemplate {
   output: StrategyStepOutput;
   error?: StrategyStepError;
   creationDate: Date;
-  lastExecutionDate: Date;
+  executionStartDate: Date;
+  executionEndDate: Date;
 }
 
 export interface StrategyStepInput {
@@ -77,6 +78,7 @@ export interface SendOrderStepOutput extends StrategyStepOutput {
   id: string;
   externalId: string;
   status: string;
+  externalStatus: string;
   quantity?: number;
   price?: number;
 }

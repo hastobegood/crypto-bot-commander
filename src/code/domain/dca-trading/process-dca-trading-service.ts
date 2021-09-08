@@ -9,7 +9,7 @@ export class ProcessDcaTradingService {
 
   async process(dcaTradingConfig: DcaTradingConfig): Promise<DcaTrading> {
     const creationDate = new Date();
-    const symbol = `${dcaTradingConfig.baseAsset}${dcaTradingConfig.quoteAsset}`;
+    const symbol = `${dcaTradingConfig.baseAsset}#${dcaTradingConfig.quoteAsset}`;
     const id = `${symbol}/${creationDate.valueOf()}`;
     const orders = await this.#process(dcaTradingConfig, symbol);
 
@@ -33,7 +33,7 @@ export class ProcessDcaTradingService {
       const tradeOrders = await Promise.all(
         dcaTradingConfig.tradeAssets.map(async (tradeAsset) => {
           const chosenAsset = await this.#chooseAsset(tradeAsset.asset);
-          return this.#order(chosenAsset, dcaTradingConfig.baseAsset, `${chosenAsset}${dcaTradingConfig.baseAsset}`, tradeAsset.percentage * baseOrder.executedQuantity!);
+          return this.#order(chosenAsset, dcaTradingConfig.baseAsset, `${chosenAsset}#${dcaTradingConfig.baseAsset}`, tradeAsset.percentage * baseOrder.executedQuantity!);
         }),
       );
       orders.push(...tradeOrders);

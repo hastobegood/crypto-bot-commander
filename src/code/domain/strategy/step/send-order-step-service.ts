@@ -31,6 +31,7 @@ export class SendOrderStepService implements StrategyStepService {
       id: order.id,
       externalId: order.externalId!,
       status: order.status,
+      externalStatus: order.externalStatus!,
       quantity: order.executedAssetQuantity,
       price: order.executedPrice,
     };
