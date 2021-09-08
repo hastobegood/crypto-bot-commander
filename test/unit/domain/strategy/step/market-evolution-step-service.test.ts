@@ -266,7 +266,7 @@ describe('MarketEvolutionStepService', () => {
             expect(calculateParams[0].period).toEqual(2);
             expect(calculateParams[0].points).toEqual([
               { timestamp: candlesticks[0].closingDate.valueOf(), value: candlesticks[0].closingPrice },
-              { timestamp: lastOrderStep.lastExecutionDate.valueOf(), value: (lastOrderStep.output as SendOrderStepOutput).price },
+              { timestamp: lastOrderStep.executionEndDate.valueOf(), value: (lastOrderStep.output as SendOrderStepOutput).price },
             ]);
           });
         });
@@ -308,7 +308,7 @@ describe('MarketEvolutionStepService', () => {
             expect(calculateParams[0].period).toEqual(2);
             expect(calculateParams[0].points).toEqual([
               { timestamp: candlesticks[0].closingDate.valueOf(), value: candlesticks[0].closingPrice },
-              { timestamp: lastOrderStep.lastExecutionDate.valueOf(), value: (lastOrderStep.output as SendOrderStepOutput).price },
+              { timestamp: lastOrderStep.executionEndDate.valueOf(), value: (lastOrderStep.output as SendOrderStepOutput).price },
             ]);
           });
         });
@@ -350,7 +350,7 @@ describe('MarketEvolutionStepService', () => {
             expect(calculateParams[0].period).toEqual(2);
             expect(calculateParams[0].points).toEqual([
               { timestamp: candlesticks[0].closingDate.valueOf(), value: candlesticks[0].closingPrice },
-              { timestamp: lastOrderStep.lastExecutionDate.valueOf(), value: (lastOrderStep.output as SendOrderStepOutput).price },
+              { timestamp: lastOrderStep.executionEndDate.valueOf(), value: (lastOrderStep.output as SendOrderStepOutput).price },
             ]);
           });
         });

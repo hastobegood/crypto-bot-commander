@@ -108,7 +108,8 @@ describe('EvaluateStrategyService', () => {
               details: stringContaining(`Unsupported '${strategy.template['1'].type}' strategy step type`),
             },
             creationDate: date,
-            lastExecutionDate: date,
+            executionStartDate: date,
+            executionEndDate: date,
           });
 
           expect(strategyStepRepositoryMock.getLastByStrategyIdAndType).toHaveBeenCalledTimes(0);
@@ -159,7 +160,8 @@ describe('EvaluateStrategyService', () => {
             strategyId: strategy.id,
             output: stepOutput,
             creationDate: date,
-            lastExecutionDate: date,
+            executionStartDate: date,
+            executionEndDate: date,
           });
 
           expect(marketEvolutionStepServiceMock.process).toHaveBeenCalledTimes(0);
@@ -211,7 +213,8 @@ describe('EvaluateStrategyService', () => {
             strategyId: strategy.id,
             output: lastStepOutput,
             creationDate: date,
-            lastExecutionDate: date,
+            executionStartDate: date,
+            executionEndDate: date,
           });
 
           expect(marketEvolutionStepServiceMock.process).toHaveBeenCalledTimes(0);
@@ -293,7 +296,8 @@ describe('EvaluateStrategyService', () => {
             strategyId: strategy.id,
             output: step1Output1,
             creationDate: date,
-            lastExecutionDate: date,
+            executionStartDate: date,
+            executionEndDate: date,
           });
           saveParams = strategyStepRepositoryMock.save.mock.calls[1];
           expect(saveParams.length).toEqual(1);
@@ -302,7 +306,8 @@ describe('EvaluateStrategyService', () => {
             strategyId: strategy.id,
             output: step2Output1,
             creationDate: date,
-            lastExecutionDate: date,
+            executionStartDate: date,
+            executionEndDate: date,
           });
           saveParams = strategyStepRepositoryMock.save.mock.calls[2];
           expect(saveParams.length).toEqual(1);
@@ -311,7 +316,8 @@ describe('EvaluateStrategyService', () => {
             strategyId: strategy.id,
             output: step3Output1,
             creationDate: date,
-            lastExecutionDate: date,
+            executionStartDate: date,
+            executionEndDate: date,
           });
           saveParams = strategyStepRepositoryMock.save.mock.calls[3];
           expect(saveParams.length).toEqual(1);
@@ -320,7 +326,8 @@ describe('EvaluateStrategyService', () => {
             strategyId: strategy.id,
             output: step4Output1,
             creationDate: date,
-            lastExecutionDate: date,
+            executionStartDate: date,
+            executionEndDate: date,
           });
           saveParams = strategyStepRepositoryMock.save.mock.calls[4];
           expect(saveParams.length).toEqual(1);
@@ -329,7 +336,8 @@ describe('EvaluateStrategyService', () => {
             strategyId: strategy.id,
             output: step1Output2,
             creationDate: date,
-            lastExecutionDate: date,
+            executionStartDate: date,
+            executionEndDate: date,
           });
         });
       });

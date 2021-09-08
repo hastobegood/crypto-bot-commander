@@ -66,7 +66,7 @@ export class MarketEvolutionStepService implements StrategyStepService {
     }
 
     return {
-      timestamp: lastSendOrderStep.lastExecutionDate.valueOf(),
+      timestamp: lastSendOrderStep.executionEndDate.valueOf(),
       value: (lastSendOrderStep.output as SendOrderStepOutput).price!,
     };
   }
