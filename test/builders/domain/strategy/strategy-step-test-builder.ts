@@ -3,6 +3,11 @@ import {
   MarketEvolutionSource,
   MarketEvolutionStepInput,
   MarketEvolutionStepOutput,
+  MovingAverageCrossover,
+  MovingAverageCrossoverStepInput,
+  MovingAverageCrossoverStepOutput,
+  MovingAverageSignal,
+  MovingAverageType,
   SendOrderSide,
   SendOrderSource,
   SendOrderStepInput,
@@ -26,6 +31,10 @@ export const buildDefaultMarketEvolutionStepTemplate = (): StrategyStepTemplate 
 
 export const buildDefaultSendOrderStepTemplate = (): StrategyStepTemplate => {
   return buildStrategyStepTemplate(randomString(), randomString(), 'SendOrder', buildDefaultSendOrderStepInput());
+};
+
+export const buildDefaultMovingAverageCrossoverStepTemplate = (): StrategyStepTemplate => {
+  return buildStrategyStepTemplate(randomString(), randomString(), 'MovingAverageCrossover', buildDefaultMovingAverageCrossoverStepInput());
 };
 
 export const buildStrategyStepTemplate = (id: string, nextId: string, type: StrategyStepType, input: StrategyStepInput): StrategyStepTemplate => {
@@ -106,5 +115,28 @@ export const buildDefaultSendOrderStepOutput = (success: boolean): SendOrderStep
     externalId: randomString(),
     quantity: randomNumber(100, 500),
     price: randomNumber(1_000, 10_000),
+  };
+};
+
+export const buildDefaultMovingAverageCrossoverStepInput = (): MovingAverageCrossoverStepInput => {
+  return buildMovingAverageCrossoverStepInput(randomFromList(['SMA', 'CMA', 'EMA']), randomFromList(['CurrentPrice', 'ShortTermPrice']), randomFromList(['Buy', 'Sell']), randomNumber(1, 5), randomNumber(10, 25));
+};
+
+export const buildMovingAverageCrossoverStepInput = (type: MovingAverageType, crossover: MovingAverageCrossover, signal: MovingAverageSignal, shortTermPeriod: number, longTermPeriod: number): MovingAverageCrossoverStepInput => {
+  return {
+    type: type,
+    crossover: crossover,
+    signal: signal,
+    shortTermPeriod: shortTermPeriod,
+    longTermPeriod: longTermPeriod,
+  };
+};
+
+export const buildDefaultMovingAverageCrossoverStepOutput = (success: boolean): MovingAverageCrossoverStepOutput => {
+  return {
+    success: success,
+    currentPrice: randomNumber(1_000, 10_000),
+    shortTermPrice: randomNumber(1_000, 10_000),
+    longTermPrice: randomNumber(1_000, 10_000),
   };
 };
