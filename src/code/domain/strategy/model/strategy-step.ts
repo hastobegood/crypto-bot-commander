@@ -1,4 +1,4 @@
-export type StrategyStepType = 'SendOrder' | 'MarketEvolution';
+export type StrategyStepType = 'SendOrder' | 'MarketEvolution' | 'MovingAverageCrossover';
 
 export interface StrategyStepTemplate {
   id: string;
@@ -42,6 +42,24 @@ export interface MarketEvolutionStepOutput extends StrategyStepOutput {
   lastPrice: number;
   currentPrice: number;
   percentage: number;
+}
+
+export type MovingAverageType = 'SMA' | 'CMA' | 'EMA';
+export type MovingAverageCrossover = 'CurrentPrice' | 'ShortTermPrice';
+export type MovingAverageSignal = 'Buy' | 'Sell';
+
+export interface MovingAverageCrossoverStepInput extends StrategyStepInput {
+  type: MovingAverageType;
+  crossover: MovingAverageCrossover;
+  signal: MovingAverageSignal;
+  shortTermPeriod: number;
+  longTermPeriod: number;
+}
+
+export interface MovingAverageCrossoverStepOutput extends StrategyStepOutput {
+  currentPrice: number;
+  shortTermPrice: number;
+  longTermPrice: number;
 }
 
 export type SendOrderSource = 'Account' | 'LastOrder';

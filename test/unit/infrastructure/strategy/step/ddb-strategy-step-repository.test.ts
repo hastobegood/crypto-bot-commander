@@ -41,7 +41,7 @@ describe('DdbStrategyStepRepository', () => {
               {
                 PutRequest: {
                   Item: {
-                    pk: `Strategy::${step.strategyId}::Step::${step.id}-${step.creationDate.valueOf()}`,
+                    pk: `Strategy::${step.strategyId}::Step::${step.creationDate.valueOf()}-${step.id}`,
                     sk: 'Details',
                     type: 'StrategyStep',
                     data: { ...step, creationDate: step.creationDate.toISOString(), lastExecutionDate: step.lastExecutionDate.toISOString() },
@@ -98,7 +98,7 @@ describe('DdbStrategyStepRepository', () => {
               {
                 PutRequest: {
                   Item: {
-                    pk: `Strategy::${step.strategyId}::Step::${step.id}-${step.creationDate.valueOf()}`,
+                    pk: `Strategy::${step.strategyId}::Step::${step.creationDate.valueOf()}-${step.id}`,
                     sk: 'Details',
                     type: 'StrategyStep',
                     data: { ...step, creationDate: step.creationDate.toISOString(), lastExecutionDate: step.lastExecutionDate.toISOString() },

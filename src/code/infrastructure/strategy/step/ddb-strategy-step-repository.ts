@@ -8,7 +8,7 @@ export class DdbStrategyStepRepository implements StrategyStepRepository {
   async save(step: StrategyStep): Promise<StrategyStep> {
     const batchWriteItemInput = {
       RequestItems: {
-        [this.tableName]: [this.#buildItem(step, `${step.id}-${step.creationDate.valueOf()}`), this.#buildItem(step, 'Last'), this.#buildItem(step, `Last::${step.type}`)],
+        [this.tableName]: [this.#buildItem(step, `${step.creationDate.valueOf()}-${step.id}`), this.#buildItem(step, 'Last'), this.#buildItem(step, `Last::${step.type}`)],
       },
     };
 
