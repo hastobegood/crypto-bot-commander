@@ -1,23 +1,23 @@
-import { DocumentClient } from 'aws-sdk/lib/dynamodb/document_client';
+import { BatchWriteCommand, BatchWriteCommandInput, DynamoDBDocumentClient, GetCommand, GetCommandInput } from '@aws-sdk/lib-dynamodb';
 import { DcaTrading } from '../../domain/dca-trading/model/dca-trading';
 import { DcaTradingRepository } from '../../domain/dca-trading/dca-trading-repository';
 
 export class DdbDcaTradingRepository implements DcaTradingRepository {
-  constructor(private tableName: string, private ddbClient: DocumentClient) {}
+  constructor(private tableName: string, private ddbClient: DynamoDBDocumentClient) {}
 
   async save(dcaTrading: DcaTrading): Promise<DcaTrading> {
-    const batchWriteItemInput = {
+    const batchWriteInput: BatchWriteCommandInput = {
       RequestItems: {
         [this.tableName]: [this.#buildItem(dcaTrading, `Id::${dcaTrading.id}`), this.#buildItem(dcaTrading, 'Last')],
       },
     };
 
-    await this.ddbClient.batchWrite(batchWriteItemInput).promise();
+    await this.ddbClient.send(new BatchWriteCommand(batchWriteInput));
 
     return dcaTrading;
   }
 
-  #buildItem(dcaTrading: DcaTrading, id: string): DocumentClient.WriteRequest {
+  #buildItem(dcaTrading: DcaTrading, id: string): any {
     return {
       PutRequest: {
         Item: {
@@ -31,7 +31,7 @@ export class DdbDcaTradingRepository implements DcaTradingRepository {
   }
 
   async getLast(): Promise<DcaTrading | null> {
-    const getItemInput = {
+    const getInput: GetCommandInput = {
       TableName: this.tableName,
       Key: {
         pk: 'DcaTrading::Last',
@@ -39,9 +39,9 @@ export class DdbDcaTradingRepository implements DcaTradingRepository {
       },
     };
 
-    const getItemOutput = await this.ddbClient.get(getItemInput).promise();
+    const getOutput = await this.ddbClient.send(new GetCommand(getInput));
 
-    return getItemOutput.Item ? this.#convertFromItemFormat(getItemOutput.Item.data) : null;
+    return getOutput.Item ? this.#convertFromItemFormat(getOutput.Item.data) : null;
   }
 
   #convertToItemFormat(dcaTrading: DcaTrading): any {

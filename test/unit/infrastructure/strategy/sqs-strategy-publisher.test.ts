@@ -1,15 +1,15 @@
-import SQS from 'aws-sdk/clients/sqs';
+import { SQSClient } from '@aws-sdk/client-sqs';
 import { ActiveStrategyMessage, SqsStrategyPublisher } from '../../../../src/code/infrastructure/strategy/sqs-strategy-publisher';
 import { StrategyPublisher } from '../../../../src/code/domain/strategy/strategy-publisher';
 import { mocked } from 'ts-jest/utils';
 import { buildDefaultActiveStrategyMessage } from '../../../builders/infrastructure/strategy/strategy-message-builder';
 import MockDate from 'mockdate';
 
-const sqsClientMock = mocked(jest.genMockFromModule<SQS>('aws-sdk/clients/sqs'), true);
+const sqsClientMock = mocked(jest.genMockFromModule<SQSClient>('@aws-sdk/client-sqs'), true);
 
 let strategyPublisher: StrategyPublisher;
 beforeEach(() => {
-  sqsClientMock.sendMessage = jest.fn();
+  sqsClientMock.send = jest.fn();
 
   strategyPublisher = new SqsStrategyPublisher('my-queue-url', sqsClientMock);
 });
@@ -26,19 +26,13 @@ describe('SqsStrategyPublisher', () => {
   });
 
   describe('Given an active strategy ID to publish', () => {
-    beforeEach(() => {
-      sqsClientMock.sendMessage = jest.fn().mockReturnValue({
-        promise: jest.fn().mockResolvedValue(null),
-      });
-    });
-
     it('Then active strategy ID is published', async () => {
       await strategyPublisher.publishWithStatusActive(activeStrategyMessage.content.id);
 
-      expect(sqsClientMock.sendMessage).toHaveBeenCalledTimes(1);
-      const sendMessageParams = sqsClientMock.sendMessage.mock.calls[0];
-      expect(sendMessageParams.length).toEqual(1);
-      expect(sendMessageParams[0]).toEqual({
+      expect(sqsClientMock.send).toHaveBeenCalledTimes(1);
+      const sendParams = sqsClientMock.send.mock.calls[0];
+      expect(sendParams.length).toEqual(1);
+      expect(sendParams[0].input).toEqual({
         QueueUrl: 'my-queue-url',
         MessageBody: JSON.stringify(activeStrategyMessage),
         MessageGroupId: activeStrategyMessage.content.id,
