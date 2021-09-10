@@ -1,19 +1,15 @@
 import 'source-map-support/register';
-import { DcaTradingEventScheduler } from '../code/application/dca-trading/dca-trading-event-scheduler';
 import { Context, ScheduledEvent } from 'aws-lambda';
-import { SecretsManagerClient } from '@aws-sdk/client-secrets-manager';
-import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
-import { DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb';
+import { handleEvent } from './handler-utils';
+import { ddbClient } from '../code/configuration/aws/dynamodb';
+import { smClient } from '../code/configuration/aws/secrets-manager';
 import { BinanceClient } from '../code/infrastructure/binance/binance-client';
 import { ProcessDcaTradingService } from '../code/domain/dca-trading/process-dca-trading-service';
 import { DcaTradingConfig } from '../code/domain/dca-trading/model/dca-trading';
 import { HttpOrderRepository } from '../code/infrastructure/order/http-order-repository';
 import { CreateOrderService } from '../code/domain/order/create-order-service';
-import { handleEvent } from './handler-utils';
 import { DdbDcaTradingRepository } from '../code/infrastructure/dca-trading/ddb-dca-trading-repository';
-
-const ddbClient = DynamoDBDocumentClient.from(new DynamoDBClient({ region: process.env.REGION }), { marshallOptions: { convertEmptyValues: true, removeUndefinedValues: true, convertClassInstanceToMap: true } });
-const smClient = new SecretsManagerClient({ region: process.env.REGION });
+import { DcaTradingEventScheduler } from '../code/application/dca-trading/dca-trading-event-scheduler';
 
 const binanceClient = new BinanceClient(smClient, process.env.BINANCE_SECRET_NAME, process.env.BINANCE_URL);
 

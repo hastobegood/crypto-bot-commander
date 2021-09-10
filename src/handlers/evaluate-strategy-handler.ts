@@ -1,10 +1,9 @@
 import 'source-map-support/register';
 import { Context, SQSEvent } from 'aws-lambda';
-import { SecretsManagerClient } from '@aws-sdk/client-secrets-manager';
-import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
-import { DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb';
-import { SQSClient } from '@aws-sdk/client-sqs';
 import { handleEvent } from './handler-utils';
+import { ddbClient } from '../code/configuration/aws/dynamodb';
+import { sqsClient } from '../code/configuration/aws/sqs';
+import { smClient } from '../code/configuration/aws/secrets-manager';
 import { ActiveStrategyMessage } from '../code/infrastructure/strategy/sqs-strategy-publisher';
 import { DdbStrategyRepository } from '../code/infrastructure/strategy/ddb-strategy-repository';
 import { DdbStrategyStepRepository } from '../code/infrastructure/strategy/step/ddb-strategy-step-repository';
@@ -23,10 +22,6 @@ import { EvaluateStrategyMessageConsumer } from '../code/application/strategy/ev
 import { MovingAverageCrossoverStepService } from '../code/domain/strategy/step/moving-average-crossover-step-service';
 import { MovingAverageService } from '../code/domain/technical-analysis/moving-average-service';
 import { SqsStrategyStepPublisher } from '../code/infrastructure/strategy/step/sqs-strategy-step-publisher';
-
-const ddbClient = DynamoDBDocumentClient.from(new DynamoDBClient({ region: process.env.REGION }), { marshallOptions: { convertEmptyValues: true, removeUndefinedValues: true, convertClassInstanceToMap: true } });
-const smClient = new SecretsManagerClient({ region: process.env.REGION });
-const sqsClient = new SQSClient({ region: process.env.REGION });
 
 const binanceClient = new BinanceClient(smClient, process.env.BINANCE_SECRET_NAME, process.env.BINANCE_URL);
 
