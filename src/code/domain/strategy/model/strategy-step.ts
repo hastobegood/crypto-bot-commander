@@ -63,7 +63,7 @@ export interface MovingAverageCrossoverStepOutput extends StrategyStepOutput {
   longTermPrice: number;
 }
 
-export type SendOrderSource = 'Account' | 'LastOrder';
+export type SendOrderSource = 'Budget' | 'LastOrder';
 export type SendOrderSide = 'Buy' | 'Sell';
 export type SendOrderType = 'Market';
 

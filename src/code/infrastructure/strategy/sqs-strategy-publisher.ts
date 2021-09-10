@@ -15,13 +15,17 @@ export class SqsStrategyPublisher implements StrategyPublisher {
     await this.sqsClient.sendMessage(sendMessageRequest).promise();
   }
 
-  #buildMessage(id: string): StrategyMessage {
+  #buildMessage(id: string): ActiveStrategyMessage {
     return {
-      id: id,
+      content: {
+        id: id,
+      },
     };
   }
 }
 
-export interface StrategyMessage {
-  id: string;
+export interface ActiveStrategyMessage {
+  content: {
+    id: string;
+  };
 }

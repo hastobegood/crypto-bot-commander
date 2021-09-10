@@ -183,7 +183,7 @@ describe('DdbStrategyRepository', () => {
           fail('An error should have been thrown');
         } catch (error) {
           expect(error).toBeDefined();
-          expect((error as Error).message).toEqual(`Unable to update strategy '123' with status 'Active': Error !`);
+          expect((error as Error).message).toEqual(`Unable to update strategy '123' status 'Active': Error !`);
         }
 
         expect(ddbClientMock.update).toHaveBeenCalledTimes(1);
@@ -195,10 +195,9 @@ describe('DdbStrategyRepository', () => {
             pk: `Strategy::123`,
             sk: 'Details',
           },
-          UpdateExpression: 'SET #data.#status = :status, #gsiPk = :gsiPk, #gsiSk = :gsiSk',
+          UpdateExpression: 'SET #data.status = :status, #gsiPk = :gsiPk, #gsiSk = :gsiSk',
           ExpressionAttributeNames: {
             '#data': 'data',
-            '#status': 'status',
             '#gsiPk': 'activeStrategiesPk',
             '#gsiSk': 'activeStrategiesSk',
           },
@@ -239,15 +238,96 @@ describe('DdbStrategyRepository', () => {
             pk: `Strategy::123`,
             sk: 'Details',
           },
-          UpdateExpression: 'SET #data.#status = :status REMOVE #gsiPk, #gsiSk',
+          UpdateExpression: 'SET #data.status = :status REMOVE #gsiPk, #gsiSk',
           ExpressionAttributeNames: {
             '#data': 'data',
-            '#status': 'status',
             '#gsiPk': 'activeStrategiesPk',
             '#gsiSk': 'activeStrategiesSk',
           },
           ExpressionAttributeValues: {
             ':status': 'Inactive',
+          },
+          ReturnValues: 'ALL_NEW',
+        });
+      });
+    });
+  });
+
+  describe('Given a strategy budget to update by its ID', () => {
+    describe('When strategy is not found', () => {
+      beforeEach(() => {
+        ddbClientMock.update = jest.fn().mockReturnValue({
+          promise: jest.fn().mockRejectedValue(new Error('Error !')),
+        });
+      });
+
+      it('Then error is thrown', async () => {
+        try {
+          await strategyRepository.updateBudgetById('123', 1.5, -100);
+          fail('An error should have been thrown');
+        } catch (error) {
+          expect(error).toBeDefined();
+          expect((error as Error).message).toEqual(`Unable to update strategy '123' budget '1.5/-100': Error !`);
+        }
+
+        expect(ddbClientMock.update).toHaveBeenCalledTimes(1);
+        const updateParams = ddbClientMock.update.mock.calls[0];
+        expect(updateParams.length).toEqual(1);
+        expect(updateParams[0]).toEqual({
+          TableName: 'my-table',
+          Key: {
+            pk: `Strategy::123`,
+            sk: 'Details',
+          },
+          UpdateExpression:
+            'SET #data.budget.availableBaseAssetQuantity = #data.budget.availableBaseAssetQuantity + :baseAssetQuantity, #data.budget.profitAndLossBaseAssetQuantity = #data.budget.profitAndLossBaseAssetQuantity + :baseAssetQuantity, #data.budget.availableQuoteAssetQuantity = #data.budget.availableQuoteAssetQuantity + :quoteAssetQuantity, #data.budget.profitAndLossQuoteAssetQuantity = #data.budget.profitAndLossQuoteAssetQuantity + :quoteAssetQuantity',
+          ExpressionAttributeNames: {
+            '#data': 'data',
+          },
+          ExpressionAttributeValues: {
+            ':baseAssetQuantity': 1.5,
+            ':quoteAssetQuantity': -100,
+          },
+          ReturnValues: 'ALL_NEW',
+        });
+      });
+    });
+
+    describe('When strategy is found', () => {
+      let strategy: Strategy;
+
+      beforeEach(() => {
+        strategy = buildDefaultStrategy();
+        ddbClientMock.update = jest.fn().mockReturnValue({
+          promise: jest.fn().mockResolvedValue({
+            Attributes: {
+              data: { ...strategy },
+            },
+          }),
+        });
+      });
+
+      it('Then updated strategy is returned', async () => {
+        const result = await strategyRepository.updateBudgetById('123', 1.5, -100);
+        expect(result).toEqual(strategy);
+
+        expect(ddbClientMock.update).toHaveBeenCalledTimes(1);
+        const updateParams = ddbClientMock.update.mock.calls[0];
+        expect(updateParams.length).toEqual(1);
+        expect(updateParams[0]).toEqual({
+          TableName: 'my-table',
+          Key: {
+            pk: `Strategy::123`,
+            sk: 'Details',
+          },
+          UpdateExpression:
+            'SET #data.budget.availableBaseAssetQuantity = #data.budget.availableBaseAssetQuantity + :baseAssetQuantity, #data.budget.profitAndLossBaseAssetQuantity = #data.budget.profitAndLossBaseAssetQuantity + :baseAssetQuantity, #data.budget.availableQuoteAssetQuantity = #data.budget.availableQuoteAssetQuantity + :quoteAssetQuantity, #data.budget.profitAndLossQuoteAssetQuantity = #data.budget.profitAndLossQuoteAssetQuantity + :quoteAssetQuantity',
+          ExpressionAttributeNames: {
+            '#data': 'data',
+          },
+          ExpressionAttributeValues: {
+            ':baseAssetQuantity': 1.5,
+            ':quoteAssetQuantity': -100,
           },
           ReturnValues: 'ALL_NEW',
         });

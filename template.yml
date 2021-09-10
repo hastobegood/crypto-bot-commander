@@ -122,6 +122,7 @@ Resources:
           BINANCE_URL: !Ref BinanceUrlParameter
           BINANCE_SECRET_NAME: !Ref BinanceSecretNameParameter
           STRATEGY_TABLE_NAME: !Ref StrategyTable
+          PROCESSED_STRATEGY_STEP_QUEUE_URL: !Ref ProcessedStrategyStepQueue
       Events:
         SqsEvent:
           Type: SQS
@@ -138,6 +139,36 @@ Resources:
               Action:
                 - kms:Decrypt
               Resource: !Sub arn:aws:kms:${AWS::Region}:${AWS::AccountId}:${BinanceSecretEncryptionKeyParameter}
+        - DynamoDBReadPolicy:
+            TableName: !Ref StrategyTable
+        - DynamoDBWritePolicy:
+            TableName: !Ref StrategyTable
+        - SQSPollerPolicy:
+            QueueName: !GetAtt ActiveStrategiesQueue.QueueName
+        - SQSSendMessagePolicy:
+            QueueName: !GetAtt ProcessedStrategyStepQueue.QueueName
+
+  UpdateStrategyBudgetFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Description: Update strategy budget function
+      CodeUri: dist/webpack/update-strategy-budget-handler
+      Handler: app.handler
+      EventInvokeConfig:
+        MaximumRetryAttempts: 0
+      Environment:
+        Variables:
+          ENV: !Ref EnvironmentParameter
+          REGION: !Ref AWS::Region
+          STRATEGY_TABLE_NAME: !Ref StrategyTable
+      Events:
+        SqsEvent:
+          Type: SQS
+          Properties:
+            Enabled: true
+            Queue: !GetAtt ProcessedStrategyStepQueue.Arn
+            BatchSize: 1
+      Policies:
         - DynamoDBReadPolicy:
             TableName: !Ref StrategyTable
         - DynamoDBWritePolicy:
@@ -193,6 +224,15 @@ Resources:
             ProjectionType: KEYS_ONLY
 
   ActiveStrategiesQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      FifoQueue: true
+      VisibilityTimeout: 90
+      MessageRetentionPeriod: 60
+      DeduplicationScope: messageGroup
+      FifoThroughputLimit: perMessageGroupId
+
+  ProcessedStrategyStepQueue:
     Type: AWS::SQS::Queue
     Properties:
       FifoQueue: true

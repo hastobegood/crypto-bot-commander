@@ -1,14 +1,14 @@
 import { mocked } from 'ts-jest/utils';
-import { EvaluateStrategyMessageConsumer } from '../../../../src/code/application/strategy/evaluate-strategy-message-consumer';
 import { GetStrategyService } from '../../../../src/code/domain/strategy/get-strategy-service';
 import { UpdateStrategyService } from '../../../../src/code/domain/strategy/update-strategy-service';
 import { EvaluateStrategyService } from '../../../../src/code/domain/strategy/evaluate-strategy-service';
-import { buildDefaultStrategyMessage } from '../../../builders/infrastructure/strategy/strategy-message-builder';
-import { StrategyMessage } from '../../../../src/code/infrastructure/strategy/sqs-strategy-publisher';
+import { buildDefaultActiveStrategyMessage } from '../../../builders/infrastructure/strategy/strategy-message-builder';
 import { Strategy } from '../../../../src/code/domain/strategy/model/strategy';
 import { buildDefaultStrategy } from '../../../builders/domain/strategy/strategy-test-builder';
 import { StrategyEvaluation } from '../../../../src/code/domain/strategy/model/strategy-evaluation';
 import { buildStrategyEvaluation } from '../../../builders/domain/strategy/strategy-evaluation-test-builder';
+import { EvaluateStrategyMessageConsumer } from '../../../../src/code/application/strategy/evaluate-strategy-message-consumer';
+import { ActiveStrategyMessage } from '../../../../src/code/infrastructure/strategy/sqs-strategy-publisher';
 
 const getStrategyServiceMock = mocked(jest.genMockFromModule<GetStrategyService>('../../../../src/code/domain/strategy/get-strategy-service'), true);
 const updateStrategyServiceMock = mocked(jest.genMockFromModule<UpdateStrategyService>('../../../../src/code/domain/strategy/update-strategy-service'), true);
@@ -24,10 +24,10 @@ beforeEach(() => {
 });
 
 describe('EvaluateStrategyMessageConsumer', () => {
-  let strategyMessage: StrategyMessage;
+  let activeStrategyMessage: ActiveStrategyMessage;
 
   beforeEach(() => {
-    strategyMessage = buildDefaultStrategyMessage();
+    activeStrategyMessage = buildDefaultActiveStrategyMessage();
   });
 
   describe('Given a strategy message to process', () => {
@@ -38,22 +38,22 @@ describe('EvaluateStrategyMessageConsumer', () => {
 
       it('Then error is thrown', async () => {
         try {
-          await evaluateStrategyMessageConsumer.process(strategyMessage);
+          await evaluateStrategyMessageConsumer.process(activeStrategyMessage);
           fail('An error should have been thrown');
         } catch (error) {
           expect(error).toBeDefined();
-          expect((error as Error).message).toEqual(`Unable to find strategy with ID '${strategyMessage.id}'`);
+          expect((error as Error).message).toEqual(`Unable to find strategy with ID '${activeStrategyMessage.content.id}'`);
         }
 
         expect(getStrategyServiceMock.getById).toHaveBeenCalledTimes(1);
         const getByIdParams = getStrategyServiceMock.getById.mock.calls[0];
         expect(getByIdParams.length).toEqual(1);
-        expect(getByIdParams[0]).toEqual(strategyMessage.id);
+        expect(getByIdParams[0]).toEqual(activeStrategyMessage.content.id);
 
         expect(updateStrategyServiceMock.updateStatusById).toHaveBeenCalledTimes(1);
         const updateStatusByIdParams = updateStrategyServiceMock.updateStatusById.mock.calls[0];
         expect(updateStatusByIdParams.length).toEqual(2);
-        expect(updateStatusByIdParams[0]).toEqual(strategyMessage.id);
+        expect(updateStatusByIdParams[0]).toEqual(activeStrategyMessage.content.id);
         expect(updateStatusByIdParams[1]).toEqual('Error');
 
         expect(evaluateStrategyServiceMock.evaluate).toHaveBeenCalledTimes(0);
@@ -75,7 +75,7 @@ describe('EvaluateStrategyMessageConsumer', () => {
 
         it('Then strategy status is updated and error is thrown', async () => {
           try {
-            await evaluateStrategyMessageConsumer.process(strategyMessage);
+            await evaluateStrategyMessageConsumer.process(activeStrategyMessage);
             fail('An error should have been thrown');
           } catch (error) {
             expect(error).toBeDefined();
@@ -85,7 +85,7 @@ describe('EvaluateStrategyMessageConsumer', () => {
           expect(getStrategyServiceMock.getById).toHaveBeenCalledTimes(1);
           const getByIdParams = getStrategyServiceMock.getById.mock.calls[0];
           expect(getByIdParams.length).toEqual(1);
-          expect(getByIdParams[0]).toEqual(strategyMessage.id);
+          expect(getByIdParams[0]).toEqual(activeStrategyMessage.content.id);
 
           expect(evaluateStrategyServiceMock.evaluate).toHaveBeenCalledTimes(1);
           const evaluateParams = evaluateStrategyServiceMock.evaluate.mock.calls[0];
@@ -95,7 +95,7 @@ describe('EvaluateStrategyMessageConsumer', () => {
           expect(updateStrategyServiceMock.updateStatusById).toHaveBeenCalledTimes(1);
           const updateStatusByIdParams = updateStrategyServiceMock.updateStatusById.mock.calls[0];
           expect(updateStatusByIdParams.length).toEqual(2);
-          expect(updateStatusByIdParams[0]).toEqual(strategyMessage.id);
+          expect(updateStatusByIdParams[0]).toEqual(activeStrategyMessage.content.id);
           expect(updateStatusByIdParams[1]).toEqual('Error');
         });
       });
@@ -110,12 +110,12 @@ describe('EvaluateStrategyMessageConsumer', () => {
           });
 
           it('Then strategy status is not updated', async () => {
-            await evaluateStrategyMessageConsumer.process(strategyMessage);
+            await evaluateStrategyMessageConsumer.process(activeStrategyMessage);
 
             expect(getStrategyServiceMock.getById).toHaveBeenCalledTimes(1);
             const getByIdParams = getStrategyServiceMock.getById.mock.calls[0];
             expect(getByIdParams.length).toEqual(1);
-            expect(getByIdParams[0]).toEqual(strategyMessage.id);
+            expect(getByIdParams[0]).toEqual(activeStrategyMessage.content.id);
 
             expect(evaluateStrategyServiceMock.evaluate).toHaveBeenCalledTimes(1);
             const evaluateParams = evaluateStrategyServiceMock.evaluate.mock.calls[0];
@@ -133,12 +133,12 @@ describe('EvaluateStrategyMessageConsumer', () => {
           });
 
           it('Then strategy status is updated', async () => {
-            await evaluateStrategyMessageConsumer.process(strategyMessage);
+            await evaluateStrategyMessageConsumer.process(activeStrategyMessage);
 
             expect(getStrategyServiceMock.getById).toHaveBeenCalledTimes(1);
             const getByIdParams = getStrategyServiceMock.getById.mock.calls[0];
             expect(getByIdParams.length).toEqual(1);
-            expect(getByIdParams[0]).toEqual(strategyMessage.id);
+            expect(getByIdParams[0]).toEqual(activeStrategyMessage.content.id);
 
             expect(evaluateStrategyServiceMock.evaluate).toHaveBeenCalledTimes(1);
             const evaluateParams = evaluateStrategyServiceMock.evaluate.mock.calls[0];
@@ -148,7 +148,7 @@ describe('EvaluateStrategyMessageConsumer', () => {
             expect(updateStrategyServiceMock.updateStatusById).toHaveBeenCalledTimes(1);
             const updateStatusByIdParams = updateStrategyServiceMock.updateStatusById.mock.calls[0];
             expect(updateStatusByIdParams.length).toEqual(2);
-            expect(updateStatusByIdParams[0]).toEqual(strategyMessage.id);
+            expect(updateStatusByIdParams[0]).toEqual(activeStrategyMessage.content.id);
             expect(updateStatusByIdParams[1]).toEqual('Error');
           });
         });

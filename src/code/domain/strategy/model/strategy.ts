@@ -11,6 +11,16 @@ export interface Strategy {
   symbol: string;
   status: StrategyStatus;
   template: StrategyTemplate;
+  budget: StrategyBudget;
+}
+
+export interface StrategyBudget {
+  initialBaseAssetQuantity: number;
+  availableBaseAssetQuantity: number;
+  profitAndLossBaseAssetQuantity: number;
+  initialQuoteAssetQuantity: number;
+  availableQuoteAssetQuantity: number;
+  profitAndLossQuoteAssetQuantity: number;
 }
 
 export const getStepTemplateById = (strategy: Strategy, stepTemplateId: string): StrategyStepTemplate => {

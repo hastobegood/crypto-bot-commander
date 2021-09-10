@@ -9,6 +9,7 @@ const strategyRepositoryMock = mocked(jest.genMockFromModule<StrategyRepository>
 let updateStrategyService: UpdateStrategyService;
 beforeEach(() => {
   strategyRepositoryMock.updateStatusById = jest.fn();
+  strategyRepositoryMock.updateBudgetById = jest.fn();
 
   updateStrategyService = new UpdateStrategyService(strategyRepositoryMock);
 });
@@ -32,6 +33,29 @@ describe('UpdateStrategyService', () => {
         expect(updateStatusByIdParams.length).toEqual(2);
         expect(updateStatusByIdParams[0]).toEqual('666');
         expect(updateStatusByIdParams[1]).toEqual('Active');
+      });
+    });
+  });
+
+  describe('Given a strategy budget to update by its ID', () => {
+    describe('When strategy budget is updated', () => {
+      let strategy: Strategy;
+
+      beforeEach(() => {
+        strategy = buildDefaultStrategy();
+        strategyRepositoryMock.updateBudgetById.mockResolvedValue(strategy);
+      });
+
+      it('Then updated strategy is returned', async () => {
+        const result = await updateStrategyService.updateBudgetById('666', 10, -20);
+        expect(result).toEqual(strategy);
+
+        expect(strategyRepositoryMock.updateBudgetById).toHaveBeenCalledTimes(1);
+        const updateBudgetByIdParams = strategyRepositoryMock.updateBudgetById.mock.calls[0];
+        expect(updateBudgetByIdParams.length).toEqual(3);
+        expect(updateBudgetByIdParams[0]).toEqual('666');
+        expect(updateBudgetByIdParams[1]).toEqual(10);
+        expect(updateBudgetByIdParams[2]).toEqual(-20);
       });
     });
   });

@@ -1,6 +1,6 @@
 import { logger } from '../../configuration/log/logger';
 import { Strategy } from '../../domain/strategy/model/strategy';
-import { StrategyMessage } from '../../infrastructure/strategy/sqs-strategy-publisher';
+import { ActiveStrategyMessage } from '../../infrastructure/strategy/sqs-strategy-publisher';
 import { GetStrategyService } from '../../domain/strategy/get-strategy-service';
 import { UpdateStrategyService } from '../../domain/strategy/update-strategy-service';
 import { EvaluateStrategyService } from '../../domain/strategy/evaluate-strategy-service';
@@ -8,18 +8,18 @@ import { EvaluateStrategyService } from '../../domain/strategy/evaluate-strategy
 export class EvaluateStrategyMessageConsumer {
   constructor(private getStrategyService: GetStrategyService, private updateStrategyService: UpdateStrategyService, private evaluateStrategyService: EvaluateStrategyService) {}
 
-  async process(strategyMessage: StrategyMessage): Promise<void> {
+  async process(activeStrategyMessage: ActiveStrategyMessage): Promise<void> {
     try {
-      logger.info(strategyMessage, 'Evaluating strategy');
-      const strategy = await this.#getStrategyById(strategyMessage.id);
+      logger.info(activeStrategyMessage, 'Evaluating strategy');
+      const strategy = await this.#getStrategyById(activeStrategyMessage.content.id);
       const strategyEvaluation = await this.evaluateStrategyService.evaluate(strategy);
       if (!strategyEvaluation.success) {
-        await this.#updateStrategyStatusById(strategyMessage.id);
+        await this.#updateStrategyStatusById(activeStrategyMessage.content.id);
       }
-      logger.info(strategyMessage, 'Strategy evaluated');
+      logger.info(activeStrategyMessage, 'Strategy evaluated');
     } catch (error) {
-      logger.error(strategyMessage, 'Unable to evaluate strategy');
-      await this.#updateStrategyStatusById(strategyMessage.id);
+      logger.error(activeStrategyMessage, 'Unable to evaluate strategy');
+      await this.#updateStrategyStatusById(activeStrategyMessage.content.id);
       throw error;
     }
   }
