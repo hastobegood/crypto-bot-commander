@@ -1,8 +1,8 @@
+import { SecretsManagerClient } from '@aws-sdk/client-secrets-manager';
 import { axiosInstance } from '../../../../src/code/configuration/http/axios';
 import MockDate from 'mockdate';
 import { mocked } from 'ts-jest/utils';
 import { BinanceClient } from '../../../../src/code/infrastructure/binance/binance-client';
-import SecretsManager from 'aws-sdk/clients/secretsmanager';
 import { buildDefaultBinanceSecrets } from '../../../builders/infrastructure/binance/binance-secrets-test-builder';
 import { BinanceSecrets } from '../../../../src/code/infrastructure/binance/model/binance-secret';
 import { BinanceAccount } from '../../../../src/code/infrastructure/binance/model/binance-account';
@@ -14,11 +14,12 @@ import { buildDefaultBinanceSymbolCandlesticks } from '../../../builders/infrast
 
 jest.mock('../../../../src/code/configuration/http/axios');
 
-const smClientMock = mocked(jest.genMockFromModule<SecretsManager>('aws-sdk/clients/secretsmanager'));
+const smClientMock = mocked(jest.genMockFromModule<SecretsManagerClient>('@aws-sdk/client-secrets-manager'), true);
 const axiosInstanceMock = mocked(axiosInstance, true);
 
 let binanceClient: BinanceClient;
 beforeEach(() => {
+  smClientMock.send = jest.fn();
   axiosInstanceMock.get = jest.fn();
   axiosInstanceMock.post = jest.fn();
   binanceClient = new BinanceClient(smClientMock, 'my-secret-name', 'my-url');
@@ -30,13 +31,9 @@ describe('BinanceClient', () => {
 
   beforeEach(() => {
     binanceSecrets = buildDefaultBinanceSecrets();
-    smClientMock.getSecretValue = jest.fn().mockReturnValue({
-      promise: jest.fn(() =>
-        Promise.resolve({
-          SecretString: JSON.stringify(binanceSecrets),
-        }),
-      ),
-    });
+    smClientMock.send.mockImplementation(() => ({
+      SecretString: JSON.stringify(binanceSecrets),
+    }));
 
     date = new Date();
     MockDate.set(date);
@@ -58,7 +55,7 @@ describe('BinanceClient', () => {
         await binanceClient.getAccount();
         await binanceClient.getAccount();
 
-        expect(smClientMock.getSecretValue).toHaveBeenCalledTimes(1);
+        expect(smClientMock.send).toHaveBeenCalledTimes(1);
       });
 
       it('Then account is returned', async () => {
@@ -119,7 +116,7 @@ describe('BinanceClient', () => {
         await binanceClient.getSymbolCandlesticks('B', 'IB', 2);
         await binanceClient.getSymbolCandlesticks('C', 'IC', 3);
 
-        expect(smClientMock.getSecretValue).toHaveBeenCalledTimes(1);
+        expect(smClientMock.send).toHaveBeenCalledTimes(1);
       });
 
       it('Then symbol candlesticks are returned', async () => {
@@ -166,7 +163,7 @@ describe('BinanceClient', () => {
         await binanceClient.sendMarketOrder('SYMBOL1', 'BUY', 1, 'BASE');
         await binanceClient.sendMarketOrder('SYMBOL2', 'BUY', 2, 'QUOTE');
 
-        expect(smClientMock.getSecretValue).toHaveBeenCalledTimes(1);
+        expect(smClientMock.send).toHaveBeenCalledTimes(1);
       });
 
       it('Then order is returned', async () => {
@@ -214,7 +211,7 @@ describe('BinanceClient', () => {
         await binanceClient.sendTakeProfitOrder('SYMBOL1', 'BUY', 1, 10);
         await binanceClient.sendTakeProfitOrder('SYMBOL2', 'BUY', 2, 20);
 
-        expect(smClientMock.getSecretValue).toHaveBeenCalledTimes(1);
+        expect(smClientMock.send).toHaveBeenCalledTimes(1);
       });
 
       it('Then order is returned', async () => {

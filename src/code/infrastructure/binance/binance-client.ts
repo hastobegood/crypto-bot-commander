@@ -1,6 +1,6 @@
+import { GetSecretValueCommand, GetSecretValueCommandInput, SecretsManagerClient } from '@aws-sdk/client-secrets-manager';
 import { axiosInstance } from '../../configuration/http/axios';
 import { AxiosRequestConfig } from 'axios';
-import SecretsManager from 'aws-sdk/clients/secretsmanager';
 import { BinanceSecrets } from './model/binance-secret';
 import { BinanceAccount } from './model/binance-account';
 import { BinanceOrder, BinanceOrderSide } from './model/binance-order';
@@ -14,7 +14,7 @@ const orderEndpoint = '/v3/order';
 export class BinanceClient {
   private secrets?: BinanceSecrets;
 
-  constructor(private smClient: SecretsManager, private secretName: string, private url: string) {}
+  constructor(private smClient: SecretsManagerClient, private secretName: string, private url: string) {}
 
   async getAccount(): Promise<BinanceAccount> {
     if (!this.secrets) {
@@ -77,14 +77,13 @@ export class BinanceClient {
   }
 
   async #getSecrets(): Promise<BinanceSecrets> {
-    const getSecretValueRequest = {
+    const getSecretValueInput: GetSecretValueCommandInput = {
       SecretId: this.secretName,
     };
 
-    return this.smClient
-      .getSecretValue(getSecretValueRequest)
-      .promise()
-      .then((getSecretValueResponse) => JSON.parse(getSecretValueResponse.SecretString!));
+    const getSecretValueOutput = await this.smClient.send(new GetSecretValueCommand(getSecretValueInput));
+
+    return JSON.parse(getSecretValueOutput.SecretString!);
   }
 
   #getSignature(parameters: string): string {

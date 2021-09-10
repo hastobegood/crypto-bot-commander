@@ -1,14 +1,14 @@
-import SQS from 'aws-sdk/clients/sqs';
+import { SQSClient } from '@aws-sdk/client-sqs';
 import { mocked } from 'ts-jest/utils';
 import { StrategyStepPublisher } from '../../../../../src/code/domain/strategy/step/strategy-step-publisher';
 import { ProcessedStrategyStepMessage, SqsStrategyStepPublisher } from '../../../../../src/code/infrastructure/strategy/step/sqs-strategy-step-publisher';
 import { buildDefaultProcessedStrategyStepMessage } from '../../../../builders/infrastructure/strategy/step/strategy-step-message-builder';
 
-const sqsClientMock = mocked(jest.genMockFromModule<SQS>('aws-sdk/clients/sqs'), true);
+const sqsClientMock = mocked(jest.genMockFromModule<SQSClient>('@aws-sdk/client-sqs'), true);
 
 let strategyStepPublisher: StrategyStepPublisher;
 beforeEach(() => {
-  sqsClientMock.sendMessage = jest.fn();
+  sqsClientMock.send = jest.fn();
 
   strategyStepPublisher = new SqsStrategyStepPublisher('my-queue-url', sqsClientMock);
 });
@@ -21,19 +21,13 @@ describe('SqsStrategyStepPublisher', () => {
   });
 
   describe('Given a processed strategy step to publish', () => {
-    beforeEach(() => {
-      sqsClientMock.sendMessage = jest.fn().mockReturnValue({
-        promise: jest.fn().mockResolvedValue(null),
-      });
-    });
-
     it('Then processed strategy step is published', async () => {
       await strategyStepPublisher.publishProcessed(processedStrategyStepMessage.content);
 
-      expect(sqsClientMock.sendMessage).toHaveBeenCalledTimes(1);
-      const sendMessageParams = sqsClientMock.sendMessage.mock.calls[0];
-      expect(sendMessageParams.length).toEqual(1);
-      expect(sendMessageParams[0]).toEqual({
+      expect(sqsClientMock.send).toHaveBeenCalledTimes(1);
+      const sendParams = sqsClientMock.send.mock.calls[0];
+      expect(sendParams.length).toEqual(1);
+      expect(sendParams[0].input).toEqual({
         QueueUrl: 'my-queue-url',
         MessageBody: JSON.stringify(processedStrategyStepMessage),
         MessageGroupId: processedStrategyStepMessage.content.strategyId,

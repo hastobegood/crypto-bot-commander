@@ -14,7 +14,7 @@ readdirSync('./src/handlers')
 const config: Configuration = {
   mode: 'production',
   target: 'node',
-  devtool: 'source-map',
+  devtool: 'nosources-source-map',
 
   context: resolve(__dirname, 'src'),
   entry: handlers,

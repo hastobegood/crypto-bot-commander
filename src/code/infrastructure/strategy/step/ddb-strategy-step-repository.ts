@@ -1,27 +1,27 @@
-import { DocumentClient } from 'aws-sdk/lib/dynamodb/document_client';
+import { BatchWriteCommand, BatchWriteCommandInput, DynamoDBDocumentClient, GetCommand, GetCommandInput } from '@aws-sdk/lib-dynamodb';
 import { StrategyStepRepository } from '../../../domain/strategy/step/strategy-step-repository';
 import { SendOrderSide, SendOrderStepInput, StrategyStep, StrategyStepType } from '../../../domain/strategy/model/strategy-step';
 
 export class DdbStrategyStepRepository implements StrategyStepRepository {
-  constructor(private tableName: string, private ddbClient: DocumentClient) {}
+  constructor(private tableName: string, private ddbClient: DynamoDBDocumentClient) {}
 
   async save(step: StrategyStep): Promise<StrategyStep> {
-    const batchWriteItemInput = {
+    const batchWriteInput: BatchWriteCommandInput = {
       RequestItems: {
         [this.tableName]: [this.#buildItem(step, `${step.creationDate.valueOf()}::${step.type}::${step.id}`), this.#buildItem(step, 'Last'), this.#buildItem(step, `Last::${step.type}`)],
       },
     };
 
     if (step.type === 'SendOrder') {
-      batchWriteItemInput.RequestItems[this.tableName].push(this.#buildItem(step, `Last::SendOrder::${(step.input as SendOrderStepInput).side}`));
+      batchWriteInput.RequestItems![this.tableName].push(this.#buildItem(step, `Last::SendOrder::${(step.input as SendOrderStepInput).side}`));
     }
 
-    await this.ddbClient.batchWrite(batchWriteItemInput).promise();
+    await this.ddbClient.send(new BatchWriteCommand(batchWriteInput));
 
     return step;
   }
 
-  #buildItem(step: StrategyStep, id: string): DocumentClient.WriteRequest {
+  #buildItem(step: StrategyStep, id: string): any {
     return {
       PutRequest: {
         Item: {
@@ -35,7 +35,7 @@ export class DdbStrategyStepRepository implements StrategyStepRepository {
   }
 
   async getLastByStrategyId(strategyId: string): Promise<StrategyStep | null> {
-    const getItemInput = {
+    const getInput: GetCommandInput = {
       TableName: this.tableName,
       Key: {
         pk: `Strategy::${strategyId}::Step::Last`,
@@ -43,13 +43,13 @@ export class DdbStrategyStepRepository implements StrategyStepRepository {
       },
     };
 
-    const getItemOutput = await this.ddbClient.get(getItemInput).promise();
+    const getOutput = await this.ddbClient.send(new GetCommand(getInput));
 
-    return getItemOutput.Item ? this.#convertFromItemFormat(getItemOutput.Item.data) : null;
+    return getOutput.Item ? this.#convertFromItemFormat(getOutput.Item.data) : null;
   }
 
   async getLastByStrategyIdAndType(strategyId: string, type: StrategyStepType): Promise<StrategyStep | null> {
-    const getItemInput = {
+    const getInput: GetCommandInput = {
       TableName: this.tableName,
       Key: {
         pk: `Strategy::${strategyId}::Step::Last::${type}`,
@@ -57,13 +57,13 @@ export class DdbStrategyStepRepository implements StrategyStepRepository {
       },
     };
 
-    const getItemOutput = await this.ddbClient.get(getItemInput).promise();
+    const getOutput = await this.ddbClient.send(new GetCommand(getInput));
 
-    return getItemOutput.Item ? this.#convertFromItemFormat(getItemOutput.Item.data) : null;
+    return getOutput.Item ? this.#convertFromItemFormat(getOutput.Item.data) : null;
   }
 
   async getLastSendOrderByStrategyIdAndOrderSide(strategyId: string, orderSide: SendOrderSide): Promise<StrategyStep | null> {
-    const getItemInput = {
+    const getInput: GetCommandInput = {
       TableName: this.tableName,
       Key: {
         pk: `Strategy::${strategyId}::Step::Last::SendOrder::${orderSide}`,
@@ -71,9 +71,9 @@ export class DdbStrategyStepRepository implements StrategyStepRepository {
       },
     };
 
-    const getItemOutput = await this.ddbClient.get(getItemInput).promise();
+    const getOutput = await this.ddbClient.send(new GetCommand(getInput));
 
-    return getItemOutput.Item ? this.#convertFromItemFormat(getItemOutput.Item.data) : null;
+    return getOutput.Item ? this.#convertFromItemFormat(getOutput.Item.data) : null;
   }
 
   #convertToItemFormat(step: StrategyStep): any {

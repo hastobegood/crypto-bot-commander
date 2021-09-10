@@ -1,15 +1,12 @@
-import { DocumentClient } from 'aws-sdk/lib/dynamodb/document_client';
+import { DynamoDBDocumentClient, GetCommand, GetCommandInput, QueryCommand, QueryCommandInput, UpdateCommand, UpdateCommandInput } from '@aws-sdk/lib-dynamodb';
 import { StrategyRepository } from '../../domain/strategy/strategy-repository';
 import { Strategy, StrategyStatus } from '../../domain/strategy/model/strategy';
-import GetItemInput = DocumentClient.GetItemInput;
-import QueryInput = DocumentClient.QueryInput;
-import UpdateItemInput = DocumentClient.UpdateItemInput;
 
 export class DdbStrategyRepository implements StrategyRepository {
-  constructor(private tableName: string, private ddbClient: DocumentClient) {}
+  constructor(private tableName: string, private ddbClient: DynamoDBDocumentClient) {}
 
   async getById(id: string): Promise<Strategy | null> {
-    const getItemInput: GetItemInput = {
+    const getInput: GetCommandInput = {
       TableName: this.tableName,
       Key: {
         pk: `Strategy::${id}`,
@@ -17,13 +14,13 @@ export class DdbStrategyRepository implements StrategyRepository {
       },
     };
 
-    const getItemOutput = await this.ddbClient.get(getItemInput).promise();
+    const getOutput = await this.ddbClient.send(new GetCommand(getInput));
 
-    return getItemOutput.Item ? this.#convertFromItemFormat(getItemOutput.Item.data) : null;
+    return getOutput.Item ? this.#convertFromItemFormat(getOutput.Item.data) : null;
   }
 
   async getAllIdsWithStatusActive(): Promise<string[]> {
-    const queryInput: QueryInput = {
+    const queryInput: QueryCommandInput = {
       TableName: this.tableName,
       IndexName: 'ActiveStrategies-Index',
       KeyConditionExpression: '#gsiPk = :gsiPk',
@@ -38,7 +35,7 @@ export class DdbStrategyRepository implements StrategyRepository {
     const results = [];
 
     do {
-      const queryOutput = await this.ddbClient.query(queryInput).promise();
+      const queryOutput = await this.ddbClient.send(new QueryCommand(queryInput));
       if (queryOutput.Items) {
         results.push(...queryOutput.Items?.map((item) => item.activeStrategiesSk));
       }
@@ -49,15 +46,16 @@ export class DdbStrategyRepository implements StrategyRepository {
   }
 
   async updateStatusById(id: string, status: StrategyStatus): Promise<Strategy> {
-    const updateItemInput: UpdateItemInput = {
+    const updateInput: UpdateCommandInput = {
       TableName: this.tableName,
       Key: {
         pk: `Strategy::${id}`,
         sk: 'Details',
       },
-      UpdateExpression: 'SET #data.status = :status',
+      UpdateExpression: 'SET #data.#status = :status',
       ExpressionAttributeNames: {
         '#data': 'data',
+        '#status': 'status',
       },
       ExpressionAttributeValues: {
         ':status': status,
@@ -66,27 +64,27 @@ export class DdbStrategyRepository implements StrategyRepository {
     };
 
     if (status === 'Active') {
-      updateItemInput.UpdateExpression = `${updateItemInput.UpdateExpression}, #gsiPk = :gsiPk, #gsiSk = :gsiSk`;
-      updateItemInput.ExpressionAttributeNames!['#gsiPk'] = 'activeStrategiesPk';
-      updateItemInput.ExpressionAttributeNames!['#gsiSk'] = 'activeStrategiesSk';
-      updateItemInput.ExpressionAttributeValues![':gsiPk'] = 'Strategy::Active';
-      updateItemInput.ExpressionAttributeValues![':gsiSk'] = id;
+      updateInput.UpdateExpression = `${updateInput.UpdateExpression}, #gsiPk = :gsiPk, #gsiSk = :gsiSk`;
+      updateInput.ExpressionAttributeNames!['#gsiPk'] = 'activeStrategiesPk';
+      updateInput.ExpressionAttributeNames!['#gsiSk'] = 'activeStrategiesSk';
+      updateInput.ExpressionAttributeValues![':gsiPk'] = 'Strategy::Active';
+      updateInput.ExpressionAttributeValues![':gsiSk'] = id;
     } else {
-      updateItemInput.UpdateExpression = `${updateItemInput.UpdateExpression} REMOVE #gsiPk, #gsiSk`;
-      updateItemInput.ExpressionAttributeNames!['#gsiPk'] = 'activeStrategiesPk';
-      updateItemInput.ExpressionAttributeNames!['#gsiSk'] = 'activeStrategiesSk';
+      updateInput.UpdateExpression = `${updateInput.UpdateExpression} REMOVE #gsiPk, #gsiSk`;
+      updateInput.ExpressionAttributeNames!['#gsiPk'] = 'activeStrategiesPk';
+      updateInput.ExpressionAttributeNames!['#gsiSk'] = 'activeStrategiesSk';
     }
 
     try {
-      const updateItemOutput = await this.ddbClient.update(updateItemInput).promise();
-      return this.#convertFromItemFormat(updateItemOutput.Attributes!.data);
+      const updateOutput = await this.ddbClient.send(new UpdateCommand(updateInput));
+      return this.#convertFromItemFormat(updateOutput.Attributes!.data);
     } catch (error) {
       throw new Error(`Unable to update strategy '${id}' status '${status}': ${(error as Error).message}`);
     }
   }
 
   async updateBudgetById(id: string, consumedBaseAssetQuantity: number, consumedQuoteAssetQuantity: number): Promise<Strategy> {
-    const updateItemInput: UpdateItemInput = {
+    const updateInput: UpdateCommandInput = {
       TableName: this.tableName,
       Key: {
         pk: `Strategy::${id}`,
@@ -105,8 +103,8 @@ export class DdbStrategyRepository implements StrategyRepository {
     };
 
     try {
-      const updateItemOutput = await this.ddbClient.update(updateItemInput).promise();
-      return this.#convertFromItemFormat(updateItemOutput.Attributes!.data);
+      const updateOutput = await this.ddbClient.send(new UpdateCommand(updateInput));
+      return this.#convertFromItemFormat(updateOutput.Attributes!.data);
     } catch (error) {
       throw new Error(`Unable to update strategy '${id}' budget '${consumedBaseAssetQuantity}/${consumedQuoteAssetQuantity}': ${(error as Error).message}`);
     }
