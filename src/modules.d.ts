@@ -2,6 +2,7 @@ declare namespace NodeJS {
   export interface ProcessEnv {
     ENV: string;
     REGION: string;
+    TRACING: boolean;
     BINANCE_URL: string;
     BINANCE_SECRET_NAME: string;
     TRADING_TABLE_NAME: string;

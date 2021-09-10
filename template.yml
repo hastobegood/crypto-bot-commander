@@ -13,6 +13,10 @@ Parameters:
     AllowedValues:
       - test
       - prod
+  TracingParameter:
+    Description: Boolean to enable or disable tracing
+    Type: String
+    Default: false
   BinanceUrlParameter:
     Description: URL of the Binance API
     Type: String
@@ -25,6 +29,9 @@ Parameters:
     Description: Encryption key used to encrypt the Binance secret in Secrets Manager (either a key id 'key/xxx' or an alias 'alias/xxx')
     Type: String
     Default: alias/aws/secretsmanager
+
+Conditions:
+  TracingCondition: !Equals [ !Ref TracingParameter, true ]
 
 Mappings:
   EnvironmentMap:
@@ -42,7 +49,12 @@ Globals:
     MemorySize: 128
     Timeout: 30
     AutoPublishAlias: Live
-    Tracing: Active
+    Tracing: !If [ TracingCondition, Active, PassThrough ]
+    Environment:
+      Variables:
+        ENV: !Ref EnvironmentParameter
+        REGION: !Ref AWS::Region
+        TRACING: !Ref TracingParameter
 
 Resources:
   DcaTradingFunction:
@@ -54,8 +66,6 @@ Resources:
       ReservedConcurrentExecutions: 1
       Environment:
         Variables:
-          ENV: !Ref EnvironmentParameter
-          REGION: !Ref AWS::Region
           BINANCE_URL: !Ref BinanceUrlParameter
           BINANCE_SECRET_NAME: !Ref BinanceSecretNameParameter
           TRADING_TABLE_NAME: !Ref TradingTable
@@ -91,8 +101,6 @@ Resources:
         MaximumRetryAttempts: 0
       Environment:
         Variables:
-          ENV: !Ref EnvironmentParameter
-          REGION: !Ref AWS::Region
           STRATEGY_TABLE_NAME: !Ref StrategyTable
           ACTIVE_STRATEGIES_QUEUE_URL: !Ref ActiveStrategiesQueue
       Events:
@@ -117,8 +125,6 @@ Resources:
         MaximumRetryAttempts: 0
       Environment:
         Variables:
-          ENV: !Ref EnvironmentParameter
-          REGION: !Ref AWS::Region
           BINANCE_URL: !Ref BinanceUrlParameter
           BINANCE_SECRET_NAME: !Ref BinanceSecretNameParameter
           STRATEGY_TABLE_NAME: !Ref StrategyTable
@@ -158,8 +164,6 @@ Resources:
         MaximumRetryAttempts: 0
       Environment:
         Variables:
-          ENV: !Ref EnvironmentParameter
-          REGION: !Ref AWS::Region
           STRATEGY_TABLE_NAME: !Ref StrategyTable
       Events:
         SqsEvent:
