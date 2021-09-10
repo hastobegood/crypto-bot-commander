@@ -6,24 +6,18 @@ import { buildDefaultStrategy } from '../../../../builders/domain/strategy/strat
 import { SendOrderStepService } from '../../../../../src/code/domain/strategy/step/send-order-step-service';
 import { Order } from '../../../../../src/code/domain/order/model/order';
 import { buildDefaultSendOrderStepOutput, buildDefaultStrategyStepTemplate, buildSendOrderStepInput, buildStrategyStep } from '../../../../builders/domain/strategy/strategy-step-test-builder';
-import { Account } from '../../../../../src/code/domain/account/model/account';
-import { buildDefaultAccount } from '../../../../builders/domain/account/account-test-builder';
 import { buildDefaultOrder } from '../../../../builders/domain/order/order-test-builder';
-import { extractAssets } from '../../../../../src/code/configuration/util/symbol';
-import { GetAccountService } from '../../../../../src/code/domain/account/get-account-service';
 import { CreateOrderService } from '../../../../../src/code/domain/order/create-order-service';
 
-const getAccountServiceMock = mocked(jest.genMockFromModule<GetAccountService>('../../../../../src/code/domain/account/get-account-service'), true);
 const createOrderServiceMock = mocked(jest.genMockFromModule<CreateOrderService>('../../../../../src/code/domain/order/create-order-service'), true);
 const strategyStepRepositoryMock = mocked(jest.genMockFromModule<StrategyStepRepository>('../../../../../src/code/domain/strategy/step/strategy-step-repository'), true);
 
 let sendOrderStepService: SendOrderStepService;
 beforeEach(() => {
-  getAccountServiceMock.get = jest.fn();
   createOrderServiceMock.create = jest.fn();
   strategyStepRepositoryMock.getLastSendOrderByStrategyIdAndOrderSide = jest.fn();
 
-  sendOrderStepService = new SendOrderStepService(getAccountServiceMock, createOrderServiceMock, strategyStepRepositoryMock);
+  sendOrderStepService = new SendOrderStepService(createOrderServiceMock, strategyStepRepositoryMock);
 });
 
 describe('SendOrderStepService', () => {
@@ -42,19 +36,15 @@ describe('SendOrderStepService', () => {
   });
 
   describe('Given a send order step to process', () => {
-    describe('When source is from account', () => {
-      let account: Account;
-
+    describe('When source is from budget', () => {
       beforeEach(() => {
-        account = buildDefaultAccount();
-        account.balances.push({ asset: extractAssets(strategy.symbol).baseAsset, availableQuantity: 10, lockedQuantity: 0 });
-        account.balances.push({ asset: extractAssets(strategy.symbol).quoteAsset, availableQuantity: 100, lockedQuantity: 0 });
-        getAccountServiceMock.get.mockResolvedValue(account);
+        strategy.budget.availableBaseAssetQuantity = 10;
+        strategy.budget.availableQuoteAssetQuantity = 100;
       });
 
       describe('And buy order is filled', () => {
         beforeEach(() => {
-          sendOrderStepInput = buildSendOrderStepInput('Account', 0.8, 'Buy', 'Market');
+          sendOrderStepInput = buildSendOrderStepInput('Budget', 0.8, 'Buy', 'Market');
 
           order = buildDefaultOrder();
           createOrderServiceMock.create.mockResolvedValue(order);
@@ -71,10 +61,6 @@ describe('SendOrderStepService', () => {
             quantity: order.executedAssetQuantity,
             price: order.executedPrice,
           });
-
-          expect(getAccountServiceMock.get).toHaveBeenCalledTimes(1);
-          const getParams = getAccountServiceMock.get.mock.calls[0];
-          expect(getParams.length).toEqual(0);
 
           expect(strategyStepRepositoryMock.getLastSendOrderByStrategyIdAndOrderSide).toHaveBeenCalledTimes(0);
 
@@ -93,7 +79,7 @@ describe('SendOrderStepService', () => {
 
       describe('And buy order is not filled', () => {
         beforeEach(() => {
-          sendOrderStepInput = buildSendOrderStepInput('Account', 0.8, 'Buy', 'Market');
+          sendOrderStepInput = buildSendOrderStepInput('Budget', 0.8, 'Buy', 'Market');
 
           order = { ...buildDefaultOrder(), externalId: undefined, status: 'Error', executedAssetQuantity: undefined, executedPrice: undefined };
           createOrderServiceMock.create.mockResolvedValue(order);
@@ -107,10 +93,6 @@ describe('SendOrderStepService', () => {
             status: order.status,
             externalStatus: order.externalStatus!,
           });
-
-          expect(getAccountServiceMock.get).toHaveBeenCalledTimes(1);
-          const getParams = getAccountServiceMock.get.mock.calls[0];
-          expect(getParams.length).toEqual(0);
 
           expect(strategyStepRepositoryMock.getLastSendOrderByStrategyIdAndOrderSide).toHaveBeenCalledTimes(0);
 
@@ -129,7 +111,7 @@ describe('SendOrderStepService', () => {
 
       describe('And sell order is filled', () => {
         beforeEach(() => {
-          sendOrderStepInput = buildSendOrderStepInput('Account', 0.5, 'Sell', 'Market');
+          sendOrderStepInput = buildSendOrderStepInput('Budget', 0.5, 'Sell', 'Market');
 
           order = buildDefaultOrder();
           createOrderServiceMock.create.mockResolvedValue(order);
@@ -146,10 +128,6 @@ describe('SendOrderStepService', () => {
             quantity: order.executedAssetQuantity,
             price: order.executedPrice,
           });
-
-          expect(getAccountServiceMock.get).toHaveBeenCalledTimes(1);
-          const getParams = getAccountServiceMock.get.mock.calls[0];
-          expect(getParams.length).toEqual(0);
 
           expect(strategyStepRepositoryMock.getLastSendOrderByStrategyIdAndOrderSide).toHaveBeenCalledTimes(0);
 
@@ -168,7 +146,7 @@ describe('SendOrderStepService', () => {
 
       describe('And sell order is not filled', () => {
         beforeEach(() => {
-          sendOrderStepInput = buildSendOrderStepInput('Account', 0.5, 'Sell', 'Market');
+          sendOrderStepInput = buildSendOrderStepInput('Budget', 0.5, 'Sell', 'Market');
 
           order = { ...buildDefaultOrder(), externalId: undefined, status: 'Error', executedAssetQuantity: undefined, executedPrice: undefined };
           createOrderServiceMock.create.mockResolvedValue(order);
@@ -182,10 +160,6 @@ describe('SendOrderStepService', () => {
             status: order.status,
             externalStatus: order.externalStatus!,
           });
-
-          expect(getAccountServiceMock.get).toHaveBeenCalledTimes(1);
-          const getParams = getAccountServiceMock.get.mock.calls[0];
-          expect(getParams.length).toEqual(0);
 
           expect(strategyStepRepositoryMock.getLastSendOrderByStrategyIdAndOrderSide).toHaveBeenCalledTimes(0);
 
@@ -220,7 +194,6 @@ describe('SendOrderStepService', () => {
             expect((error as Error).message).toEqual('Unable to send buy order from last order source');
           }
 
-          expect(getAccountServiceMock.get).toHaveBeenCalledTimes(0);
           expect(strategyStepRepositoryMock.getLastSendOrderByStrategyIdAndOrderSide).toHaveBeenCalledTimes(0);
           expect(createOrderServiceMock.create).toHaveBeenCalledTimes(0);
         });
@@ -254,7 +227,6 @@ describe('SendOrderStepService', () => {
             expect(getLastSendOrderByStrategyIdAndOrderSideParams[0]).toEqual(strategy.id);
             expect(getLastSendOrderByStrategyIdAndOrderSideParams[1]).toEqual('Buy');
 
-            expect(getAccountServiceMock.get).toHaveBeenCalledTimes(0);
             expect(createOrderServiceMock.create).toHaveBeenCalledTimes(0);
           });
         });
@@ -293,8 +265,6 @@ describe('SendOrderStepService', () => {
               baseAssetQuantity: (lastOrderStep.output as SendOrderStepOutput).quantity! * sendOrderStepInput.percentage,
               quoteAssetQuantity: undefined,
             });
-
-            expect(getAccountServiceMock.get).toHaveBeenCalledTimes(0);
           });
         });
       });

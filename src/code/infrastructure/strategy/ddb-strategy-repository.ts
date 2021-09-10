@@ -55,10 +55,9 @@ export class DdbStrategyRepository implements StrategyRepository {
         pk: `Strategy::${id}`,
         sk: 'Details',
       },
-      UpdateExpression: 'SET #data.#status = :status',
+      UpdateExpression: 'SET #data.status = :status',
       ExpressionAttributeNames: {
         '#data': 'data',
-        '#status': 'status',
       },
       ExpressionAttributeValues: {
         ':status': status,
@@ -82,7 +81,34 @@ export class DdbStrategyRepository implements StrategyRepository {
       const updateItemOutput = await this.ddbClient.update(updateItemInput).promise();
       return this.#convertFromItemFormat(updateItemOutput.Attributes!.data);
     } catch (error) {
-      throw new Error(`Unable to update strategy '${id}' with status '${status}': ${(error as Error).message}`);
+      throw new Error(`Unable to update strategy '${id}' status '${status}': ${(error as Error).message}`);
+    }
+  }
+
+  async updateBudgetById(id: string, consumedBaseAssetQuantity: number, consumedQuoteAssetQuantity: number): Promise<Strategy> {
+    const updateItemInput: UpdateItemInput = {
+      TableName: this.tableName,
+      Key: {
+        pk: `Strategy::${id}`,
+        sk: 'Details',
+      },
+      UpdateExpression:
+        'SET #data.budget.availableBaseAssetQuantity = #data.budget.availableBaseAssetQuantity + :baseAssetQuantity, #data.budget.profitAndLossBaseAssetQuantity = #data.budget.profitAndLossBaseAssetQuantity + :baseAssetQuantity, #data.budget.availableQuoteAssetQuantity = #data.budget.availableQuoteAssetQuantity + :quoteAssetQuantity, #data.budget.profitAndLossQuoteAssetQuantity = #data.budget.profitAndLossQuoteAssetQuantity + :quoteAssetQuantity',
+      ExpressionAttributeNames: {
+        '#data': 'data',
+      },
+      ExpressionAttributeValues: {
+        ':baseAssetQuantity': consumedBaseAssetQuantity,
+        ':quoteAssetQuantity': consumedQuoteAssetQuantity,
+      },
+      ReturnValues: 'ALL_NEW',
+    };
+
+    try {
+      const updateItemOutput = await this.ddbClient.update(updateItemInput).promise();
+      return this.#convertFromItemFormat(updateItemOutput.Attributes!.data);
+    } catch (error) {
+      throw new Error(`Unable to update strategy '${id}' budget '${consumedBaseAssetQuantity}/${consumedQuoteAssetQuantity}': ${(error as Error).message}`);
     }
   }
 

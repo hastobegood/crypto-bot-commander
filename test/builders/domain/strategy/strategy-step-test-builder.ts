@@ -96,7 +96,7 @@ export const buildMarketEvolutionStepOutput = (success: boolean, lastPrice: numb
 };
 
 export const buildDefaultSendOrderStepInput = (): SendOrderStepInput => {
-  return buildSendOrderStepInput(randomFromList(['Account', 'LastOrder']), randomPercentage(), randomFromList(['Buy', 'Sell']), 'Market');
+  return buildSendOrderStepInput(randomFromList(['Budget', 'LastOrder']), randomPercentage(), randomFromList(['Buy', 'Sell']), 'Market');
 };
 
 export const buildSendOrderStepInput = (source: SendOrderSource, percentage: number, side: SendOrderSide, type: SendOrderType): SendOrderStepInput => {

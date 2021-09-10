@@ -7,6 +7,7 @@ declare namespace NodeJS {
     TRADING_TABLE_NAME: string;
     STRATEGY_TABLE_NAME: string;
     ACTIVE_STRATEGIES_QUEUE_URL: string;
+    PROCESSED_STRATEGY_STEP_QUEUE_URL: string;
     DCA_TRADING_CONFIG: string;
   }
 }

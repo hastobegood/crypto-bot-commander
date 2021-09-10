@@ -1,8 +1,10 @@
-import { StrategyMessage } from '../../../../src/code/infrastructure/strategy/sqs-strategy-publisher';
+import { ActiveStrategyMessage } from '../../../../src/code/infrastructure/strategy/sqs-strategy-publisher';
 import { randomString } from '../../random-test-builder';
 
-export const buildDefaultStrategyMessage = (): StrategyMessage => {
+export const buildDefaultActiveStrategyMessage = (): ActiveStrategyMessage => {
   return {
-    id: randomString(10),
+    content: {
+      id: randomString(10),
+    },
   };
 };

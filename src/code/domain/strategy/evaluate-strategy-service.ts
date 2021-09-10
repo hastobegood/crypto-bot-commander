@@ -5,9 +5,10 @@ import { StrategyStepService } from './step/strategy-step-service';
 import { StrategyStepRepository } from './step/strategy-step-repository';
 import { serializeError } from 'serialize-error';
 import { StrategyEvaluation } from './model/strategy-evaluation';
+import { StrategyStepPublisher } from './step/strategy-step-publisher';
 
 export class EvaluateStrategyService {
-  constructor(private strategyStepServices: StrategyStepService[], private strategyStepRepository: StrategyStepRepository) {}
+  constructor(private strategyStepServices: StrategyStepService[], private strategyStepRepository: StrategyStepRepository, private strategyStepPublisher: StrategyStepPublisher) {}
 
   async evaluate(strategy: Strategy): Promise<StrategyEvaluation> {
     if (strategy.status !== 'Active') {
@@ -46,13 +47,22 @@ export class EvaluateStrategyService {
       logger.info(step, 'Processing strategy step');
       step.output = await this.#getStepService(stepTemplate).process(strategy, stepTemplate.input);
       logger.info(step, 'Strategy step processed');
-      return step;
     } catch (error) {
       step.error = { message: (error as Error).message, details: JSON.stringify(serializeError(error)) };
       logger.error(step, 'Unable to process strategy step');
-      return step;
     } finally {
       step.executionEndDate = new Date();
+      await this.#publishProcessedStep(step);
+    }
+
+    return step;
+  }
+
+  async #publishProcessedStep(step: StrategyStep): Promise<void> {
+    try {
+      await this.strategyStepPublisher.publishProcessed(step);
+    } catch (error) {
+      logger.child({ err: error }).error(step, 'Unable to publish processed strategy step');
     }
   }
 

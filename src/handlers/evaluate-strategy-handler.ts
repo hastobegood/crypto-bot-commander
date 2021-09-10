@@ -3,7 +3,7 @@ import { Context, SQSEvent } from 'aws-lambda';
 import DynamoDB from 'aws-sdk/clients/dynamodb';
 import SecretsManager from 'aws-sdk/clients/secretsmanager';
 import { handleEvent } from './handler-utils';
-import { StrategyMessage } from '../code/infrastructure/strategy/sqs-strategy-publisher';
+import { ActiveStrategyMessage } from '../code/infrastructure/strategy/sqs-strategy-publisher';
 import { DdbStrategyRepository } from '../code/infrastructure/strategy/ddb-strategy-repository';
 import { DdbStrategyStepRepository } from '../code/infrastructure/strategy/step/ddb-strategy-step-repository';
 import { GetStrategyService } from '../code/domain/strategy/get-strategy-service';
@@ -15,21 +15,19 @@ import { GetCandlestickService } from '../code/domain/candlestick/get-candlestic
 import { MarketEvolutionStepService } from '../code/domain/strategy/step/market-evolution-step-service';
 import { MarketEvolutionService } from '../code/domain/technical-analysis/market-evolution-service';
 import { SendOrderStepService } from '../code/domain/strategy/step/send-order-step-service';
-import { HttpAccountRepository } from '../code/infrastructure/account/http-account-repository';
-import { GetAccountService } from '../code/domain/account/get-account-service';
 import { HttpOrderRepository } from '../code/infrastructure/order/http-order-repository';
 import { CreateOrderService } from '../code/domain/order/create-order-service';
 import { EvaluateStrategyMessageConsumer } from '../code/application/strategy/evaluate-strategy-message-consumer';
 import { MovingAverageCrossoverStepService } from '../code/domain/strategy/step/moving-average-crossover-step-service';
 import { MovingAverageService } from '../code/domain/technical-analysis/moving-average-service';
+import SQS from 'aws-sdk/clients/sqs';
+import { SqsStrategyStepPublisher } from '../code/infrastructure/strategy/step/sqs-strategy-step-publisher';
 
 const ddbClient = new DynamoDB.DocumentClient({ region: process.env.REGION });
 const smClient = new SecretsManager({ region: process.env.REGION });
+const sqsClient = new SQS({ region: process.env.REGION });
 
 const binanceClient = new BinanceClient(smClient, process.env.BINANCE_SECRET_NAME, process.env.BINANCE_URL);
-
-const accountRepository = new HttpAccountRepository(binanceClient);
-const getAccountService = new GetAccountService(accountRepository);
 
 const candlestickRepository = new HttpCandlestickRepository(binanceClient);
 const getCandlestickService = new GetCandlestickService(candlestickRepository);
@@ -42,18 +40,19 @@ const getStrategyService = new GetStrategyService(strategyRepository);
 const updateStrategyService = new UpdateStrategyService(strategyRepository);
 
 const strategyStepRepository = new DdbStrategyStepRepository(process.env.STRATEGY_TABLE_NAME, ddbClient);
+const strategyStepPublisher = new SqsStrategyStepPublisher(process.env.PROCESSED_STRATEGY_STEP_QUEUE_URL, sqsClient);
 const marketEvolutionService = new MarketEvolutionService();
 const marketEvolutionStepService = new MarketEvolutionStepService(getCandlestickService, marketEvolutionService, strategyStepRepository);
 const movingAverageService = new MovingAverageService();
 const movingAverageCrossoverService = new MovingAverageCrossoverStepService(getCandlestickService, movingAverageService);
-const sendOrderStepService = new SendOrderStepService(getAccountService, createOrderService, strategyStepRepository);
-const evaluateStrategyService = new EvaluateStrategyService([marketEvolutionStepService, movingAverageCrossoverService, sendOrderStepService], strategyStepRepository);
+const sendOrderStepService = new SendOrderStepService(createOrderService, strategyStepRepository);
+const evaluateStrategyService = new EvaluateStrategyService([marketEvolutionStepService, movingAverageCrossoverService, sendOrderStepService], strategyStepRepository, strategyStepPublisher);
 
-const evaluateStrategiesScheduler = new EvaluateStrategyMessageConsumer(getStrategyService, updateStrategyService, evaluateStrategyService);
+const evaluateStrategyMessageConsumer = new EvaluateStrategyMessageConsumer(getStrategyService, updateStrategyService, evaluateStrategyService);
 
 export const handler = async (event: SQSEvent, context: Context): Promise<void> => {
   return handleEvent(context, async () => {
-    const messages = event.Records.map((record) => JSON.parse(record.body) as StrategyMessage);
-    return evaluateStrategiesScheduler.process(messages[0]);
+    const messages = event.Records.map((record) => JSON.parse(record.body) as ActiveStrategyMessage);
+    return evaluateStrategyMessageConsumer.process(messages[0]);
   });
 };

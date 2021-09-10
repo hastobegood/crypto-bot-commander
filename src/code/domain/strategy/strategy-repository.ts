@@ -6,4 +6,6 @@ export interface StrategyRepository {
   getAllIdsWithStatusActive(): Promise<string[]>;
 
   updateStatusById(id: string, status: StrategyStatus): Promise<Strategy>;
+
+  updateBudgetById(id: string, consumedBaseAssetQuantity: number, consumedQuoteAssetQuantity: number): Promise<Strategy>;
 }

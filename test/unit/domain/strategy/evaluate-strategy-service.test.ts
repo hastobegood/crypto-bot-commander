@@ -16,11 +16,13 @@ import { MarketEvolutionStepOutput, SendOrderStepOutput, StrategyStep } from '..
 import MockDate from 'mockdate';
 import { EvaluateStrategyService } from '../../../../src/code/domain/strategy/evaluate-strategy-service';
 import { stringContaining } from 'expect/build/asymmetricMatchers';
+import { StrategyStepPublisher } from '../../../../src/code/domain/strategy/step/strategy-step-publisher';
 
 const marketEvolutionStepServiceMock = mocked(jest.genMockFromModule<MarketEvolutionStepService>('../../../../src/code/domain/strategy/step/market-evolution-step-service'), true);
 const sendOrderStepServiceMock = mocked(jest.genMockFromModule<SendOrderStepService>('../../../../src/code/domain/strategy/step/send-order-step-service'), true);
 const strategyStepServicesMocks = [marketEvolutionStepServiceMock, sendOrderStepServiceMock];
 const strategyStepRepositoryMock = mocked(jest.genMockFromModule<StrategyStepRepository>('../../../../src/code/domain/strategy/step/strategy-step-repository'), true);
+const strategyStepPublisherMock = mocked(jest.genMockFromModule<StrategyStepPublisher>('../../../../src/code/domain/strategy/step/strategy-step-publisher'), true);
 
 let evaluateStrategyService: EvaluateStrategyService;
 beforeEach(() => {
@@ -28,12 +30,14 @@ beforeEach(() => {
   strategyStepRepositoryMock.getLastByStrategyIdAndType = jest.fn();
   strategyStepRepositoryMock.save = jest.fn();
 
+  strategyStepPublisherMock.publishProcessed = jest.fn();
+
   strategyStepServicesMocks.forEach((strategyStepServiceMock) => {
     strategyStepServiceMock.getType = jest.fn();
     strategyStepServiceMock.process = jest.fn();
   });
 
-  evaluateStrategyService = new EvaluateStrategyService(strategyStepServicesMocks, strategyStepRepositoryMock);
+  evaluateStrategyService = new EvaluateStrategyService(strategyStepServicesMocks, strategyStepRepositoryMock, strategyStepPublisherMock);
 });
 
 describe('EvaluateStrategyService', () => {
@@ -65,6 +69,8 @@ describe('EvaluateStrategyService', () => {
         expect(strategyStepRepositoryMock.getLastByStrategyId).toHaveBeenCalledTimes(0);
         expect(strategyStepRepositoryMock.getLastByStrategyIdAndType).toHaveBeenCalledTimes(0);
         expect(strategyStepRepositoryMock.save).toHaveBeenCalledTimes(0);
+
+        expect(strategyStepPublisherMock.publishProcessed).toHaveBeenCalledTimes(0);
 
         strategyStepServicesMocks.forEach((strategyStepServiceMock) => {
           expect(strategyStepServiceMock.process).toHaveBeenCalledTimes(0);
@@ -111,6 +117,11 @@ describe('EvaluateStrategyService', () => {
             executionStartDate: date,
             executionEndDate: date,
           });
+
+          expect(strategyStepPublisherMock.publishProcessed).toHaveBeenCalledTimes(1);
+          const publishProcessedParams = strategyStepPublisherMock.publishProcessed.mock.calls[0];
+          expect(publishProcessedParams.length).toEqual(1);
+          expect(publishProcessedParams[0]).toEqual(saveParams[0]);
 
           expect(strategyStepRepositoryMock.getLastByStrategyIdAndType).toHaveBeenCalledTimes(0);
           strategyStepServicesMocks.forEach((strategyStepServiceMock) => {
@@ -164,6 +175,11 @@ describe('EvaluateStrategyService', () => {
             executionEndDate: date,
           });
 
+          expect(strategyStepPublisherMock.publishProcessed).toHaveBeenCalledTimes(1);
+          const publishProcessedParams = strategyStepPublisherMock.publishProcessed.mock.calls[0];
+          expect(publishProcessedParams.length).toEqual(1);
+          expect(publishProcessedParams[0]).toEqual(saveParams[0]);
+
           expect(marketEvolutionStepServiceMock.process).toHaveBeenCalledTimes(0);
         });
       });
@@ -216,6 +232,11 @@ describe('EvaluateStrategyService', () => {
             executionStartDate: date,
             executionEndDate: date,
           });
+
+          expect(strategyStepPublisherMock.publishProcessed).toHaveBeenCalledTimes(1);
+          const publishProcessedParams = strategyStepPublisherMock.publishProcessed.mock.calls[0];
+          expect(publishProcessedParams.length).toEqual(1);
+          expect(publishProcessedParams[0]).toEqual(saveParams[0]);
 
           expect(marketEvolutionStepServiceMock.process).toHaveBeenCalledTimes(0);
         });
