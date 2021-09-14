@@ -1,5 +1,7 @@
-import { Candlestick, CandlestickInterval } from './model/candlestick';
+import { Candlestick } from './model/candlestick';
 
 export interface CandlestickRepository {
-  getAllBySymbol(symbol: string, period: number, interval: CandlestickInterval): Promise<Candlestick[]>;
+  saveAllBySymbol(symbol: string, candlesticks: Candlestick[]): Promise<void>;
+
+  getAllBySymbol(symbol: string, startDate: number, endDate: number): Promise<Candlestick[]>;
 }

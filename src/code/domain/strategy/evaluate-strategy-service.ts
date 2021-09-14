@@ -21,7 +21,6 @@ export class EvaluateStrategyService {
     let stepSuccess = true;
     while (stepSuccess) {
       lastStep = await this.#processStep(strategy, stepTemplate, lastStep);
-      lastStep = await this.strategyStepRepository.save(lastStep);
       stepSuccess = lastStep.output.success;
       stepTemplate = getStepTemplateById(strategy, lastStep.nextId);
     }
@@ -52,10 +51,9 @@ export class EvaluateStrategyService {
       logger.error(step, 'Unable to process strategy step');
     } finally {
       step.executionEndDate = new Date();
-      await this.#publishProcessedStep(step);
     }
 
-    return step;
+    return (await Promise.all([this.#publishProcessedStep(step), this.strategyStepRepository.save(step)]))[1];
   }
 
   async #publishProcessedStep(step: StrategyStep): Promise<void> {

@@ -3,7 +3,7 @@ import { Strategy, StrategyStatus } from './model/strategy';
 export interface StrategyRepository {
   getById(id: string): Promise<Strategy | null>;
 
-  getAllIdsWithStatusActive(): Promise<string[]>;
+  getAllIdsBySymbolAndActiveStatus(symbol: string): Promise<string[]>;
 
   updateStatusById(id: string, status: StrategyStatus): Promise<Strategy>;
 

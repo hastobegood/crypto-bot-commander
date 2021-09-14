@@ -38,7 +38,7 @@ Mappings:
     test:
       DcaTradingConfig: '{ "baseAsset": "BTC", "quoteAsset": "BUSD", "quoteAssetQuantity": 25, "tradeAssets": [ { "asset": "ETH|BNB", "percentage": 0.50 } ] }'
       DcaTradingSchedule: cron(0 18 ? * * *)
-      PublishAllActiveStrategiesSchedule: rate(1 minute)
+      UpdateAllCandlesticksSchedule: rate(1 minute)
     prod:
       DcaTradingConfig: '{ "baseAsset": "BTC", "quoteAsset": "EUR", "quoteAssetQuantity": 25, "tradeAssets": [ { "asset": "ETH", "percentage": 0.28 }, { "asset":"XRP", "percentage": 0.28 }, { "asset": "ADA|MATIC", "percentage": 0.20 } ] }'
       DcaTradingSchedule: cron(0 18 ? * 1 *)
@@ -74,7 +74,7 @@ Resources:
         ScheduleEvent:
           Type: Schedule
           Properties:
-            Enabled: true
+            Enabled: false
             Schedule: !FindInMap [ EnvironmentMap, !Ref EnvironmentParameter, DcaTradingSchedule ]
       Policies:
         - AWSSecretsManagerGetSecretValuePolicy:
@@ -90,13 +90,73 @@ Resources:
         - DynamoDBWritePolicy:
             TableName: !Ref TradingTable
 
+  InitializeAllCandlesticksFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Description: Initialize all candlesticks function
+      CodeUri: dist/webpack/initialize-all-candlesticks-handler
+      Handler: app.handler
+      Timeout: 300
+      ReservedConcurrentExecutions: 1
+      EventInvokeConfig:
+        MaximumRetryAttempts: 0
+      Environment:
+        Variables:
+          BINANCE_URL: !Ref BinanceUrlParameter
+          BINANCE_SECRET_NAME: !Ref BinanceSecretNameParameter
+          CANDLESTICK_TABLE_NAME: !Ref CandlestickTable
+      Policies:
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Sub arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${BinanceSecretNameParameter}*
+        - Version: 2012-10-17
+          Statement:
+            - Effect: Allow
+              Action:
+                - kms:Decrypt
+              Resource: !Sub arn:aws:kms:${AWS::Region}:${AWS::AccountId}:${BinanceSecretEncryptionKeyParameter}
+        - DynamoDBWritePolicy:
+            TableName: !Ref CandlestickTable
+
+  UpdateAllCandlesticksFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Description: Update all candlesticks function
+      CodeUri: dist/webpack/update-all-candlesticks-handler
+      Handler: app.handler
+      EventInvokeConfig:
+        MaximumRetryAttempts: 0
+      Environment:
+        Variables:
+          BINANCE_URL: !Ref BinanceUrlParameter
+          BINANCE_SECRET_NAME: !Ref BinanceSecretNameParameter
+          CANDLESTICK_TABLE_NAME: !Ref CandlestickTable
+          UPDATED_CANDLESTICKS_QUEUE_URL: !Ref UpdatedCandlesticksQueue
+      Events:
+        ScheduleEvent:
+          Type: Schedule
+          Properties:
+            Enabled: true
+            Schedule: !FindInMap [ EnvironmentMap, !Ref EnvironmentParameter, UpdateAllCandlesticksSchedule ]
+      Policies:
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Sub arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${BinanceSecretNameParameter}*
+        - Version: 2012-10-17
+          Statement:
+            - Effect: Allow
+              Action:
+                - kms:Decrypt
+              Resource: !Sub arn:aws:kms:${AWS::Region}:${AWS::AccountId}:${BinanceSecretEncryptionKeyParameter}
+        - DynamoDBWritePolicy:
+            TableName: !Ref CandlestickTable
+        - SQSSendMessagePolicy:
+            QueueName: !GetAtt UpdatedCandlesticksQueue.QueueName
+
   PublishAllActiveStrategiesFunction:
     Type: AWS::Serverless::Function
     Properties:
       Description: Publish all active strategies function
       CodeUri: dist/webpack/publish-all-active-strategies-handler
       Handler: app.handler
-      ReservedConcurrentExecutions: 1
       EventInvokeConfig:
         MaximumRetryAttempts: 0
       Environment:
@@ -104,14 +164,17 @@ Resources:
           STRATEGY_TABLE_NAME: !Ref StrategyTable
           ACTIVE_STRATEGIES_QUEUE_URL: !Ref ActiveStrategiesQueue
       Events:
-        ScheduleEvent:
-          Type: Schedule
+        SqsEvent:
+          Type: SQS
           Properties:
             Enabled: true
-            Schedule: !FindInMap [ EnvironmentMap, !Ref EnvironmentParameter, PublishAllActiveStrategiesSchedule ]
+            Queue: !GetAtt UpdatedCandlesticksQueue.Arn
+            BatchSize: 10
       Policies:
         - DynamoDBReadPolicy:
             TableName: !Ref StrategyTable
+        - SQSPollerPolicy:
+            QueueName: !GetAtt UpdatedCandlesticksQueue.QueueName
         - SQSSendMessagePolicy:
             QueueName: !GetAtt ActiveStrategiesQueue.QueueName
 
@@ -121,12 +184,14 @@ Resources:
       Description: Evaluate strategy function
       CodeUri: dist/webpack/evaluate-strategy-handler
       Handler: app.handler
+      MemorySize: 1024
       EventInvokeConfig:
         MaximumRetryAttempts: 0
       Environment:
         Variables:
           BINANCE_URL: !Ref BinanceUrlParameter
           BINANCE_SECRET_NAME: !Ref BinanceSecretNameParameter
+          CANDLESTICK_TABLE_NAME: !Ref CandlestickTable
           STRATEGY_TABLE_NAME: !Ref StrategyTable
           PROCESSED_STRATEGY_STEP_QUEUE_URL: !Ref ProcessedStrategyStepQueue
       Events:
@@ -145,6 +210,8 @@ Resources:
               Action:
                 - kms:Decrypt
               Resource: !Sub arn:aws:kms:${AWS::Region}:${AWS::AccountId}:${BinanceSecretEncryptionKeyParameter}
+        - DynamoDBReadPolicy:
+            TableName: !Ref CandlestickTable
         - DynamoDBReadPolicy:
             TableName: !Ref StrategyTable
         - DynamoDBWritePolicy:
@@ -197,6 +264,23 @@ Resources:
         - AttributeName: sk
           AttributeType: S
 
+  CandlestickTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      BillingMode: PAY_PER_REQUEST
+      SSESpecification:
+        SSEEnabled: true
+      KeySchema:
+        - AttributeName: pk
+          KeyType: HASH
+        - AttributeName: sk
+          KeyType: RANGE
+      AttributeDefinitions:
+        - AttributeName: pk
+          AttributeType: S
+        - AttributeName: sk
+          AttributeType: S
+
   StrategyTable:
     Type: AWS::DynamoDB::Table
     Properties:
@@ -213,19 +297,28 @@ Resources:
           AttributeType: S
         - AttributeName: sk
           AttributeType: S
-        - AttributeName: activeStrategiesPk
+        - AttributeName: symbolStatusPk
           AttributeType: S
-        - AttributeName: activeStrategiesSk
+        - AttributeName: symbolStatusSk
           AttributeType: S
       GlobalSecondaryIndexes:
-        - IndexName: ActiveStrategies-Index
+        - IndexName: SymbolStatus-Index
           KeySchema:
-            - AttributeName: activeStrategiesPk
+            - AttributeName: symbolStatusPk
               KeyType: HASH
-            - AttributeName: activeStrategiesSk
+            - AttributeName: symbolStatusSk
               KeyType: RANGE
           Projection:
             ProjectionType: KEYS_ONLY
+
+  UpdatedCandlesticksQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      FifoQueue: true
+      VisibilityTimeout: 90
+      MessageRetentionPeriod: 60
+      DeduplicationScope: messageGroup
+      FifoThroughputLimit: perMessageGroupId
 
   ActiveStrategiesQueue:
     Type: AWS::SQS::Queue
@@ -253,6 +346,20 @@ Outputs:
     Description: DCA trading function ARN
     Value: !GetAtt DcaTradingFunction.Arn
 
+  InitializeAllCandlesticksFunctionName:
+    Description: Initialize all candlesticks function name
+    Value: !Ref InitializeAllCandlesticksFunction
+  InitializeAllCandlesticksFunctionArn:
+    Description: Initialize all candlesticks function name
+    Value: !Ref InitializeAllCandlesticksFunction
+
+  UpdateAllCandlesticksFunctionName:
+    Description: Update all candlesticks function name
+    Value: !Ref UpdateAllCandlesticksFunction
+  UpdateAllCandlesticksFunctionArn:
+    Description: Update all candlesticks function name
+    Value: !Ref UpdateAllCandlesticksFunction
+
   PublishAllActiveStrategiesFunctionName:
     Description: Publish all active strategies function name
     Value: !Ref PublishAllActiveStrategiesFunction
@@ -267,6 +374,13 @@ Outputs:
     Description: Evaluate strategy function ARN
     Value: !GetAtt EvaluateStrategyFunction.Arn
 
+  UpdateStrategyBudgetFunctionName:
+    Description: Update strategy budget function name
+    Value: !Ref UpdateStrategyBudgetFunction
+  UpdateStrategyBudgetFunctionArn:
+    Description: Update strategy budget function ARN
+    Value: !GetAtt UpdateStrategyBudgetFunction.Arn
+
   TradingTableName:
     Description: Trading table name
     Value: !Ref TradingTable
@@ -274,12 +388,29 @@ Outputs:
     Description: Trading table ARN
     Value: !GetAtt TradingTable.Arn
 
+  CandlestickTableName:
+    Description: Candlestick table name
+    Value: !Ref CandlestickTable
+  CandlestickTableArn:
+    Description: Candlestick table ARN
+    Value: !GetAtt CandlestickTable.Arn
+
   StrategyTableName:
     Description: Strategy table name
     Value: !Ref StrategyTable
   StrategyTableArn:
     Description: Strategy table ARN
     Value: !GetAtt StrategyTable.Arn
+
+  UpdatedCandlesticksQueueName:
+    Description: Updated candlesticks queue name
+    Value: !GetAtt UpdatedCandlesticksQueue.QueueName
+  UpdatedCandlesticksQueueArn:
+    Description: Updated candlesticks queue ARN
+    Value: !GetAtt UpdatedCandlesticksQueue.Arn
+  UpdatedCandlesticksQueueUrl:
+    Description: Updated candlesticks queue URL
+    Value: !Ref UpdatedCandlesticksQueue
 
   ActiveStrategiesQueueName:
     Description: Active strategies queue name
@@ -290,3 +421,13 @@ Outputs:
   ActiveStrategiesQueueUrl:
     Description: Active strategies queue URL
     Value: !Ref ActiveStrategiesQueue
+
+  ProcessedStrategyStepQueueName:
+    Description: Processed strategy step queue name
+    Value: !GetAtt ProcessedStrategyStepQueue.QueueName
+  ProcessedStrategyStepQueueArn:
+    Description: Processed strategy step queue ARN
+    Value: !GetAtt ProcessedStrategyStepQueue.Arn
+  ProcessedStrategyStepQueueUrl:
+    Description: Processed strategy step queue URL
+    Value: !Ref ProcessedStrategyStepQueue

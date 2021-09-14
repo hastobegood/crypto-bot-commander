@@ -30,12 +30,12 @@ export class BinanceClient {
     return account.data;
   }
 
-  async getSymbolCandlesticks(symbol: string, interval: string, limit: number): Promise<BinanceSymbolCandlestick[]> {
+  async getSymbolCandlesticks(symbol: string, startTime: number, endTime: number, interval: string, limit: number): Promise<BinanceSymbolCandlestick[]> {
     if (!this.secrets) {
       this.secrets = await this.#getSecrets();
     }
 
-    const queryParameters = `symbol=${symbol}&interval=${interval}&limit=${limit}`;
+    const queryParameters = `symbol=${symbol}&startTime=${startTime}&endTime=${endTime}&interval=${interval}&limit=${limit}`;
     const queryUrl = `${symbolCandlesticksEndpoint}?${queryParameters}`;
     const queryConfig = this.#getQueryConfig();
     const response = await axiosInstance.get<[string | number[]]>(queryUrl, queryConfig);

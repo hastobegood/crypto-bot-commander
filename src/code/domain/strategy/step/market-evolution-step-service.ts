@@ -73,7 +73,7 @@ export class MarketEvolutionStepService implements StrategyStepService {
 
   #buildPoints(candlesticks: Candlestick[]): Point[] {
     return candlesticks.map((candlestick) => ({
-      timestamp: candlestick.closingDate.valueOf(),
+      timestamp: candlestick.closingDate,
       value: candlestick.closingPrice,
     }));
   }
