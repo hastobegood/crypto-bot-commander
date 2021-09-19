@@ -1,17 +1,17 @@
 import { mocked } from 'ts-jest/utils';
 import { InitializeCandlestickService } from '../../../../src/code/domain/candlestick/initialize-candlestick-service';
-import { InitializeAllCandlesticksController } from '../../../../src/code/application/candlestick/initialize-all-candlesticks-controller';
+import { InitializeAllCandlesticksApiController } from '../../../../src/code/application/candlestick/initialize-all-candlesticks-api-controller';
 
 const initializeCandlestickServiceMock = mocked(jest.genMockFromModule<InitializeCandlestickService>('../../../../src/code/domain/candlestick/initialize-candlestick-service'), true);
 
-let initializeAllCandlesticksController: InitializeAllCandlesticksController;
+let initializeAllCandlesticksController: InitializeAllCandlesticksApiController;
 beforeEach(() => {
   initializeCandlestickServiceMock.initializeAllBySymbol = jest.fn();
 
-  initializeAllCandlesticksController = new InitializeAllCandlesticksController(initializeCandlestickServiceMock);
+  initializeAllCandlesticksController = new InitializeAllCandlesticksApiController(initializeCandlestickServiceMock);
 });
 
-describe('InitializeAllCandlesticksController', () => {
+describe('InitializeAllCandlesticksApiController', () => {
   describe('Given candlesticks to initialize for a symbol, a year and a month', () => {
     describe('When initialization has failed', () => {
       beforeEach(() => {

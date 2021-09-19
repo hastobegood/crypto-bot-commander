@@ -1,20 +1,20 @@
 import { mocked } from 'ts-jest/utils';
-import { UpdateAllCandlesticksController } from '../../../../src/code/application/candlestick/update-all-candlesticks-controller';
+import { UpdateAllCandlesticksEventScheduler } from '../../../../src/code/application/candlestick/update-all-candlesticks-event-scheduler';
 import { UpdateCandlestickService } from '../../../../src/code/domain/candlestick/update-candlestick-service';
 import { PublishCandlestickService } from '../../../../src/code/domain/candlestick/publish-candlestick-service';
 
 const updateCandlestickServiceMock = mocked(jest.genMockFromModule<UpdateCandlestickService>('../../../../src/code/domain/candlestick/update-candlestick-service'), true);
 const publishCandlestickServiceMock = mocked(jest.genMockFromModule<PublishCandlestickService>('../../../../src/code/domain/candlestick/publish-candlestick-service'), true);
 
-let updateAllCandlesticksController: UpdateAllCandlesticksController;
+let updateAllCandlesticksEventScheduler: UpdateAllCandlesticksEventScheduler;
 beforeEach(() => {
   updateCandlestickServiceMock.updateAllBySymbol = jest.fn();
   publishCandlestickServiceMock.publishUpdatedBySymbol = jest.fn();
 
-  updateAllCandlesticksController = new UpdateAllCandlesticksController(updateCandlestickServiceMock, publishCandlestickServiceMock);
+  updateAllCandlesticksEventScheduler = new UpdateAllCandlesticksEventScheduler(updateCandlestickServiceMock, publishCandlestickServiceMock);
 });
 
-describe('UpdateAllCandlesticksController', () => {
+describe('UpdateAllCandlesticksEventScheduler', () => {
   describe('Given candlesticks to update for a symbol', () => {
     describe('When update has failed', () => {
       beforeEach(() => {
@@ -23,7 +23,7 @@ describe('UpdateAllCandlesticksController', () => {
 
       it('Then error is thrown', async () => {
         try {
-          await updateAllCandlesticksController.process('ABC');
+          await updateAllCandlesticksEventScheduler.process('ABC');
           fail();
         } catch (error) {
           expect(error).toBeDefined();
@@ -45,7 +45,7 @@ describe('UpdateAllCandlesticksController', () => {
       });
 
       it('Then nothing is returned', async () => {
-        await updateAllCandlesticksController.process('ABC');
+        await updateAllCandlesticksEventScheduler.process('ABC');
 
         expect(updateCandlestickServiceMock.updateAllBySymbol).toHaveBeenCalledTimes(1);
         const updateAllBySymbolParams = updateCandlestickServiceMock.updateAllBySymbol.mock.calls[0];

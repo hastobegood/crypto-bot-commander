@@ -8,7 +8,7 @@ import { BinanceClient } from '../code/infrastructure/binance/binance-client';
 import { DdbCandlestickRepository } from '../code/infrastructure/candlestick/ddb-candlestick-repository';
 import { HttpCandlestickClient } from '../code/infrastructure/candlestick/http-candlestick-client';
 import { UpdateCandlestickService } from '../code/domain/candlestick/update-candlestick-service';
-import { UpdateAllCandlesticksController } from '../code/application/candlestick/update-all-candlesticks-controller';
+import { UpdateAllCandlesticksEventScheduler } from '../code/application/candlestick/update-all-candlesticks-event-scheduler';
 import { PublishCandlestickService } from '../code/domain/candlestick/publish-candlestick-service';
 import { SqsCandlestickPublisher } from '../code/infrastructure/candlestick/sqs-candlestick-publisher';
 
@@ -20,8 +20,8 @@ const updateCandlestickService = new UpdateCandlestickService(candlestickClient,
 const candlestickPublisher = new SqsCandlestickPublisher(process.env.UPDATED_CANDLESTICKS_QUEUE_URL, sqsClient);
 const publishCandlestickService = new PublishCandlestickService(candlestickPublisher);
 
-const updateAllCandlesticksController = new UpdateAllCandlesticksController(updateCandlestickService, publishCandlestickService);
+const updateAllCandlesticksEventScheduler = new UpdateAllCandlesticksEventScheduler(updateCandlestickService, publishCandlestickService);
 
 export const handler = async (event: ScheduledEvent, context: Context): Promise<void> => {
-  return handleEvent(context, async () => updateAllCandlesticksController.process('BNB#USDT'));
+  return handleEvent(context, async () => updateAllCandlesticksEventScheduler.process('BNB#USDT'));
 };

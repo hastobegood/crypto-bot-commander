@@ -1,19 +1,19 @@
 import { mocked } from 'ts-jest/utils';
 import { PublishStrategyService } from '../../../../src/code/domain/strategy/publish-strategy-service';
-import { PublishAllActiveStrategiesEventScheduler } from '../../../../src/code/application/strategy/publish-all-active-strategies-event-scheduler';
+import { PublishAllActiveStrategiesMessageConsumer } from '../../../../src/code/application/strategy/publish-all-active-strategies-message-consumer';
 import { UpdatedCandlesticksMessage } from '../../../../src/code/infrastructure/candlestick/sqs-candlestick-publisher';
 import { buildDefaultUpdatedCandlesticksMessage } from '../../../builders/infrastructure/candlestick/candlestick-message-builder';
 
 const publishStrategyServiceMock = mocked(jest.genMockFromModule<PublishStrategyService>('../../../../src/code/domain/strategy/publish-strategy-service'), true);
 
-let publishAllActiveStrategiesEventScheduler: PublishAllActiveStrategiesEventScheduler;
+let publishAllActiveStrategiesMessageConsumer: PublishAllActiveStrategiesMessageConsumer;
 beforeEach(() => {
   publishStrategyServiceMock.publishAllBySymbolAndActiveStatus = jest.fn();
 
-  publishAllActiveStrategiesEventScheduler = new PublishAllActiveStrategiesEventScheduler(publishStrategyServiceMock);
+  publishAllActiveStrategiesMessageConsumer = new PublishAllActiveStrategiesMessageConsumer(publishStrategyServiceMock);
 });
 
-describe('PublishAllActiveStrategiesEventScheduler', () => {
+describe('PublishAllActiveStrategiesMessageConsumer', () => {
   let updatedCandlesticksMessage: UpdatedCandlesticksMessage;
 
   beforeEach(() => {
@@ -28,7 +28,7 @@ describe('PublishAllActiveStrategiesEventScheduler', () => {
 
       it('Then error is thrown', async () => {
         try {
-          await publishAllActiveStrategiesEventScheduler.process(updatedCandlesticksMessage);
+          await publishAllActiveStrategiesMessageConsumer.process(updatedCandlesticksMessage);
           fail('An error should have been thrown');
         } catch (error) {
           expect(error).toBeDefined();
@@ -48,7 +48,7 @@ describe('PublishAllActiveStrategiesEventScheduler', () => {
       });
 
       it('Then nothing is returned', async () => {
-        await publishAllActiveStrategiesEventScheduler.process(updatedCandlesticksMessage);
+        await publishAllActiveStrategiesMessageConsumer.process(updatedCandlesticksMessage);
 
         expect(publishStrategyServiceMock.publishAllBySymbolAndActiveStatus).toHaveBeenCalledTimes(1);
         const publishAllBySymbolAndActiveStatusParams = publishStrategyServiceMock.publishAllBySymbolAndActiveStatus.mock.calls[0];

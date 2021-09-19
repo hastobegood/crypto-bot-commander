@@ -2,7 +2,7 @@ import { logger } from '../../configuration/log/logger';
 import { UpdateCandlestickService } from '../../domain/candlestick/update-candlestick-service';
 import { PublishCandlestickService } from '../../domain/candlestick/publish-candlestick-service';
 
-export class UpdateAllCandlesticksController {
+export class UpdateAllCandlesticksEventScheduler {
   constructor(private updateCandlestickService: UpdateCandlestickService, private publishCandlesticksService: PublishCandlestickService) {}
 
   async process(symbol: string): Promise<void> {

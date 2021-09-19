@@ -2,7 +2,7 @@ import { logger } from '../../configuration/log/logger';
 import { PublishStrategyService } from '../../domain/strategy/publish-strategy-service';
 import { UpdatedCandlesticksMessage } from '../../infrastructure/candlestick/sqs-candlestick-publisher';
 
-export class PublishAllActiveStrategiesEventScheduler {
+export class PublishAllActiveStrategiesMessageConsumer {
   constructor(private publishStrategyService: PublishStrategyService) {}
 
   async process(updatedCandlesticksMessage: UpdatedCandlesticksMessage): Promise<void> {

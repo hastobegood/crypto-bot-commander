@@ -7,7 +7,7 @@ import { smClient } from '../code/configuration/aws/secrets-manager';
 import { DdbCandlestickRepository } from '../code/infrastructure/candlestick/ddb-candlestick-repository';
 import { InitializeCandlestickService } from '../code/domain/candlestick/initialize-candlestick-service';
 import { HttpCandlestickClient } from '../code/infrastructure/candlestick/http-candlestick-client';
-import { InitializeAllCandlesticksController } from '../code/application/candlestick/initialize-all-candlesticks-controller';
+import { InitializeAllCandlesticksApiController } from '../code/application/candlestick/initialize-all-candlesticks-api-controller';
 
 const binanceClient = new BinanceClient(smClient, process.env.BINANCE_SECRET_NAME, process.env.BINANCE_URL);
 
@@ -15,8 +15,8 @@ const candlestickClient = new HttpCandlestickClient(binanceClient);
 const candlestickRepository = new DdbCandlestickRepository(process.env.CANDLESTICK_TABLE_NAME, ddbClient);
 const initializeCandlestickService = new InitializeCandlestickService(candlestickClient, candlestickRepository);
 
-const initializeAllCandlesticksController = new InitializeAllCandlesticksController(initializeCandlestickService);
+const initializeAllCandlesticksApiController = new InitializeAllCandlesticksApiController(initializeCandlestickService);
 
 export const handler = async (event: ScheduledEvent, context: Context): Promise<void> => {
-  return handleEvent(context, async () => initializeAllCandlesticksController.process('BNB#USDT', 2021, 9));
+  return handleEvent(context, async () => initializeAllCandlesticksApiController.process('BNB#USDT', 2021, 9));
 };
