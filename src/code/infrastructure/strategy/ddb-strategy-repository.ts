@@ -19,16 +19,16 @@ export class DdbStrategyRepository implements StrategyRepository {
     return getOutput.Item ? this.#convertFromItemFormat(getOutput.Item.data) : null;
   }
 
-  async getAllIdsWithStatusActive(): Promise<string[]> {
+  async getAllIdsBySymbolAndActiveStatus(symbol: string): Promise<string[]> {
     const queryInput: QueryCommandInput = {
       TableName: this.tableName,
-      IndexName: 'ActiveStrategies-Index',
+      IndexName: 'SymbolStatus-Index',
       KeyConditionExpression: '#gsiPk = :gsiPk',
       ExpressionAttributeNames: {
-        '#gsiPk': 'activeStrategiesPk',
+        '#gsiPk': 'symbolStatusPk',
       },
       ExpressionAttributeValues: {
-        ':gsiPk': 'Strategy::Active',
+        ':gsiPk': `Strategy::${symbol}::Active`,
       },
     };
 
@@ -37,7 +37,7 @@ export class DdbStrategyRepository implements StrategyRepository {
     do {
       const queryOutput = await this.ddbClient.send(new QueryCommand(queryInput));
       if (queryOutput.Items) {
-        results.push(...queryOutput.Items?.map((item) => item.activeStrategiesSk));
+        results.push(...queryOutput.Items?.map((item) => item.symbolStatusSk));
       }
       queryInput.ExclusiveStartKey = queryOutput.LastEvaluatedKey;
     } while (queryInput.ExclusiveStartKey);
@@ -46,34 +46,31 @@ export class DdbStrategyRepository implements StrategyRepository {
   }
 
   async updateStatusById(id: string, status: StrategyStatus): Promise<Strategy> {
+    const symbol = await this.#getSymbolById(id);
+    if (!symbol) {
+      throw new Error(`Unable to find strategy with ID '${id}'`);
+    }
+
     const updateInput: UpdateCommandInput = {
       TableName: this.tableName,
       Key: {
         pk: `Strategy::${id}`,
         sk: 'Details',
       },
-      UpdateExpression: 'SET #data.#status = :status',
+      UpdateExpression: 'SET #data.#status = :status, #gsiPk = :gsiPk, #gsiSk = :gsiSk',
       ExpressionAttributeNames: {
         '#data': 'data',
         '#status': 'status',
+        '#gsiPk': 'symbolStatusPk',
+        '#gsiSk': 'symbolStatusSk',
       },
       ExpressionAttributeValues: {
         ':status': status,
+        ':gsiPk': `Strategy::${symbol}::${status}`,
+        ':gsiSk': id,
       },
       ReturnValues: 'ALL_NEW',
     };
-
-    if (status === 'Active') {
-      updateInput.UpdateExpression = `${updateInput.UpdateExpression}, #gsiPk = :gsiPk, #gsiSk = :gsiSk`;
-      updateInput.ExpressionAttributeNames!['#gsiPk'] = 'activeStrategiesPk';
-      updateInput.ExpressionAttributeNames!['#gsiSk'] = 'activeStrategiesSk';
-      updateInput.ExpressionAttributeValues![':gsiPk'] = 'Strategy::Active';
-      updateInput.ExpressionAttributeValues![':gsiSk'] = id;
-    } else {
-      updateInput.UpdateExpression = `${updateInput.UpdateExpression} REMOVE #gsiPk, #gsiSk`;
-      updateInput.ExpressionAttributeNames!['#gsiPk'] = 'activeStrategiesPk';
-      updateInput.ExpressionAttributeNames!['#gsiSk'] = 'activeStrategiesSk';
-    }
 
     try {
       const updateOutput = await this.ddbClient.send(new UpdateCommand(updateInput));
@@ -81,6 +78,24 @@ export class DdbStrategyRepository implements StrategyRepository {
     } catch (error) {
       throw new Error(`Unable to update strategy '${id}' status '${status}': ${(error as Error).message}`);
     }
+  }
+
+  async #getSymbolById(id: string): Promise<string> {
+    const getInput: GetCommandInput = {
+      TableName: this.tableName,
+      Key: {
+        pk: `Strategy::${id}`,
+        sk: 'Details',
+      },
+      ProjectionExpression: '#data.symbol',
+      ExpressionAttributeNames: {
+        '#data': 'data',
+      },
+    };
+
+    const getOutput = await this.ddbClient.send(new GetCommand(getInput));
+
+    return getOutput.Item ? getOutput.Item.data.symbol : null;
   }
 
   async updateBudgetById(id: string, consumedBaseAssetQuantity: number, consumedQuoteAssetQuantity: number): Promise<Strategy> {

@@ -10,7 +10,6 @@ import { DdbStrategyStepRepository } from '../code/infrastructure/strategy/step/
 import { GetStrategyService } from '../code/domain/strategy/get-strategy-service';
 import { UpdateStrategyService } from '../code/domain/strategy/update-strategy-service';
 import { EvaluateStrategyService } from '../code/domain/strategy/evaluate-strategy-service';
-import { HttpCandlestickRepository } from '../code/infrastructure/candlestick/http-candlestick-repository';
 import { BinanceClient } from '../code/infrastructure/binance/binance-client';
 import { GetCandlestickService } from '../code/domain/candlestick/get-candlestick-service';
 import { MarketEvolutionStepService } from '../code/domain/strategy/step/market-evolution-step-service';
@@ -22,10 +21,11 @@ import { EvaluateStrategyMessageConsumer } from '../code/application/strategy/ev
 import { MovingAverageCrossoverStepService } from '../code/domain/strategy/step/moving-average-crossover-step-service';
 import { MovingAverageService } from '../code/domain/technical-analysis/moving-average-service';
 import { SqsStrategyStepPublisher } from '../code/infrastructure/strategy/step/sqs-strategy-step-publisher';
+import { DdbCandlestickRepository } from '../code/infrastructure/candlestick/ddb-candlestick-repository';
 
 const binanceClient = new BinanceClient(smClient, process.env.BINANCE_SECRET_NAME, process.env.BINANCE_URL);
 
-const candlestickRepository = new HttpCandlestickRepository(binanceClient);
+const candlestickRepository = new DdbCandlestickRepository(process.env.CANDLESTICK_TABLE_NAME, ddbClient);
 const getCandlestickService = new GetCandlestickService(candlestickRepository);
 
 const orderRepository = new HttpOrderRepository(binanceClient);

@@ -70,7 +70,7 @@ describe('DdbStrategyRepository', () => {
     });
   });
 
-  describe('Given all active strategies IDs to retrieve', () => {
+  describe('Given all active strategies IDs to retrieve by symbol', () => {
     describe('When active strategies IDs are not found', () => {
       beforeEach(() => {
         ddbClientMock.send.mockImplementation(() => ({
@@ -79,7 +79,7 @@ describe('DdbStrategyRepository', () => {
       });
 
       it('Then empty list is returned', async () => {
-        const result = await strategyRepository.getAllIdsWithStatusActive();
+        const result = await strategyRepository.getAllIdsBySymbolAndActiveStatus('ABC');
         expect(result).toEqual([]);
 
         expect(ddbClientMock.send).toHaveBeenCalledTimes(1);
@@ -87,13 +87,13 @@ describe('DdbStrategyRepository', () => {
         expect(sendParams.length).toEqual(1);
         expect(sendParams[0].input).toEqual({
           TableName: 'my-table',
-          IndexName: 'ActiveStrategies-Index',
+          IndexName: 'SymbolStatus-Index',
           KeyConditionExpression: '#gsiPk = :gsiPk',
           ExpressionAttributeNames: {
-            '#gsiPk': 'activeStrategiesPk',
+            '#gsiPk': 'symbolStatusPk',
           },
           ExpressionAttributeValues: {
-            ':gsiPk': 'Strategy::Active',
+            ':gsiPk': 'Strategy::ABC::Active',
           },
         });
       });
@@ -111,18 +111,18 @@ describe('DdbStrategyRepository', () => {
         ddbClientMock.send
           .mockImplementationOnce(() => ({
             Items: [
-              { data: { ...strategy1 }, activeStrategiesSk: strategy1.id },
-              { data: { ...strategy2 }, activeStrategiesSk: strategy2.id },
+              { data: { ...strategy1 }, symbolStatusSk: strategy1.id },
+              { data: { ...strategy2 }, symbolStatusSk: strategy2.id },
             ],
             LastEvaluatedKey: '888',
           }))
           .mockImplementationOnce(() => ({
-            Items: [{ data: { ...strategy3 }, activeStrategiesSk: strategy3.id }],
+            Items: [{ data: { ...strategy3 }, symbolStatusSk: strategy3.id }],
           }));
       });
 
       it('Then active strategies IDs are returned', async () => {
-        const result = await strategyRepository.getAllIdsWithStatusActive();
+        const result = await strategyRepository.getAllIdsBySymbolAndActiveStatus('ABC');
         expect(result).toEqual([strategy1.id, strategy2.id, strategy3.id]);
 
         expect(ddbClientMock.send).toHaveBeenCalledTimes(2);
@@ -130,26 +130,26 @@ describe('DdbStrategyRepository', () => {
         expect(sendParams.length).toEqual(1);
         expect(sendParams[0].input).toEqual({
           TableName: 'my-table',
-          IndexName: 'ActiveStrategies-Index',
+          IndexName: 'SymbolStatus-Index',
           KeyConditionExpression: '#gsiPk = :gsiPk',
           ExpressionAttributeNames: {
-            '#gsiPk': 'activeStrategiesPk',
+            '#gsiPk': 'symbolStatusPk',
           },
           ExpressionAttributeValues: {
-            ':gsiPk': 'Strategy::Active',
+            ':gsiPk': 'Strategy::ABC::Active',
           },
         });
         sendParams = ddbClientMock.send.mock.calls[1];
         expect(sendParams.length).toEqual(1);
         expect(sendParams[0].input).toEqual({
           TableName: 'my-table',
-          IndexName: 'ActiveStrategies-Index',
+          IndexName: 'SymbolStatus-Index',
           KeyConditionExpression: '#gsiPk = :gsiPk',
           ExpressionAttributeNames: {
-            '#gsiPk': 'activeStrategiesPk',
+            '#gsiPk': 'symbolStatusPk',
           },
           ExpressionAttributeValues: {
-            ':gsiPk': 'Strategy::Active',
+            ':gsiPk': 'Strategy::ABC::Active',
           },
         });
       });
@@ -159,22 +159,73 @@ describe('DdbStrategyRepository', () => {
   describe('Given a strategy status to update by its ID', () => {
     describe('When strategy is not found', () => {
       beforeEach(() => {
-        ddbClientMock.send.mockImplementationOnce(() => {
-          throw new Error('Error !');
-        });
+        ddbClientMock.send.mockImplementation(() => ({
+          Item: undefined,
+        }));
       });
 
       it('Then error is thrown', async () => {
         try {
-          await strategyRepository.updateStatusById('123', 'Active');
+          await strategyRepository.updateStatusById('123', 'Inactive');
           fail('An error should have been thrown');
         } catch (error) {
           expect(error).toBeDefined();
-          expect((error as Error).message).toEqual(`Unable to update strategy '123' status 'Active': Error !`);
+          expect((error as Error).message).toEqual(`Unable to find strategy with ID '123'`);
         }
 
         expect(ddbClientMock.send).toHaveBeenCalledTimes(1);
         const sendParams = ddbClientMock.send.mock.calls[0];
+        expect(sendParams.length).toEqual(1);
+        expect(sendParams[0].input).toEqual({
+          TableName: 'my-table',
+          Key: {
+            pk: 'Strategy::123',
+            sk: 'Details',
+          },
+          ProjectionExpression: '#data.symbol',
+          ExpressionAttributeNames: {
+            '#data': 'data',
+          },
+        });
+      });
+    });
+
+    describe('When strategy is found', () => {
+      let strategy: Strategy;
+
+      beforeEach(() => {
+        strategy = buildDefaultStrategy();
+        ddbClientMock.send.mockImplementationOnce(() => ({
+          Item: {
+            data: { ...strategy },
+          },
+        }));
+        ddbClientMock.send.mockImplementationOnce(() => ({
+          Attributes: {
+            data: { ...strategy },
+          },
+        }));
+      });
+
+      it('Then updated strategy is returned', async () => {
+        const result = await strategyRepository.updateStatusById('123', 'Inactive');
+        expect(result).toEqual(strategy);
+
+        expect(ddbClientMock.send).toHaveBeenCalledTimes(2);
+        let sendParams = ddbClientMock.send.mock.calls[0];
+        expect(sendParams.length).toEqual(1);
+        expect(sendParams[0].input).toEqual({
+          TableName: 'my-table',
+          Key: {
+            pk: 'Strategy::123',
+            sk: 'Details',
+          },
+          ProjectionExpression: '#data.symbol',
+          ExpressionAttributeNames: {
+            '#data': 'data',
+          },
+        });
+        sendParams = ddbClientMock.send.mock.calls[1];
         expect(sendParams.length).toEqual(1);
         expect(sendParams[0].input).toEqual({
           TableName: 'my-table',
@@ -186,136 +237,96 @@ describe('DdbStrategyRepository', () => {
           ExpressionAttributeNames: {
             '#data': 'data',
             '#status': 'status',
-            '#gsiPk': 'activeStrategiesPk',
-            '#gsiSk': 'activeStrategiesSk',
+            '#gsiPk': 'symbolStatusPk',
+            '#gsiSk': 'symbolStatusSk',
           },
           ExpressionAttributeValues: {
-            ':status': 'Active',
-            ':gsiPk': 'Strategy::Active',
+            ':status': 'Inactive',
+            ':gsiPk': `Strategy::${strategy.symbol}::Inactive`,
             ':gsiSk': '123',
           },
           ReturnValues: 'ALL_NEW',
         });
       });
     });
+  });
+});
 
-    describe('When strategy is found', () => {
-      let strategy: Strategy;
-
-      beforeEach(() => {
-        strategy = buildDefaultStrategy();
-        ddbClientMock.send.mockImplementation(() => ({
-          Attributes: {
-            data: { ...strategy },
-          },
-        }));
+describe('Given a strategy budget to update by its ID', () => {
+  describe('When strategy is not found', () => {
+    beforeEach(() => {
+      ddbClientMock.send.mockImplementation(() => {
+        throw new Error('Error !');
       });
+    });
 
-      it('Then updated strategy is returned', async () => {
-        const result = await strategyRepository.updateStatusById('123', 'Inactive');
-        expect(result).toEqual(strategy);
+    it('Then error is thrown', async () => {
+      try {
+        await strategyRepository.updateBudgetById('123', 1.5, -100);
+        fail('An error should have been thrown');
+      } catch (error) {
+        expect(error).toBeDefined();
+        expect((error as Error).message).toEqual(`Unable to update strategy '123' budget '1.5/-100': Error !`);
+      }
 
-        expect(ddbClientMock.send).toHaveBeenCalledTimes(1);
-        const sendParams = ddbClientMock.send.mock.calls[0];
-        expect(sendParams.length).toEqual(1);
-        expect(sendParams[0].input).toEqual({
-          TableName: 'my-table',
-          Key: {
-            pk: `Strategy::123`,
-            sk: 'Details',
-          },
-          UpdateExpression: 'SET #data.#status = :status REMOVE #gsiPk, #gsiSk',
-          ExpressionAttributeNames: {
-            '#data': 'data',
-            '#status': 'status',
-            '#gsiPk': 'activeStrategiesPk',
-            '#gsiSk': 'activeStrategiesSk',
-          },
-          ExpressionAttributeValues: {
-            ':status': 'Inactive',
-          },
-          ReturnValues: 'ALL_NEW',
-        });
+      expect(ddbClientMock.send).toHaveBeenCalledTimes(1);
+      const sendParams = ddbClientMock.send.mock.calls[0];
+      expect(sendParams.length).toEqual(1);
+      expect(sendParams[0].input).toEqual({
+        TableName: 'my-table',
+        Key: {
+          pk: `Strategy::123`,
+          sk: 'Details',
+        },
+        UpdateExpression:
+          'SET #data.budget.availableBaseAssetQuantity = #data.budget.availableBaseAssetQuantity + :baseAssetQuantity, #data.budget.profitAndLossBaseAssetQuantity = #data.budget.profitAndLossBaseAssetQuantity + :baseAssetQuantity, #data.budget.availableQuoteAssetQuantity = #data.budget.availableQuoteAssetQuantity + :quoteAssetQuantity, #data.budget.profitAndLossQuoteAssetQuantity = #data.budget.profitAndLossQuoteAssetQuantity + :quoteAssetQuantity',
+        ExpressionAttributeNames: {
+          '#data': 'data',
+        },
+        ExpressionAttributeValues: {
+          ':baseAssetQuantity': 1.5,
+          ':quoteAssetQuantity': -100,
+        },
+        ReturnValues: 'ALL_NEW',
       });
     });
   });
 
-  describe('Given a strategy budget to update by its ID', () => {
-    describe('When strategy is not found', () => {
-      beforeEach(() => {
-        ddbClientMock.send.mockImplementation(() => {
-          throw new Error('Error !');
-        });
-      });
+  describe('When strategy is found', () => {
+    let strategy: Strategy;
 
-      it('Then error is thrown', async () => {
-        try {
-          await strategyRepository.updateBudgetById('123', 1.5, -100);
-          fail('An error should have been thrown');
-        } catch (error) {
-          expect(error).toBeDefined();
-          expect((error as Error).message).toEqual(`Unable to update strategy '123' budget '1.5/-100': Error !`);
-        }
-
-        expect(ddbClientMock.send).toHaveBeenCalledTimes(1);
-        const sendParams = ddbClientMock.send.mock.calls[0];
-        expect(sendParams.length).toEqual(1);
-        expect(sendParams[0].input).toEqual({
-          TableName: 'my-table',
-          Key: {
-            pk: `Strategy::123`,
-            sk: 'Details',
-          },
-          UpdateExpression:
-            'SET #data.budget.availableBaseAssetQuantity = #data.budget.availableBaseAssetQuantity + :baseAssetQuantity, #data.budget.profitAndLossBaseAssetQuantity = #data.budget.profitAndLossBaseAssetQuantity + :baseAssetQuantity, #data.budget.availableQuoteAssetQuantity = #data.budget.availableQuoteAssetQuantity + :quoteAssetQuantity, #data.budget.profitAndLossQuoteAssetQuantity = #data.budget.profitAndLossQuoteAssetQuantity + :quoteAssetQuantity',
-          ExpressionAttributeNames: {
-            '#data': 'data',
-          },
-          ExpressionAttributeValues: {
-            ':baseAssetQuantity': 1.5,
-            ':quoteAssetQuantity': -100,
-          },
-          ReturnValues: 'ALL_NEW',
-        });
-      });
+    beforeEach(() => {
+      strategy = buildDefaultStrategy();
+      ddbClientMock.send.mockImplementation(() => ({
+        Attributes: {
+          data: { ...strategy },
+        },
+      }));
     });
 
-    describe('When strategy is found', () => {
-      let strategy: Strategy;
+    it('Then updated strategy is returned', async () => {
+      const result = await strategyRepository.updateBudgetById('123', 1.5, -100);
+      expect(result).toEqual(strategy);
 
-      beforeEach(() => {
-        strategy = buildDefaultStrategy();
-        ddbClientMock.send.mockImplementation(() => ({
-          Attributes: {
-            data: { ...strategy },
-          },
-        }));
-      });
-
-      it('Then updated strategy is returned', async () => {
-        const result = await strategyRepository.updateBudgetById('123', 1.5, -100);
-        expect(result).toEqual(strategy);
-
-        expect(ddbClientMock.send).toHaveBeenCalledTimes(1);
-        const sendParams = ddbClientMock.send.mock.calls[0];
-        expect(sendParams.length).toEqual(1);
-        expect(sendParams[0].input).toEqual({
-          TableName: 'my-table',
-          Key: {
-            pk: `Strategy::123`,
-            sk: 'Details',
-          },
-          UpdateExpression:
-            'SET #data.budget.availableBaseAssetQuantity = #data.budget.availableBaseAssetQuantity + :baseAssetQuantity, #data.budget.profitAndLossBaseAssetQuantity = #data.budget.profitAndLossBaseAssetQuantity + :baseAssetQuantity, #data.budget.availableQuoteAssetQuantity = #data.budget.availableQuoteAssetQuantity + :quoteAssetQuantity, #data.budget.profitAndLossQuoteAssetQuantity = #data.budget.profitAndLossQuoteAssetQuantity + :quoteAssetQuantity',
-          ExpressionAttributeNames: {
-            '#data': 'data',
-          },
-          ExpressionAttributeValues: {
-            ':baseAssetQuantity': 1.5,
-            ':quoteAssetQuantity': -100,
-          },
-          ReturnValues: 'ALL_NEW',
-        });
+      expect(ddbClientMock.send).toHaveBeenCalledTimes(1);
+      const sendParams = ddbClientMock.send.mock.calls[0];
+      expect(sendParams.length).toEqual(1);
+      expect(sendParams[0].input).toEqual({
+        TableName: 'my-table',
+        Key: {
+          pk: `Strategy::123`,
+          sk: 'Details',
+        },
+        UpdateExpression:
+          'SET #data.budget.availableBaseAssetQuantity = #data.budget.availableBaseAssetQuantity + :baseAssetQuantity, #data.budget.profitAndLossBaseAssetQuantity = #data.budget.profitAndLossBaseAssetQuantity + :baseAssetQuantity, #data.budget.availableQuoteAssetQuantity = #data.budget.availableQuoteAssetQuantity + :quoteAssetQuantity, #data.budget.profitAndLossQuoteAssetQuantity = #data.budget.profitAndLossQuoteAssetQuantity + :quoteAssetQuantity',
+        ExpressionAttributeNames: {
+          '#data': 'data',
+        },
+        ExpressionAttributeValues: {
+          ':baseAssetQuantity': 1.5,
+          ':quoteAssetQuantity': -100,
+        },
+        ReturnValues: 'ALL_NEW',
       });
     });
   });

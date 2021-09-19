@@ -8,7 +8,7 @@ const strategyPublisherMock = mocked(jest.genMockFromModule<StrategyPublisher>('
 
 let publishStrategyService: PublishStrategyService;
 beforeEach(() => {
-  strategyRepositoryMock.getAllIdsWithStatusActive = jest.fn();
+  strategyRepositoryMock.getAllIdsBySymbolAndActiveStatus = jest.fn();
   strategyPublisherMock.publishWithStatusActive = jest.fn();
 
   publishStrategyService = new PublishStrategyService(strategyRepositoryMock, strategyPublisherMock);
@@ -18,15 +18,16 @@ describe('PublishStrategyService', () => {
   describe('Given all active strategies to publish', () => {
     describe('When active strategies are not found', () => {
       beforeEach(() => {
-        strategyRepositoryMock.getAllIdsWithStatusActive.mockResolvedValue([]);
+        strategyRepositoryMock.getAllIdsBySymbolAndActiveStatus.mockResolvedValue([]);
       });
 
       it('Then nothing is published', async () => {
-        await publishStrategyService.publishAllWithStatusActive();
+        await publishStrategyService.publishAllBySymbolAndActiveStatus('ABC');
 
-        expect(strategyRepositoryMock.getAllIdsWithStatusActive).toHaveBeenCalledTimes(1);
-        const getAllIdsWithStatusActiveParams = strategyRepositoryMock.getAllIdsWithStatusActive.mock.calls[0];
-        expect(getAllIdsWithStatusActiveParams.length).toEqual(0);
+        expect(strategyRepositoryMock.getAllIdsBySymbolAndActiveStatus).toHaveBeenCalledTimes(1);
+        const getAllIdsWithStatusActiveParams = strategyRepositoryMock.getAllIdsBySymbolAndActiveStatus.mock.calls[0];
+        expect(getAllIdsWithStatusActiveParams.length).toEqual(1);
+        expect(getAllIdsWithStatusActiveParams[0]).toEqual('ABC');
 
         expect(strategyPublisherMock.publishWithStatusActive).toHaveBeenCalledTimes(0);
       });
@@ -34,15 +35,16 @@ describe('PublishStrategyService', () => {
 
     describe('When active strategies are found', () => {
       beforeEach(() => {
-        strategyRepositoryMock.getAllIdsWithStatusActive.mockResolvedValue(['1', '2', '3']);
+        strategyRepositoryMock.getAllIdsBySymbolAndActiveStatus.mockResolvedValue(['1', '2', '3']);
       });
 
       it('Then active strategies IDs are published one by one', async () => {
-        await publishStrategyService.publishAllWithStatusActive();
+        await publishStrategyService.publishAllBySymbolAndActiveStatus('ABC');
 
-        expect(strategyRepositoryMock.getAllIdsWithStatusActive).toHaveBeenCalledTimes(1);
-        const getAllIdsWithStatusActiveParams = strategyRepositoryMock.getAllIdsWithStatusActive.mock.calls[0];
-        expect(getAllIdsWithStatusActiveParams.length).toEqual(0);
+        expect(strategyRepositoryMock.getAllIdsBySymbolAndActiveStatus).toHaveBeenCalledTimes(1);
+        const getAllIdsWithStatusActiveParams = strategyRepositoryMock.getAllIdsBySymbolAndActiveStatus.mock.calls[0];
+        expect(getAllIdsWithStatusActiveParams.length).toEqual(1);
+        expect(getAllIdsWithStatusActiveParams[0]).toEqual('ABC');
 
         expect(strategyPublisherMock.publishWithStatusActive).toHaveBeenCalledTimes(3);
         let publishWithStatusActiveParams = strategyPublisherMock.publishWithStatusActive.mock.calls[0];

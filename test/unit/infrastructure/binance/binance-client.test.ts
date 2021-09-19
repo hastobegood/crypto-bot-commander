@@ -112,22 +112,22 @@ describe('BinanceClient', () => {
       });
 
       it('Then secrets are loaded only once', async () => {
-        await binanceClient.getSymbolCandlesticks('A', 'IA', 1);
-        await binanceClient.getSymbolCandlesticks('B', 'IB', 2);
-        await binanceClient.getSymbolCandlesticks('C', 'IC', 3);
+        await binanceClient.getSymbolCandlesticks('A', 123, 456, 'IA', 1);
+        await binanceClient.getSymbolCandlesticks('B', 123, 456, 'IB', 2);
+        await binanceClient.getSymbolCandlesticks('C', 123, 456, 'IC', 3);
 
         expect(smClientMock.send).toHaveBeenCalledTimes(1);
       });
 
       it('Then symbol candlesticks are returned', async () => {
-        const result = await binanceClient.getSymbolCandlesticks('A', 'I', 1);
+        const result = await binanceClient.getSymbolCandlesticks('A', 123, 456, 'I', 1);
         expect(result).toBeDefined();
         expect(result).toEqual(symbolCandlesticks);
 
         expect(axiosInstanceMock.get).toHaveBeenCalledTimes(1);
         const axiosGetParams = axiosInstanceMock.get.mock.calls[0];
         expect(axiosGetParams).toBeDefined();
-        expect(axiosGetParams[0]).toEqual('/v3/klines?symbol=A&interval=I&limit=1');
+        expect(axiosGetParams[0]).toEqual('/v3/klines?symbol=A&startTime=123&endTime=456&interval=I&limit=1');
       });
     });
 
@@ -138,7 +138,7 @@ describe('BinanceClient', () => {
 
       it('Then error is thrown', async () => {
         try {
-          await binanceClient.getSymbolCandlesticks('A', 'I', 1);
+          await binanceClient.getSymbolCandlesticks('A', 123, 456, 'I', 1);
           fail('An error should have been thrown');
         } catch (error) {
           expect(error).toBeDefined();
