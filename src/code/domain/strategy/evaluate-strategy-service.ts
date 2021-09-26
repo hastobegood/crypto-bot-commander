@@ -1,6 +1,6 @@
 import { logger } from '../../configuration/log/logger';
 import { getStepTemplateById, Strategy } from './model/strategy';
-import { StrategyStep, StrategyStepTemplate } from './model/strategy-step';
+import { CheckOrderStepInput, SendOrderStepOutput, StrategyStep, StrategyStepTemplate } from './model/strategy-step';
 import { StrategyStepService } from './step/strategy-step-service';
 import { StrategyStepRepository } from './step/strategy-step-repository';
 import { serializeError } from 'serialize-error';
@@ -18,12 +18,10 @@ export class EvaluateStrategyService {
     let lastStep = await this.strategyStepRepository.getLastByStrategyId(strategy.id);
     let stepTemplate = lastStep || getStepTemplateById(strategy, '1');
 
-    let stepSuccess = true;
-    while (stepSuccess) {
+    do {
       lastStep = await this.#processStep(strategy, stepTemplate, lastStep);
-      stepSuccess = lastStep.output.success;
-      stepTemplate = getStepTemplateById(strategy, lastStep.nextId);
-    }
+      stepTemplate = this.#getNextStepTemplate(strategy, lastStep);
+    } while (lastStep.output.success);
 
     return {
       success: !lastStep?.error,
@@ -70,5 +68,24 @@ export class EvaluateStrategyService {
       throw new Error(`Unsupported '${stepTemplate.type}' strategy step type`);
     }
     return stepService;
+  }
+
+  #getNextStepTemplate(strategy: Strategy, lastStep: StrategyStep): StrategyStepTemplate {
+    if (lastStep.type === 'SendOrder') {
+      const sendOrderStepOutput = lastStep.output as SendOrderStepOutput;
+      const checkOrderStepInput: CheckOrderStepInput = {
+        id: sendOrderStepOutput.id,
+        externalId: sendOrderStepOutput.externalId,
+      };
+
+      return {
+        id: `${lastStep.id}`,
+        type: 'CheckOrder',
+        input: checkOrderStepInput,
+        nextId: lastStep.nextId,
+      };
+    }
+
+    return getStepTemplateById(strategy, lastStep.nextId);
   }
 }

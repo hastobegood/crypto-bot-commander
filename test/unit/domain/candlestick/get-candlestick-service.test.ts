@@ -23,6 +23,51 @@ describe('GetCandlestickService', () => {
     MockDate.set(date);
   });
 
+  describe('Given last candlestick to retrieve', () => {
+    beforeEach(() => {
+      date = new Date('2021-09-13T16:38:10.500Z');
+      MockDate.set(date);
+    });
+
+    describe('When last candlestick is not found', () => {
+      beforeEach(() => {
+        candlesticks = [];
+        candlestickRepositoryMock.getAllBySymbol.mockResolvedValue(candlesticks);
+      });
+
+      it('Then null is returned', async () => {
+        const result = await getCandlestickService.getLastBySymbol('ABC');
+        expect(result).toBeNull();
+
+        expect(candlestickRepositoryMock.getAllBySymbol).toHaveBeenCalledTimes(1);
+        const getAllBySymbolParams = candlestickRepositoryMock.getAllBySymbol.mock.calls[0];
+        expect(getAllBySymbolParams.length).toEqual(3);
+        expect(getAllBySymbolParams[0]).toEqual('ABC');
+        expect(getAllBySymbolParams[1]).toEqual(new Date('2021-09-13T16:38:00.000Z').valueOf());
+        expect(getAllBySymbolParams[2]).toEqual(new Date('2021-09-13T16:38:00.000Z').valueOf());
+      });
+    });
+
+    describe('When last candlestick is found', () => {
+      beforeEach(() => {
+        candlesticks = buildCandlesticksFromTo(new Date('2021-09-13T16:38:00.000Z'), new Date('2021-09-13T16:38:00.000Z'));
+        candlestickRepositoryMock.getAllBySymbol.mockResolvedValue(candlesticks);
+      });
+
+      it('Then last candlestick is returned', async () => {
+        const result = await getCandlestickService.getLastBySymbol('ABC');
+        expect(result).toEqual(candlesticks[0]);
+
+        expect(candlestickRepositoryMock.getAllBySymbol).toHaveBeenCalledTimes(1);
+        const getAllBySymbolParams = candlestickRepositoryMock.getAllBySymbol.mock.calls[0];
+        expect(getAllBySymbolParams.length).toEqual(3);
+        expect(getAllBySymbolParams[0]).toEqual('ABC');
+        expect(getAllBySymbolParams[1]).toEqual(new Date('2021-09-13T16:38:00.000Z').valueOf());
+        expect(getAllBySymbolParams[2]).toEqual(new Date('2021-09-13T16:38:00.000Z').valueOf());
+      });
+    });
+  });
+
   describe('Given candlesticks to retrieve for the last 60 periods of 1 minute interval', () => {
     beforeEach(() => {
       date = new Date('2021-09-13T16:38:10.500Z');

@@ -11,10 +11,9 @@ export interface Strategy {
   symbol: string;
   status: StrategyStatus;
   template: StrategyTemplate;
-  budget: StrategyBudget;
 }
 
-export interface StrategyBudget {
+export interface StrategyWallet {
   initialBaseAssetQuantity: number;
   availableBaseAssetQuantity: number;
   profitAndLossBaseAssetQuantity: number;

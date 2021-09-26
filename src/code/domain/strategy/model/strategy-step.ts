@@ -1,4 +1,4 @@
-export type StrategyStepType = 'SendOrder' | 'MarketEvolution' | 'MovingAverageCrossover';
+export type StrategyStepType = 'SendOrder' | 'CheckOrder' | 'MarketEvolution' | 'MovingAverageCrossover';
 
 export interface StrategyStepTemplate {
   id: string;
@@ -63,21 +63,40 @@ export interface MovingAverageCrossoverStepOutput extends StrategyStepOutput {
   longTermPrice: number;
 }
 
-export type SendOrderSource = 'Budget' | 'LastOrder';
+export type SendOrderSource = 'Wallet' | 'LastOrder';
 export type SendOrderSide = 'Buy' | 'Sell';
-export type SendOrderType = 'Market';
+export type SendOrderType = 'Market' | 'Limit';
 
 export interface SendOrderStepInput extends StrategyStepInput {
   source: SendOrderSource;
   side: SendOrderSide;
   type: SendOrderType;
   percentage: number;
+  deviation?: number;
 }
 
 export interface SendOrderStepOutput extends StrategyStepOutput {
   id: string;
   externalId: string;
   status: string;
+  externalStatus: string;
+  baseAssetQuantity?: number;
+  quoteAssetQuantity?: number;
+  priceLimit?: number;
+}
+
+export type CheckOrderSide = 'Buy' | 'Sell';
+
+export interface CheckOrderStepInput extends StrategyStepInput {
+  id: string;
+  externalId: string;
+}
+
+export interface CheckOrderStepOutput extends StrategyStepOutput {
+  id: string;
+  side: CheckOrderSide;
+  status: string;
+  externalId: string;
   externalStatus: string;
   quantity?: number;
   price?: number;

@@ -10,11 +10,16 @@ import { HttpOrderRepository } from '../code/infrastructure/order/http-order-rep
 import { CreateOrderService } from '../code/domain/order/create-order-service';
 import { DdbDcaTradingRepository } from '../code/infrastructure/dca-trading/ddb-dca-trading-repository';
 import { DcaTradingEventScheduler } from '../code/application/dca-trading/dca-trading-event-scheduler';
+import { HttpTickerRepository } from '../code/infrastructure/ticker/http-ticker-repository';
+import { GetTickerService } from '../code/domain/ticker/get-ticker-service';
 
 const binanceClient = new BinanceClient(smClient, process.env.BINANCE_SECRET_NAME, process.env.BINANCE_URL);
 
+const tickerRepository = new HttpTickerRepository(binanceClient);
+const getTickerService = new GetTickerService(tickerRepository);
+
 const orderRepository = new HttpOrderRepository(binanceClient);
-const createOrderService = new CreateOrderService(orderRepository);
+const createOrderService = new CreateOrderService(getTickerService, orderRepository);
 
 const dcaTradingConfig = JSON.parse(process.env.DCA_TRADING_CONFIG) as DcaTradingConfig;
 const dcaTradingRepository = new DdbDcaTradingRepository(process.env.TRADING_TABLE_NAME, ddbClient);

@@ -72,7 +72,7 @@ describe('ProcessDcaTradingService', () => {
         expect(createOrderParams.type).toEqual('Market');
         expect(createOrderParams.baseAssetQuantity).toBeUndefined();
         expect(createOrderParams.quoteAssetQuantity).toEqual(dcaTradingConfig.quoteAssetQuantity);
-        expect(createOrderParams.priceThreshold).toBeUndefined();
+        expect(createOrderParams.priceLimit).toBeUndefined();
 
         expect(dcaTradingRepositoryMock.getLast).toHaveBeenCalledTimes(0);
 
@@ -162,7 +162,7 @@ describe('ProcessDcaTradingService', () => {
         expect(createOrderParams!.type).toEqual('Market');
         expect(createOrderParams!.baseAssetQuantity).toBeUndefined();
         expect(createOrderParams!.quoteAssetQuantity).toEqual(dcaTradingConfig.quoteAssetQuantity);
-        expect(createOrderParams!.priceThreshold).toBeUndefined();
+        expect(createOrderParams!.priceLimit).toBeUndefined();
 
         createOrderParams = getCreateOrder(createOrdersParams, 'ASSET1#BASE');
         expect(createOrderParams).toBeDefined();
@@ -170,7 +170,7 @@ describe('ProcessDcaTradingService', () => {
         expect(createOrderParams!.type).toEqual('Market');
         expect(createOrderParams!.baseAssetQuantity).toBeUndefined();
         expect(createOrderParams!.quoteAssetQuantity).toEqual(dcaTradingConfigTradeAsset1.percentage * baseOrder.executedAssetQuantity!);
-        expect(createOrderParams!.priceThreshold).toBeUndefined();
+        expect(createOrderParams!.priceLimit).toBeUndefined();
 
         createOrderParams = getCreateOrder(createOrdersParams, 'ASSET2#BASE');
         expect(createOrderParams).toBeDefined();
@@ -178,7 +178,7 @@ describe('ProcessDcaTradingService', () => {
         expect(createOrderParams!.type).toEqual('Market');
         expect(createOrderParams!.baseAssetQuantity).toBeUndefined();
         expect(createOrderParams!.quoteAssetQuantity).toEqual(dcaTradingConfigTradeAsset2.percentage * baseOrder.executedAssetQuantity!);
-        expect(createOrderParams!.priceThreshold).toBeUndefined();
+        expect(createOrderParams!.priceLimit).toBeUndefined();
 
         createOrderParams = getCreateOrder(createOrdersParams, 'ASSET3#BASE');
         expect(createOrderParams).toBeDefined();
@@ -186,7 +186,7 @@ describe('ProcessDcaTradingService', () => {
         expect(createOrderParams!.type).toEqual('Market');
         expect(createOrderParams!.baseAssetQuantity).toBeUndefined();
         expect(createOrderParams!.quoteAssetQuantity).toEqual(dcaTradingConfigTradeAsset3.percentage * baseOrder.executedAssetQuantity!);
-        expect(createOrderParams!.priceThreshold).toBeUndefined();
+        expect(createOrderParams!.priceLimit).toBeUndefined();
 
         expect(dcaTradingRepositoryMock.getLast).toHaveBeenCalledTimes(0);
 
@@ -282,7 +282,7 @@ describe('ProcessDcaTradingService', () => {
         expect(createOrderParams!.type).toEqual('Market');
         expect(createOrderParams!.baseAssetQuantity).toBeUndefined();
         expect(createOrderParams!.quoteAssetQuantity).toEqual(dcaTradingConfig.quoteAssetQuantity);
-        expect(createOrderParams!.priceThreshold).toBeUndefined();
+        expect(createOrderParams!.priceLimit).toBeUndefined();
 
         createOrderParams = getCreateOrder(createOrdersParams, 'ASSET1#BASE');
         expect(createOrderParams).toBeDefined();
@@ -290,7 +290,7 @@ describe('ProcessDcaTradingService', () => {
         expect(createOrderParams!.type).toEqual('Market');
         expect(createOrderParams!.baseAssetQuantity).toBeUndefined();
         expect(createOrderParams!.quoteAssetQuantity).toEqual(dcaTradingConfigTradeAsset1.percentage * baseOrder.executedAssetQuantity!);
-        expect(createOrderParams!.priceThreshold).toBeUndefined();
+        expect(createOrderParams!.priceLimit).toBeUndefined();
 
         createOrderParams = getCreateOrder(createOrdersParams, 'ASSET2#BASE');
         expect(createOrderParams).toBeDefined();
@@ -298,7 +298,7 @@ describe('ProcessDcaTradingService', () => {
         expect(createOrderParams!.type).toEqual('Market');
         expect(createOrderParams!.baseAssetQuantity).toBeUndefined();
         expect(createOrderParams!.quoteAssetQuantity).toEqual(dcaTradingConfigTradeAsset2.percentage * baseOrder.executedAssetQuantity!);
-        expect(createOrderParams!.priceThreshold).toBeUndefined();
+        expect(createOrderParams!.priceLimit).toBeUndefined();
 
         createOrderParams = getCreateOrder(createOrdersParams, 'ASSET3#BASE');
         expect(createOrderParams).toBeDefined();
@@ -306,7 +306,7 @@ describe('ProcessDcaTradingService', () => {
         expect(createOrderParams!.type).toEqual('Market');
         expect(createOrderParams!.baseAssetQuantity).toBeUndefined();
         expect(createOrderParams!.quoteAssetQuantity).toEqual(dcaTradingConfigTradeAsset3.percentage * baseOrder.executedAssetQuantity!);
-        expect(createOrderParams!.priceThreshold).toBeUndefined();
+        expect(createOrderParams!.priceLimit).toBeUndefined();
 
         expect(dcaTradingRepositoryMock.getLast).toHaveBeenCalledTimes(0);
 
@@ -405,7 +405,7 @@ describe('ProcessDcaTradingService', () => {
         expect(createOrderParams!.type).toEqual('Market');
         expect(createOrderParams!.baseAssetQuantity).toBeUndefined();
         expect(createOrderParams!.quoteAssetQuantity).toEqual(dcaTradingConfig.quoteAssetQuantity);
-        expect(createOrderParams!.priceThreshold).toBeUndefined();
+        expect(createOrderParams!.priceLimit).toBeUndefined();
 
         createOrderParams = getCreateOrder(createOrdersParams, 'ASSET1#BASE');
         expect(createOrderParams).toBeDefined();
@@ -413,7 +413,7 @@ describe('ProcessDcaTradingService', () => {
         expect(createOrderParams!.type).toEqual('Market');
         expect(createOrderParams!.baseAssetQuantity).toBeUndefined();
         expect(createOrderParams!.quoteAssetQuantity).toEqual(dcaTradingConfigTradeAsset1.percentage * baseOrder.executedAssetQuantity!);
-        expect(createOrderParams!.priceThreshold).toBeUndefined();
+        expect(createOrderParams!.priceLimit).toBeUndefined();
 
         createOrderParams = getCreateOrder(createOrdersParams, 'ASSET2#BASE');
         expect(createOrderParams).toBeDefined();
@@ -421,7 +421,7 @@ describe('ProcessDcaTradingService', () => {
         expect(createOrderParams!.type).toEqual('Market');
         expect(createOrderParams!.baseAssetQuantity).toBeUndefined();
         expect(createOrderParams!.quoteAssetQuantity).toEqual(dcaTradingConfigTradeAsset2.percentage * baseOrder.executedAssetQuantity!);
-        expect(createOrderParams!.priceThreshold).toBeUndefined();
+        expect(createOrderParams!.priceLimit).toBeUndefined();
 
         createOrderParams = getCreateOrder(createOrdersParams, 'ASSET3#BASE');
         expect(createOrderParams).toBeDefined();
@@ -429,7 +429,7 @@ describe('ProcessDcaTradingService', () => {
         expect(createOrderParams!.type).toEqual('Market');
         expect(createOrderParams!.baseAssetQuantity).toBeUndefined();
         expect(createOrderParams!.quoteAssetQuantity).toEqual(dcaTradingConfigTradeAsset3.percentage * baseOrder.executedAssetQuantity!);
-        expect(createOrderParams!.priceThreshold).toBeUndefined();
+        expect(createOrderParams!.priceLimit).toBeUndefined();
 
         expect(dcaTradingRepositoryMock.getLast).toHaveBeenCalledTimes(0);
 
@@ -512,7 +512,7 @@ describe('ProcessDcaTradingService', () => {
         expect(createOrderParams!.type).toEqual('Market');
         expect(createOrderParams!.baseAssetQuantity).toBeUndefined();
         expect(createOrderParams!.quoteAssetQuantity).toEqual(dcaTradingConfig.quoteAssetQuantity);
-        expect(createOrderParams!.priceThreshold).toBeUndefined();
+        expect(createOrderParams!.priceLimit).toBeUndefined();
 
         createOrderParams = getCreateOrder(createOrdersParams, 'ASSET1#BASE');
         expect(createOrderParams).toBeDefined();
@@ -520,7 +520,7 @@ describe('ProcessDcaTradingService', () => {
         expect(createOrderParams!.type).toEqual('Market');
         expect(createOrderParams!.baseAssetQuantity).toBeUndefined();
         expect(createOrderParams!.quoteAssetQuantity).toEqual(dcaTradingConfigTradeAsset.percentage * baseOrder.executedAssetQuantity!);
-        expect(createOrderParams!.priceThreshold).toBeUndefined();
+        expect(createOrderParams!.priceLimit).toBeUndefined();
 
         expect(dcaTradingRepositoryMock.getLast).toHaveBeenCalledTimes(1);
 
@@ -596,7 +596,7 @@ describe('ProcessDcaTradingService', () => {
         expect(createOrderParams!.type).toEqual('Market');
         expect(createOrderParams!.baseAssetQuantity).toBeUndefined();
         expect(createOrderParams!.quoteAssetQuantity).toEqual(dcaTradingConfig.quoteAssetQuantity);
-        expect(createOrderParams!.priceThreshold).toBeUndefined();
+        expect(createOrderParams!.priceLimit).toBeUndefined();
 
         createOrderParams = getCreateOrder(createOrdersParams, 'ASSET1#BASE');
         expect(createOrderParams).toBeDefined();
@@ -604,7 +604,7 @@ describe('ProcessDcaTradingService', () => {
         expect(createOrderParams!.type).toEqual('Market');
         expect(createOrderParams!.baseAssetQuantity).toBeUndefined();
         expect(createOrderParams!.quoteAssetQuantity).toEqual(dcaTradingConfigTradeAsset.percentage * baseOrder.executedAssetQuantity!);
-        expect(createOrderParams!.priceThreshold).toBeUndefined();
+        expect(createOrderParams!.priceLimit).toBeUndefined();
 
         expect(dcaTradingRepositoryMock.getLast).toHaveBeenCalledTimes(1);
 
@@ -681,7 +681,7 @@ describe('ProcessDcaTradingService', () => {
         expect(createOrderParams!.type).toEqual('Market');
         expect(createOrderParams!.baseAssetQuantity).toBeUndefined();
         expect(createOrderParams!.quoteAssetQuantity).toEqual(dcaTradingConfig.quoteAssetQuantity);
-        expect(createOrderParams!.priceThreshold).toBeUndefined();
+        expect(createOrderParams!.priceLimit).toBeUndefined();
 
         createOrderParams = getCreateOrder(createOrdersParams, 'ASSET2#BASE');
         expect(createOrderParams).toBeDefined();
@@ -689,7 +689,7 @@ describe('ProcessDcaTradingService', () => {
         expect(createOrderParams!.type).toEqual('Market');
         expect(createOrderParams!.baseAssetQuantity).toBeUndefined();
         expect(createOrderParams!.quoteAssetQuantity).toEqual(dcaTradingConfigTradeAsset.percentage * baseOrder.executedAssetQuantity!);
-        expect(createOrderParams!.priceThreshold).toBeUndefined();
+        expect(createOrderParams!.priceLimit).toBeUndefined();
 
         expect(dcaTradingRepositoryMock.getLast).toHaveBeenCalledTimes(1);
 
@@ -766,7 +766,7 @@ describe('ProcessDcaTradingService', () => {
         expect(createOrderParams!.type).toEqual('Market');
         expect(createOrderParams!.baseAssetQuantity).toBeUndefined();
         expect(createOrderParams!.quoteAssetQuantity).toEqual(dcaTradingConfig.quoteAssetQuantity);
-        expect(createOrderParams!.priceThreshold).toBeUndefined();
+        expect(createOrderParams!.priceLimit).toBeUndefined();
 
         createOrderParams = getCreateOrder(createOrdersParams, 'ASSET3#BASE');
         expect(createOrderParams).toBeDefined();
@@ -774,7 +774,7 @@ describe('ProcessDcaTradingService', () => {
         expect(createOrderParams!.type).toEqual('Market');
         expect(createOrderParams!.baseAssetQuantity).toBeUndefined();
         expect(createOrderParams!.quoteAssetQuantity).toEqual(dcaTradingConfigTradeAsset.percentage * baseOrder.executedAssetQuantity!);
-        expect(createOrderParams!.priceThreshold).toBeUndefined();
+        expect(createOrderParams!.priceLimit).toBeUndefined();
 
         expect(dcaTradingRepositoryMock.getLast).toHaveBeenCalledTimes(1);
 
@@ -851,7 +851,7 @@ describe('ProcessDcaTradingService', () => {
         expect(createOrderParams!.type).toEqual('Market');
         expect(createOrderParams!.baseAssetQuantity).toBeUndefined();
         expect(createOrderParams!.quoteAssetQuantity).toEqual(dcaTradingConfig.quoteAssetQuantity);
-        expect(createOrderParams!.priceThreshold).toBeUndefined();
+        expect(createOrderParams!.priceLimit).toBeUndefined();
 
         createOrderParams = getCreateOrder(createOrdersParams, 'ASSET1#BASE');
         expect(createOrderParams).toBeDefined();
@@ -859,7 +859,7 @@ describe('ProcessDcaTradingService', () => {
         expect(createOrderParams!.type).toEqual('Market');
         expect(createOrderParams!.baseAssetQuantity).toBeUndefined();
         expect(createOrderParams!.quoteAssetQuantity).toEqual(dcaTradingConfigTradeAsset.percentage * baseOrder.executedAssetQuantity!);
-        expect(createOrderParams!.priceThreshold).toBeUndefined();
+        expect(createOrderParams!.priceLimit).toBeUndefined();
 
         expect(dcaTradingRepositoryMock.getLast).toHaveBeenCalledTimes(1);
 

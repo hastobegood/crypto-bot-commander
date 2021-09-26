@@ -22,14 +22,22 @@ import { MovingAverageCrossoverStepService } from '../code/domain/strategy/step/
 import { MovingAverageService } from '../code/domain/technical-analysis/moving-average-service';
 import { SqsStrategyStepPublisher } from '../code/infrastructure/strategy/step/sqs-strategy-step-publisher';
 import { DdbCandlestickRepository } from '../code/infrastructure/candlestick/ddb-candlestick-repository';
+import { CheckOrderStepService } from '../code/domain/strategy/step/check-order-step-service';
+import { StatusOrderService } from '../code/domain/order/status-order-service';
+import { HttpTickerRepository } from '../code/infrastructure/ticker/http-ticker-repository';
+import { GetTickerService } from '../code/domain/ticker/get-ticker-service';
 
 const binanceClient = new BinanceClient(smClient, process.env.BINANCE_SECRET_NAME, process.env.BINANCE_URL);
 
 const candlestickRepository = new DdbCandlestickRepository(process.env.CANDLESTICK_TABLE_NAME, ddbClient);
 const getCandlestickService = new GetCandlestickService(candlestickRepository);
 
+const tickerRepository = new HttpTickerRepository(binanceClient);
+const getTickerService = new GetTickerService(tickerRepository);
+
 const orderRepository = new HttpOrderRepository(binanceClient);
-const createOrderService = new CreateOrderService(orderRepository);
+const createOrderService = new CreateOrderService(getTickerService, orderRepository);
+const statusOrderService = new StatusOrderService(orderRepository);
 
 const strategyRepository = new DdbStrategyRepository(process.env.STRATEGY_TABLE_NAME, ddbClient);
 const getStrategyService = new GetStrategyService(strategyRepository);
@@ -41,8 +49,9 @@ const marketEvolutionService = new MarketEvolutionService();
 const marketEvolutionStepService = new MarketEvolutionStepService(getCandlestickService, marketEvolutionService, strategyStepRepository);
 const movingAverageService = new MovingAverageService();
 const movingAverageCrossoverService = new MovingAverageCrossoverStepService(getCandlestickService, movingAverageService);
-const sendOrderStepService = new SendOrderStepService(createOrderService, strategyStepRepository);
-const evaluateStrategyService = new EvaluateStrategyService([marketEvolutionStepService, movingAverageCrossoverService, sendOrderStepService], strategyStepRepository, strategyStepPublisher);
+const sendOrderStepService = new SendOrderStepService(getStrategyService, createOrderService, getCandlestickService, strategyStepRepository);
+const checkOrderStepService = new CheckOrderStepService(statusOrderService, updateStrategyService);
+const evaluateStrategyService = new EvaluateStrategyService([marketEvolutionStepService, movingAverageCrossoverService, sendOrderStepService, checkOrderStepService], strategyStepRepository, strategyStepPublisher);
 
 const evaluateStrategyMessageConsumer = new EvaluateStrategyMessageConsumer(getStrategyService, updateStrategyService, evaluateStrategyService);
 

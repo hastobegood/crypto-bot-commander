@@ -5,6 +5,7 @@ import { MarketEvolutionStepService } from '../../../../src/code/domain/strategy
 import { SendOrderStepService } from '../../../../src/code/domain/strategy/step/send-order-step-service';
 import { StrategyStepRepository } from '../../../../src/code/domain/strategy/step/strategy-step-repository';
 import {
+  buildDefaultCheckOrderStepOutput,
   buildDefaultMarketEvolutionStepInput,
   buildDefaultMarketEvolutionStepOutput,
   buildDefaultSendOrderStepInput,
@@ -12,15 +13,17 @@ import {
   buildStrategyStep,
   buildStrategyStepTemplate,
 } from '../../../builders/domain/strategy/strategy-step-test-builder';
-import { MarketEvolutionStepOutput, SendOrderStepOutput, StrategyStep } from '../../../../src/code/domain/strategy/model/strategy-step';
+import { CheckOrderStepOutput, MarketEvolutionStepOutput, SendOrderStepOutput, StrategyStep } from '../../../../src/code/domain/strategy/model/strategy-step';
 import MockDate from 'mockdate';
 import { EvaluateStrategyService } from '../../../../src/code/domain/strategy/evaluate-strategy-service';
 import { stringContaining } from 'expect/build/asymmetricMatchers';
 import { StrategyStepPublisher } from '../../../../src/code/domain/strategy/step/strategy-step-publisher';
+import { CheckOrderStepService } from '../../../../src/code/domain/strategy/step/check-order-step-service';
 
 const marketEvolutionStepServiceMock = mocked(jest.genMockFromModule<MarketEvolutionStepService>('../../../../src/code/domain/strategy/step/market-evolution-step-service'), true);
 const sendOrderStepServiceMock = mocked(jest.genMockFromModule<SendOrderStepService>('../../../../src/code/domain/strategy/step/send-order-step-service'), true);
-const strategyStepServicesMocks = [marketEvolutionStepServiceMock, sendOrderStepServiceMock];
+const checkOrderStepServiceMock = mocked(jest.genMockFromModule<CheckOrderStepService>('../../../../src/code/domain/strategy/step/check-order-step-service'), true);
+const strategyStepServicesMocks = [marketEvolutionStepServiceMock, sendOrderStepServiceMock, checkOrderStepServiceMock];
 const strategyStepRepositoryMock = mocked(jest.genMockFromModule<StrategyStepRepository>('../../../../src/code/domain/strategy/step/strategy-step-repository'), true);
 const strategyStepPublisherMock = mocked(jest.genMockFromModule<StrategyStepPublisher>('../../../../src/code/domain/strategy/step/strategy-step-publisher'), true);
 
@@ -181,6 +184,7 @@ describe('EvaluateStrategyService', () => {
           expect(publishProcessedParams[0]).toEqual(saveParams[0]);
 
           expect(marketEvolutionStepServiceMock.process).toHaveBeenCalledTimes(0);
+          expect(checkOrderStepServiceMock.process).toHaveBeenCalledTimes(0);
         });
       });
 
@@ -239,6 +243,7 @@ describe('EvaluateStrategyService', () => {
           expect(publishProcessedParams[0]).toEqual(saveParams[0]);
 
           expect(marketEvolutionStepServiceMock.process).toHaveBeenCalledTimes(0);
+          expect(checkOrderStepServiceMock.process).toHaveBeenCalledTimes(0);
         });
       });
 
@@ -246,8 +251,10 @@ describe('EvaluateStrategyService', () => {
         let step1Output1: MarketEvolutionStepOutput;
         let step1Output2: MarketEvolutionStepOutput;
         let step2Output1: SendOrderStepOutput;
+        let step2Output2: CheckOrderStepOutput;
         let step3Output1: MarketEvolutionStepOutput;
         let step4Output1: SendOrderStepOutput;
+        let step4Output2: CheckOrderStepOutput;
 
         beforeEach(() => {
           strategy.template = {
@@ -260,8 +267,10 @@ describe('EvaluateStrategyService', () => {
           step1Output1 = buildDefaultMarketEvolutionStepOutput(true);
           step1Output2 = buildDefaultMarketEvolutionStepOutput(false);
           step2Output1 = buildDefaultSendOrderStepOutput(true);
+          step2Output2 = buildDefaultCheckOrderStepOutput(true);
           step3Output1 = buildDefaultMarketEvolutionStepOutput(true);
           step4Output1 = buildDefaultSendOrderStepOutput(true);
+          step4Output2 = buildDefaultCheckOrderStepOutput(true);
 
           strategyStepRepositoryMock.getLastByStrategyId.mockResolvedValue(null);
           strategyStepRepositoryMock.save.mockImplementation((step) => Promise.resolve(step));
@@ -271,6 +280,9 @@ describe('EvaluateStrategyService', () => {
 
           sendOrderStepServiceMock.getType.mockReturnValue('SendOrder');
           sendOrderStepServiceMock.process.mockResolvedValueOnce(step2Output1).mockResolvedValueOnce(step4Output1);
+
+          checkOrderStepServiceMock.getType.mockReturnValue('CheckOrder');
+          checkOrderStepServiceMock.process.mockResolvedValueOnce(step2Output2).mockResolvedValueOnce(step4Output2);
         });
 
         it('Then strategy is evaluated until success output is false', async () => {
@@ -308,7 +320,23 @@ describe('EvaluateStrategyService', () => {
           expect(sendOrderProcessParams[0]).toEqual(strategy);
           expect(sendOrderProcessParams[1]).toEqual(strategy.template['4'].input);
 
-          expect(strategyStepRepositoryMock.save).toHaveBeenCalledTimes(5);
+          expect(checkOrderStepServiceMock.process).toHaveBeenCalledTimes(2);
+          let checkOrderProcessParams = checkOrderStepServiceMock.process.mock.calls[0];
+          expect(checkOrderProcessParams.length).toEqual(2);
+          expect(checkOrderProcessParams[0]).toEqual(strategy);
+          expect(checkOrderProcessParams[1]).toEqual({
+            id: step2Output1.id,
+            externalId: step2Output1.externalId,
+          });
+          checkOrderProcessParams = checkOrderStepServiceMock.process.mock.calls[1];
+          expect(checkOrderProcessParams.length).toEqual(2);
+          expect(checkOrderProcessParams[0]).toEqual(strategy);
+          expect(checkOrderProcessParams[1]).toEqual({
+            id: step4Output1.id,
+            externalId: step4Output1.externalId,
+          });
+
+          expect(strategyStepRepositoryMock.save).toHaveBeenCalledTimes(7);
 
           let saveParams = strategyStepRepositoryMock.save.mock.calls[0];
           expect(saveParams.length).toEqual(1);
@@ -333,6 +361,22 @@ describe('EvaluateStrategyService', () => {
           saveParams = strategyStepRepositoryMock.save.mock.calls[2];
           expect(saveParams.length).toEqual(1);
           expect(saveParams[0]).toEqual({
+            id: `${strategy.template['2'].id}`,
+            type: 'CheckOrder',
+            input: {
+              id: step2Output1.id,
+              externalId: step2Output1.externalId,
+            },
+            nextId: strategy.template['2'].nextId,
+            strategyId: strategy.id,
+            output: step2Output2,
+            creationDate: date,
+            executionStartDate: date,
+            executionEndDate: date,
+          });
+          saveParams = strategyStepRepositoryMock.save.mock.calls[3];
+          expect(saveParams.length).toEqual(1);
+          expect(saveParams[0]).toEqual({
             ...strategy.template['3'],
             strategyId: strategy.id,
             output: step3Output1,
@@ -340,7 +384,7 @@ describe('EvaluateStrategyService', () => {
             executionStartDate: date,
             executionEndDate: date,
           });
-          saveParams = strategyStepRepositoryMock.save.mock.calls[3];
+          saveParams = strategyStepRepositoryMock.save.mock.calls[4];
           expect(saveParams.length).toEqual(1);
           expect(saveParams[0]).toEqual({
             ...strategy.template['4'],
@@ -350,7 +394,23 @@ describe('EvaluateStrategyService', () => {
             executionStartDate: date,
             executionEndDate: date,
           });
-          saveParams = strategyStepRepositoryMock.save.mock.calls[4];
+          saveParams = strategyStepRepositoryMock.save.mock.calls[5];
+          expect(saveParams.length).toEqual(1);
+          expect(saveParams[0]).toEqual({
+            id: `${strategy.template['4'].id}`,
+            type: 'CheckOrder',
+            input: {
+              id: step4Output1.id,
+              externalId: step4Output1.externalId,
+            },
+            nextId: strategy.template['4'].nextId,
+            strategyId: strategy.id,
+            output: step4Output2,
+            creationDate: date,
+            executionStartDate: date,
+            executionEndDate: date,
+          });
+          saveParams = strategyStepRepositoryMock.save.mock.calls[6];
           expect(saveParams.length).toEqual(1);
           expect(saveParams[0]).toEqual({
             ...strategy.template['1'],

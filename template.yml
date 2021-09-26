@@ -221,32 +221,6 @@ Resources:
         - SQSSendMessagePolicy:
             QueueName: !GetAtt ProcessedStrategyStepQueue.QueueName
 
-  UpdateStrategyBudgetFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      Description: Update strategy budget function
-      CodeUri: dist/webpack/update-strategy-budget-handler
-      Handler: app.handler
-      EventInvokeConfig:
-        MaximumRetryAttempts: 0
-      Environment:
-        Variables:
-          STRATEGY_TABLE_NAME: !Ref StrategyTable
-      Events:
-        SqsEvent:
-          Type: SQS
-          Properties:
-            Enabled: true
-            Queue: !GetAtt ProcessedStrategyStepQueue.Arn
-            BatchSize: 1
-      Policies:
-        - DynamoDBReadPolicy:
-            TableName: !Ref StrategyTable
-        - DynamoDBWritePolicy:
-            TableName: !Ref StrategyTable
-        - SQSPollerPolicy:
-            QueueName: !GetAtt ActiveStrategiesQueue.QueueName
-
   TradingTable:
     Type: AWS::DynamoDB::Table
     Properties:
@@ -373,13 +347,6 @@ Outputs:
   EvaluateStrategyFunctionArn:
     Description: Evaluate strategy function ARN
     Value: !GetAtt EvaluateStrategyFunction.Arn
-
-  UpdateStrategyBudgetFunctionName:
-    Description: Update strategy budget function name
-    Value: !Ref UpdateStrategyBudgetFunction
-  UpdateStrategyBudgetFunctionArn:
-    Description: Update strategy budget function ARN
-    Value: !GetAtt UpdateStrategyBudgetFunction.Arn
 
   TradingTableName:
     Description: Trading table name

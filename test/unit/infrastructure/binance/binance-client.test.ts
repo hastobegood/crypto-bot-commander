@@ -11,6 +11,8 @@ import { BinanceOrder } from '../../../../src/code/infrastructure/binance/model/
 import { buildDefaultBinanceOrder } from '../../../builders/infrastructure/binance/binance-order-test-builder';
 import { BinanceSymbolCandlestick } from '../../../../src/code/infrastructure/binance/model/binance-candlestick';
 import { buildDefaultBinanceSymbolCandlesticks } from '../../../builders/infrastructure/binance/binance-symbol-candlestick-test-builder';
+import { BinanceExchange } from '../../../../src/code/infrastructure/binance/model/binance-exchange';
+import { buildDefaultBinanceExchange } from '../../../builders/infrastructure/binance/binance-exchange-test-builder';
 
 jest.mock('../../../../src/code/configuration/http/axios');
 
@@ -78,7 +80,55 @@ describe('BinanceClient', () => {
       it('Then error is thrown', async () => {
         try {
           await binanceClient.getAccount();
-          fail('An error should have been thrown');
+          fail();
+        } catch (error) {
+          expect(error).toBeDefined();
+          expect((error as Error).message).toEqual('Error');
+        }
+      });
+    });
+  });
+
+  describe('Given a Binance exchange to retrieve', () => {
+    describe('When exchange retrieval has succeeded', () => {
+      let exchange: BinanceExchange;
+
+      beforeEach(() => {
+        exchange = buildDefaultBinanceExchange();
+        axiosInstanceMock.get.mockResolvedValue({
+          data: exchange,
+        });
+      });
+
+      it('Then secrets are loaded only once', async () => {
+        await binanceClient.getExchange('ABC');
+        await binanceClient.getExchange('ABC');
+        await binanceClient.getExchange('ABC');
+
+        expect(smClientMock.send).toHaveBeenCalledTimes(1);
+      });
+
+      it('Then exchange is returned', async () => {
+        const result = await binanceClient.getExchange('ABC');
+        expect(result).toBeDefined();
+        expect(result).toEqual(exchange);
+
+        expect(axiosInstanceMock.get).toHaveBeenCalledTimes(1);
+        const axiosGetParams = axiosInstanceMock.get.mock.calls[0];
+        expect(axiosGetParams).toBeDefined();
+        expect(axiosGetParams[0]).toEqual(`/v3/exchangeInfo?symbol=ABC`);
+      });
+    });
+
+    describe('When exchange retrieval has failed', () => {
+      beforeEach(() => {
+        axiosInstanceMock.get.mockRejectedValue(new Error('Error'));
+      });
+
+      it('Then error is thrown', async () => {
+        try {
+          await binanceClient.getExchange('ABC');
+          fail();
         } catch (error) {
           expect(error).toBeDefined();
           expect((error as Error).message).toEqual('Error');
@@ -139,7 +189,7 @@ describe('BinanceClient', () => {
       it('Then error is thrown', async () => {
         try {
           await binanceClient.getSymbolCandlesticks('A', 123, 456, 'I', 1);
-          fail('An error should have been thrown');
+          fail();
         } catch (error) {
           expect(error).toBeDefined();
           expect((error as Error).message).toEqual('Error');
@@ -187,7 +237,7 @@ describe('BinanceClient', () => {
       it('Then error is thrown', async () => {
         try {
           await binanceClient.sendMarketOrder('SYMBOL', 'BUY', 1, 'BASE');
-          fail('An error should have been thrown');
+          fail();
         } catch (error) {
           expect(error).toBeDefined();
           expect((error as Error).message).toEqual('Error');
@@ -196,7 +246,7 @@ describe('BinanceClient', () => {
     });
   });
 
-  describe('Given a Binance take profit order to send', () => {
+  describe('Given a Binance limit order to send', () => {
     let order: BinanceOrder;
 
     beforeEach(() => {
@@ -208,21 +258,21 @@ describe('BinanceClient', () => {
 
     describe('When order transmission has succeeded', () => {
       it('Then secrets are loaded only once', async () => {
-        await binanceClient.sendTakeProfitOrder('SYMBOL1', 'BUY', 1, 10);
-        await binanceClient.sendTakeProfitOrder('SYMBOL2', 'BUY', 2, 20);
+        await binanceClient.sendLimitOrder('SYMBOL1', 'BUY', 1, 10);
+        await binanceClient.sendLimitOrder('SYMBOL2', 'BUY', 2, 20);
 
         expect(smClientMock.send).toHaveBeenCalledTimes(1);
       });
 
       it('Then order is returned', async () => {
-        const result = await binanceClient.sendTakeProfitOrder('SYMBOL', 'BUY', 1, 10);
+        const result = await binanceClient.sendLimitOrder('SYMBOL', 'BUY', 1, 10);
         expect(result).toBeDefined();
         expect(result).toEqual(order);
 
         expect(axiosInstanceMock.post).toHaveBeenCalledTimes(1);
         const axiosPostParams = axiosInstanceMock.post.mock.calls[0];
         expect(axiosPostParams).toBeDefined();
-        expect(axiosPostParams[0]).toContain(`/v3/order?symbol=SYMBOL&side=BUY&type=TAKE_PROFIT_LIMIT&quantity=1&stopPrice=10&price=10&timeInForce=GTC&newOrderRespType=FULL&timestamp=${date.valueOf()}&signature=`);
+        expect(axiosPostParams[0]).toContain(`/v3/order?symbol=SYMBOL&side=BUY&type=LIMIT&quantity=1&price=10&timeInForce=GTC&newOrderRespType=FULL&timestamp=${date.valueOf()}&signature=`);
         expect(axiosPostParams[1]).toBeNull();
       });
     });
@@ -234,12 +284,73 @@ describe('BinanceClient', () => {
 
       it('Then error is thrown', async () => {
         try {
-          await binanceClient.sendTakeProfitOrder('SYMBOL', 'BUY', 1, 10);
-          fail('An error should have been thrown');
+          await binanceClient.sendLimitOrder('SYMBOL', 'BUY', 1, 10);
+          fail();
         } catch (error) {
           expect(error).toBeDefined();
           expect((error as Error).message).toEqual('Error');
         }
+      });
+    });
+  });
+
+  describe('Given a Binance order to query', () => {
+    describe('When order query has succeeded', () => {
+      let order: BinanceOrder;
+
+      beforeEach(() => {
+        order = buildDefaultBinanceOrder();
+        axiosInstanceMock.get.mockResolvedValue({
+          data: order,
+        });
+      });
+
+      it('Then secrets are loaded only once', async () => {
+        await binanceClient.queryOrder('ABC', '123');
+        await binanceClient.queryOrder('ABC', '123');
+        await binanceClient.queryOrder('ABC', '123');
+
+        expect(smClientMock.send).toHaveBeenCalledTimes(1);
+      });
+
+      it('Then order is returned', async () => {
+        const result = await binanceClient.queryOrder('ABC', '123');
+        expect(result).toEqual(order);
+
+        expect(axiosInstanceMock.get).toHaveBeenCalledTimes(1);
+        const axiosGetParams = axiosInstanceMock.get.mock.calls[0];
+        expect(axiosGetParams[0]).toContain(`/v3/order?symbol=ABC&orderId=123&timestamp=${date.valueOf()}&signature=`);
+        expect(axiosGetParams[1]).toEqual({
+          baseURL: 'my-url',
+          headers: {
+            'X-MBX-APIKEY': binanceSecrets.apiKey,
+          },
+        });
+      });
+    });
+
+    describe('When order query has failed', () => {
+      beforeEach(() => {
+        axiosInstanceMock.get.mockRejectedValue(new Error('Error'));
+      });
+
+      it('Then error is thrown', async () => {
+        try {
+          await binanceClient.queryOrder('ABC', '123');
+          fail();
+        } catch (error) {
+          expect((error as Error).message).toEqual('Error');
+        }
+
+        expect(axiosInstanceMock.get).toHaveBeenCalledTimes(1);
+        const axiosGetParams = axiosInstanceMock.get.mock.calls[0];
+        expect(axiosGetParams[0]).toContain(`/v3/order?symbol=ABC&orderId=123&timestamp=${date.valueOf()}&signature=`);
+        expect(axiosGetParams[1]).toEqual({
+          baseURL: 'my-url',
+          headers: {
+            'X-MBX-APIKEY': binanceSecrets.apiKey,
+          },
+        });
       });
     });
   });

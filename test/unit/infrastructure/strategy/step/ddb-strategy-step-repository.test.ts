@@ -2,7 +2,7 @@ import { DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb';
 import { mocked } from 'ts-jest/utils';
 import { StrategyStepRepository } from '../../../../../src/code/domain/strategy/step/strategy-step-repository';
 import { DdbStrategyStepRepository } from '../../../../../src/code/infrastructure/strategy/step/ddb-strategy-step-repository';
-import { SendOrderStepInput, StrategyStep } from '../../../../../src/code/domain/strategy/model/strategy-step';
+import { StrategyStep } from '../../../../../src/code/domain/strategy/model/strategy-step';
 import { buildDefaultMarketEvolutionStep, buildDefaultSendOrderStep, buildDefaultStrategyStep } from '../../../../builders/domain/strategy/strategy-step-test-builder';
 
 const ddbClientMock = mocked(jest.genMockFromModule<DynamoDBDocumentClient>('@aws-sdk/lib-dynamodb'), true);
@@ -39,7 +39,12 @@ describe('DdbStrategyStepRepository', () => {
                     pk: `Strategy::${step.strategyId}::Step::${step.creationDate.valueOf()}::${step.type}::${step.id}`,
                     sk: 'Details',
                     type: 'StrategyStep',
-                    data: { ...step, creationDate: step.creationDate.toISOString(), executionStartDate: step.executionStartDate.toISOString(), executionEndDate: step.executionEndDate.toISOString() },
+                    data: {
+                      ...step,
+                      creationDate: step.creationDate.toISOString(),
+                      executionStartDate: step.executionStartDate.toISOString(),
+                      executionEndDate: step.executionEndDate.toISOString(),
+                    },
                   },
                 },
               },
@@ -49,7 +54,12 @@ describe('DdbStrategyStepRepository', () => {
                     pk: `Strategy::${step.strategyId}::Step::Last`,
                     sk: 'Details',
                     type: 'StrategyStep',
-                    data: { ...step, creationDate: step.creationDate.toISOString(), executionStartDate: step.executionStartDate.toISOString(), executionEndDate: step.executionEndDate.toISOString() },
+                    data: {
+                      ...step,
+                      creationDate: step.creationDate.toISOString(),
+                      executionStartDate: step.executionStartDate.toISOString(),
+                      executionEndDate: step.executionEndDate.toISOString(),
+                    },
                   },
                 },
               },
@@ -59,7 +69,12 @@ describe('DdbStrategyStepRepository', () => {
                     pk: `Strategy::${step.strategyId}::Step::Last::MarketEvolution`,
                     sk: 'Details',
                     type: 'StrategyStep',
-                    data: { ...step, creationDate: step.creationDate.toISOString(), executionStartDate: step.executionStartDate.toISOString(), executionEndDate: step.executionEndDate.toISOString() },
+                    data: {
+                      ...step,
+                      creationDate: step.creationDate.toISOString(),
+                      executionStartDate: step.executionStartDate.toISOString(),
+                      executionEndDate: step.executionEndDate.toISOString(),
+                    },
                   },
                 },
               },
@@ -92,7 +107,12 @@ describe('DdbStrategyStepRepository', () => {
                     pk: `Strategy::${step.strategyId}::Step::${step.creationDate.valueOf()}::${step.type}::${step.id}`,
                     sk: 'Details',
                     type: 'StrategyStep',
-                    data: { ...step, creationDate: step.creationDate.toISOString(), executionStartDate: step.executionStartDate.toISOString(), executionEndDate: step.executionEndDate.toISOString() },
+                    data: {
+                      ...step,
+                      creationDate: step.creationDate.toISOString(),
+                      executionStartDate: step.executionStartDate.toISOString(),
+                      executionEndDate: step.executionEndDate.toISOString(),
+                    },
                   },
                 },
               },
@@ -102,7 +122,12 @@ describe('DdbStrategyStepRepository', () => {
                     pk: `Strategy::${step.strategyId}::Step::Last`,
                     sk: 'Details',
                     type: 'StrategyStep',
-                    data: { ...step, creationDate: step.creationDate.toISOString(), executionStartDate: step.executionStartDate.toISOString(), executionEndDate: step.executionEndDate.toISOString() },
+                    data: {
+                      ...step,
+                      creationDate: step.creationDate.toISOString(),
+                      executionStartDate: step.executionStartDate.toISOString(),
+                      executionEndDate: step.executionEndDate.toISOString(),
+                    },
                   },
                 },
               },
@@ -112,17 +137,12 @@ describe('DdbStrategyStepRepository', () => {
                     pk: `Strategy::${step.strategyId}::Step::Last::SendOrder`,
                     sk: 'Details',
                     type: 'StrategyStep',
-                    data: { ...step, creationDate: step.creationDate.toISOString(), executionStartDate: step.executionStartDate.toISOString(), executionEndDate: step.executionEndDate.toISOString() },
-                  },
-                },
-              },
-              {
-                PutRequest: {
-                  Item: {
-                    pk: `Strategy::${step.strategyId}::Step::Last::SendOrder::${(step.input as SendOrderStepInput).side}`,
-                    sk: 'Details',
-                    type: 'StrategyStep',
-                    data: { ...step, creationDate: step.creationDate.toISOString(), executionStartDate: step.executionStartDate.toISOString(), executionEndDate: step.executionEndDate.toISOString() },
+                    data: {
+                      ...step,
+                      creationDate: step.creationDate.toISOString(),
+                      executionStartDate: step.executionStartDate.toISOString(),
+                      executionEndDate: step.executionEndDate.toISOString(),
+                    },
                   },
                 },
               },
@@ -166,7 +186,12 @@ describe('DdbStrategyStepRepository', () => {
       beforeEach(() => {
         ddbClientMock.send.mockImplementation(() => ({
           Item: {
-            data: { ...step, creationDate: step.creationDate.toISOString(), executionStartDate: step.executionStartDate.toISOString(), executionEndDate: step.executionEndDate.toISOString() },
+            data: {
+              ...step,
+              creationDate: step.creationDate.toISOString(),
+              executionStartDate: step.executionStartDate.toISOString(),
+              executionEndDate: step.executionEndDate.toISOString(),
+            },
           },
         }));
       });
@@ -222,7 +247,12 @@ describe('DdbStrategyStepRepository', () => {
       beforeEach(() => {
         ddbClientMock.send.mockImplementation(() => ({
           Item: {
-            data: { ...step, creationDate: step.creationDate.toISOString(), executionStartDate: step.executionStartDate.toISOString(), executionEndDate: step.executionEndDate.toISOString() },
+            data: {
+              ...step,
+              creationDate: step.creationDate.toISOString(),
+              executionStartDate: step.executionStartDate.toISOString(),
+              executionEndDate: step.executionEndDate.toISOString(),
+            },
           },
         }));
       });
@@ -238,62 +268,6 @@ describe('DdbStrategyStepRepository', () => {
           TableName: 'my-table',
           Key: {
             pk: 'Strategy::123::Step::Last::MarketEvolution',
-            sk: 'Details',
-          },
-        });
-      });
-    });
-  });
-
-  describe('Given last send order step to retrieve by its strategy ID and order side', () => {
-    beforeEach(() => {
-      step = buildDefaultSendOrderStep();
-    });
-
-    describe('When strategy step is not found', () => {
-      beforeEach(() => {
-        ddbClientMock.send.mockImplementation(() => ({
-          Item: undefined,
-        }));
-      });
-
-      it('Then null is returned', async () => {
-        const result = await strategyStepRepository.getLastSendOrderByStrategyIdAndOrderSide('123', 'Buy');
-        expect(result).toBeNull();
-
-        expect(ddbClientMock.send).toHaveBeenCalledTimes(1);
-        const sendParams = ddbClientMock.send.mock.calls[0];
-        expect(sendParams.length).toEqual(1);
-        expect(sendParams[0].input).toEqual({
-          TableName: 'my-table',
-          Key: {
-            pk: 'Strategy::123::Step::Last::SendOrder::Buy',
-            sk: 'Details',
-          },
-        });
-      });
-    });
-
-    describe('When strategy step is found', () => {
-      beforeEach(() => {
-        ddbClientMock.send.mockImplementation(() => ({
-          Item: {
-            data: { ...step, creationDate: step.creationDate.toISOString(), executionStartDate: step.executionStartDate.toISOString(), executionEndDate: step.executionEndDate.toISOString() },
-          },
-        }));
-      });
-
-      it('Then strategy step is returned', async () => {
-        const result = await strategyStepRepository.getLastSendOrderByStrategyIdAndOrderSide('123', 'Sell');
-        expect(result).toEqual(step);
-
-        expect(ddbClientMock.send).toHaveBeenCalledTimes(1);
-        const sendParams = ddbClientMock.send.mock.calls[0];
-        expect(sendParams.length).toEqual(1);
-        expect(sendParams[0].input).toEqual({
-          TableName: 'my-table',
-          Key: {
-            pk: 'Strategy::123::Step::Last::SendOrder::Sell',
             sk: 'Details',
           },
         });

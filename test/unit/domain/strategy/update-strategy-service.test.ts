@@ -9,7 +9,7 @@ const strategyRepositoryMock = mocked(jest.genMockFromModule<StrategyRepository>
 let updateStrategyService: UpdateStrategyService;
 beforeEach(() => {
   strategyRepositoryMock.updateStatusById = jest.fn();
-  strategyRepositoryMock.updateBudgetById = jest.fn();
+  strategyRepositoryMock.updateWalletById = jest.fn();
 
   updateStrategyService = new UpdateStrategyService(strategyRepositoryMock);
 });
@@ -37,25 +37,25 @@ describe('UpdateStrategyService', () => {
     });
   });
 
-  describe('Given a strategy budget to update by its ID', () => {
-    describe('When strategy budget is updated', () => {
+  describe('Given a strategy wallet to update by its ID', () => {
+    describe('When strategy wallet is updated', () => {
       let strategy: Strategy;
 
       beforeEach(() => {
         strategy = buildDefaultStrategy();
-        strategyRepositoryMock.updateBudgetById.mockResolvedValue(strategy);
+        strategyRepositoryMock.updateWalletById.mockResolvedValue(strategy);
       });
 
       it('Then updated strategy is returned', async () => {
-        const result = await updateStrategyService.updateBudgetById('666', 10, -20);
+        const result = await updateStrategyService.updateWalletById('666', 10, -20);
         expect(result).toEqual(strategy);
 
-        expect(strategyRepositoryMock.updateBudgetById).toHaveBeenCalledTimes(1);
-        const updateBudgetByIdParams = strategyRepositoryMock.updateBudgetById.mock.calls[0];
-        expect(updateBudgetByIdParams.length).toEqual(3);
-        expect(updateBudgetByIdParams[0]).toEqual('666');
-        expect(updateBudgetByIdParams[1]).toEqual(10);
-        expect(updateBudgetByIdParams[2]).toEqual(-20);
+        expect(strategyRepositoryMock.updateWalletById).toHaveBeenCalledTimes(1);
+        const updateWalletByIdParams = strategyRepositoryMock.updateWalletById.mock.calls[0];
+        expect(updateWalletByIdParams.length).toEqual(3);
+        expect(updateWalletByIdParams[0]).toEqual('666');
+        expect(updateWalletByIdParams[1]).toEqual(10);
+        expect(updateWalletByIdParams[2]).toEqual(-20);
       });
     });
   });

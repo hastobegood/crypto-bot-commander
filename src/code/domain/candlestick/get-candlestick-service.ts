@@ -14,6 +14,12 @@ intervalDataMap.set('1d', { value: 1, seconds: 86400, minutes: 1440 });
 export class GetCandlestickService {
   constructor(private candlestickRepository: CandlestickRepository) {}
 
+  async getLastBySymbol(symbol: string): Promise<Candlestick | null> {
+    const candlesticks = await this.getAllBySymbol(symbol, 1, '1m');
+
+    return candlesticks.length === 0 ? null : candlesticks[0];
+  }
+
   async getAllBySymbol(symbol: string, period: number, interval: CandlestickInterval): Promise<Candlestick[]> {
     const candlesticks: Candlestick[] = [];
     const intervalData = intervalDataMap.get(interval)!;

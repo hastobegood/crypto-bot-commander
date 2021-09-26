@@ -1,5 +1,5 @@
-import { OrderStatus } from '../../domain/order/model/order';
-import { BinanceOrderStatus } from './model/binance-order';
+import { OrderSide, OrderStatus } from '../../domain/order/model/order';
+import { BinanceOrderSide, BinanceOrderStatus } from './model/binance-order';
 import { extractAssets } from '../../configuration/util/symbol';
 
 export const toBinanceSymbol = (symbol: string): string => {
@@ -7,8 +7,21 @@ export const toBinanceSymbol = (symbol: string): string => {
   return `${assets.baseAsset}${assets.quoteAsset}`;
 };
 
+export const fromBinanceOrderSide = (side: BinanceOrderSide): OrderSide => {
+  switch (side) {
+    case 'BUY':
+      return 'Buy';
+    case 'SELL':
+      return 'Sell';
+    default:
+      throw new Error(`Unsupported '${side}' Binance order side`);
+  }
+};
+
 export const fromBinanceOrderStatus = (status: BinanceOrderStatus): OrderStatus => {
   switch (status) {
+    case 'NEW':
+      return 'Waiting';
     case 'FILLED':
       return 'Filled';
     case 'PENDING_CANCEL':

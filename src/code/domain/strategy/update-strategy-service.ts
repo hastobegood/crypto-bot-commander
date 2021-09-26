@@ -8,7 +8,7 @@ export class UpdateStrategyService {
     return this.strategyRepository.updateStatusById(id, status);
   }
 
-  async updateBudgetById(id: string, consumedBaseAssetQuantity: number, consumedQuoteAssetQuantity: number): Promise<Strategy> {
-    return await this.strategyRepository.updateBudgetById(id, consumedBaseAssetQuantity, consumedQuoteAssetQuantity);
+  async updateWalletById(id: string, consumedBaseAssetQuantity: number, consumedQuoteAssetQuantity: number): Promise<Strategy> {
+    return await this.strategyRepository.updateWalletById(id, consumedBaseAssetQuantity, consumedQuoteAssetQuantity);
   }
 }

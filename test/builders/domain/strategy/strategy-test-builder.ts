@@ -1,5 +1,5 @@
 import { randomNumber, randomString, randomSymbol } from '../../random-test-builder';
-import { Strategy, StrategyBudget, StrategyTemplate } from '../../../../src/code/domain/strategy/model/strategy';
+import { Strategy, StrategyTemplate, StrategyWallet } from '../../../../src/code/domain/strategy/model/strategy';
 import { buildDefaultMarketEvolutionStepInput, buildDefaultSendOrderStepInput, buildStrategyStepTemplate } from './strategy-step-test-builder';
 import { random } from 'lodash';
 
@@ -9,7 +9,6 @@ export const buildDefaultStrategy = (): Strategy => {
     symbol: randomSymbol(),
     status: 'Active',
     template: buildDefaultStrategyTemplate(),
-    budget: buildDefaultStrategyBudget(),
   };
 };
 
@@ -20,7 +19,7 @@ export const buildDefaultStrategyTemplate = (): StrategyTemplate => {
   };
 };
 
-export const buildDefaultStrategyBudget = (): StrategyBudget => {
+export const buildDefaultStrategyWallet = (): StrategyWallet => {
   return {
     initialBaseAssetQuantity: randomNumber(1_000, 2_000),
     availableBaseAssetQuantity: randomNumber(500, 1_000),

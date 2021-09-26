@@ -1,5 +1,5 @@
-import { CreateOrder, Order } from '../../../../src/code/domain/order/model/order';
-import { randomFromList, randomNumber, randomPercentage, randomString, randomSymbol } from '../../random-test-builder';
+import { CreateOrder, Order, StatusOrder } from '../../../../src/code/domain/order/model/order';
+import { randomBoolean, randomFromList, randomNumber, randomString, randomSymbol } from '../../random-test-builder';
 
 export const buildDefaultCreateMarketOrder = (): CreateOrder => {
   return {
@@ -10,13 +10,13 @@ export const buildDefaultCreateMarketOrder = (): CreateOrder => {
   };
 };
 
-export const buildDefaultCreateTakeProfitOrder = (): CreateOrder => {
+export const buildDefaultCreateLimitOrder = (): CreateOrder => {
   return {
     symbol: randomSymbol(),
     side: 'Buy',
-    type: 'TakeProfit',
+    type: 'Limit',
     baseAssetQuantity: randomNumber(1, 1_000),
-    priceThreshold: randomNumber(1, 1_000),
+    priceLimit: randomNumber(1, 1_000),
   };
 };
 
@@ -26,29 +26,61 @@ export const buildDefaultOrder = (): Order => {
     externalId: randomString(20),
     symbol: randomSymbol(),
     side: 'Buy',
-    type: randomFromList(['Market', 'TakeProfit']),
+    type: 'Market',
     creationDate: new Date(),
     transactionDate: new Date(),
-    baseAssetQuantity: randomNumber(100, 1_000),
     quoteAssetQuantity: randomNumber(100, 1_000),
-    priceThreshold: randomPercentage(),
     executedAssetQuantity: randomNumber(1, 100),
     executedPrice: randomNumber(10, 1_000),
     status: 'Filled',
     externalStatus: 'FILLED',
-    fills: [
-      {
-        price: randomNumber(1_000, 1_000_000),
-        quantity: randomNumber(1, 1_000),
-        commission: randomNumber(1, 10),
-        commissionAsset: randomString(5).toUpperCase(),
-      },
-      {
-        price: randomNumber(1_000, 1_000_000),
-        quantity: randomNumber(1, 1_000),
-        commission: randomNumber(1, 10),
-        commissionAsset: randomString(5).toUpperCase(),
-      },
-    ],
+  };
+};
+
+export const buildDefaultMarketOrder = (): Order => {
+  const baseAsset = randomBoolean();
+  return {
+    id: randomString(20),
+    externalId: randomString(20),
+    symbol: randomSymbol(),
+    side: 'Buy',
+    type: 'Market',
+    creationDate: new Date(),
+    transactionDate: new Date(),
+    baseAssetQuantity: baseAsset ? randomNumber(100, 1_000) : undefined,
+    quoteAssetQuantity: baseAsset ? undefined : randomNumber(100, 1_000),
+    executedAssetQuantity: randomNumber(1, 100),
+    executedPrice: randomNumber(10, 1_000),
+    status: 'Filled',
+    externalStatus: 'FILLED',
+  };
+};
+
+export const buildDefaultLimitOrder = (): Order => {
+  return {
+    id: randomString(20),
+    externalId: randomString(20),
+    symbol: randomSymbol(),
+    side: 'Buy',
+    type: 'Limit',
+    creationDate: new Date(),
+    transactionDate: new Date(),
+    baseAssetQuantity: randomNumber(100, 1_000),
+    priceLimit: randomNumber(10, 1_000),
+    executedAssetQuantity: randomNumber(1, 100),
+    executedPrice: randomNumber(10, 1_000),
+    status: 'Filled',
+    externalStatus: 'FILLED',
+  };
+};
+
+export const buildDefaultStatusOrder = (): StatusOrder => {
+  return {
+    side: randomFromList(['Buy', 'Sell']),
+    status: 'Filled',
+    externalId: randomString(20),
+    externalStatus: randomString(10),
+    executedAssetQuantity: randomNumber(1, 100),
+    executedPrice: randomNumber(10, 1_000),
   };
 };

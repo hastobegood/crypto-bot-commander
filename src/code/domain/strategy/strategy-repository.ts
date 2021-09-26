@@ -1,4 +1,4 @@
-import { Strategy, StrategyStatus } from './model/strategy';
+import { Strategy, StrategyStatus, StrategyWallet } from './model/strategy';
 
 export interface StrategyRepository {
   getById(id: string): Promise<Strategy | null>;
@@ -7,5 +7,7 @@ export interface StrategyRepository {
 
   updateStatusById(id: string, status: StrategyStatus): Promise<Strategy>;
 
-  updateBudgetById(id: string, consumedBaseAssetQuantity: number, consumedQuoteAssetQuantity: number): Promise<Strategy>;
+  getWalletById(id: string): Promise<StrategyWallet | null>;
+
+  updateWalletById(id: string, consumedBaseAssetQuantity: number, consumedQuoteAssetQuantity: number): Promise<Strategy>;
 }
