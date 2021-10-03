@@ -1,30 +1,36 @@
 import { randomNumber, randomString, randomSymbol } from '../../random-test-builder';
-import { BinanceOrder, BinanceOrderFill } from '../../../../src/code/infrastructure/binance/model/binance-order';
+import { BinanceOrder } from '../../../../src/code/infrastructure/binance/model/binance-order';
 
 export const buildDefaultBinanceOrder = (): BinanceOrder => {
-  return buildBinanceOrder([buildDefaultBinanceFill(), buildDefaultBinanceFill()]);
+  return buildDefaultBinanceMarketOrder();
 };
 
-export const buildBinanceOrder = (fills: BinanceOrderFill[]): BinanceOrder => {
+export const buildDefaultBinanceMarketOrder = (): BinanceOrder => {
   return {
     symbol: randomSymbol(),
     orderId: randomNumber(),
     clientOrderId: randomString(),
     transactTime: new Date().valueOf(),
-    price: randomNumber(100, 1_000).toString(),
+    price: '0',
     executedQty: randomNumber(10, 100).toString(),
+    cummulativeQuoteQty: randomNumber(10, 100).toString(),
     status: 'FILLED',
     side: 'BUY',
     type: 'MARKET',
-    fills: fills,
   };
 };
 
-export const buildDefaultBinanceFill = (): BinanceOrderFill => {
+export const buildDefaultBinanceLimitOrder = (): BinanceOrder => {
   return {
-    price: randomNumber(1, 1_000).toString(),
-    qty: randomNumber(1, 1_000).toString(),
-    commission: randomNumber(1, 1_000).toString(),
-    commissionAsset: randomString(5).toUpperCase(),
+    symbol: randomSymbol(),
+    orderId: randomNumber(),
+    clientOrderId: randomString(),
+    transactTime: new Date().valueOf(),
+    price: '0',
+    executedQty: '0',
+    cummulativeQuoteQty: '0',
+    status: 'NEW',
+    side: 'BUY',
+    type: 'LIMIT',
   };
 };

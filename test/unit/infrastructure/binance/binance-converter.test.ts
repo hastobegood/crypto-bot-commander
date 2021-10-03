@@ -5,6 +5,7 @@ describe('BinanceConverter', () => {
   describe('Given a Binance order status', () => {
     describe('When known value', () => {
       it('Then converted value is returned', async () => {
+        expect(fromBinanceOrderStatus('NEW')).toEqual('Waiting');
         expect(fromBinanceOrderStatus('FILLED')).toEqual('Filled');
         expect(fromBinanceOrderStatus('PENDING_CANCEL')).toEqual('Canceled');
         expect(fromBinanceOrderStatus('CANCELED')).toEqual('Canceled');

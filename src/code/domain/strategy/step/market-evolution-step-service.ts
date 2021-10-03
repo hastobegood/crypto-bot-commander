@@ -1,6 +1,6 @@
 import { MarketEvolutionService } from '../../technical-analysis/market-evolution-service';
 import { Point } from '../../technical-analysis/model/point';
-import { MarketEvolutionInterval, MarketEvolutionStepInput, MarketEvolutionStepOutput, SendOrderStepOutput, StrategyStepType } from '../model/strategy-step';
+import { CheckOrderStepOutput, MarketEvolutionInterval, MarketEvolutionStepInput, MarketEvolutionStepOutput, StrategyStepType } from '../model/strategy-step';
 import { StrategyStepService } from './strategy-step-service';
 import { Candlestick } from '../../candlestick/model/candlestick';
 import { StrategyStepRepository } from './strategy-step-repository';
@@ -60,14 +60,14 @@ export class MarketEvolutionStepService implements StrategyStepService {
   }
 
   async #getLastOrderStepPoint(strategy: Strategy): Promise<Point> {
-    const lastSendOrderStep = await this.strategyStepRepository.getLastByStrategyIdAndType(strategy.id, 'SendOrder');
-    if (!lastSendOrderStep) {
+    const lastCheckOrderStep = await this.strategyStepRepository.getLastByStrategyIdAndType(strategy.id, 'CheckOrder');
+    if (!lastCheckOrderStep) {
       throw new Error(`Unable to calculate market evolution without last order`);
     }
 
     return {
-      timestamp: lastSendOrderStep.executionEndDate.valueOf(),
-      value: (lastSendOrderStep.output as SendOrderStepOutput).price!,
+      timestamp: lastCheckOrderStep.executionEndDate.valueOf(),
+      value: (lastCheckOrderStep.output as CheckOrderStepOutput).price!,
     };
   }
 

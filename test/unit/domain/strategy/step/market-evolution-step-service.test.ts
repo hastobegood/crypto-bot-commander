@@ -3,9 +3,9 @@ import { StrategyStepRepository } from '../../../../../src/code/domain/strategy/
 import { MarketEvolutionService } from '../../../../../src/code/domain/technical-analysis/market-evolution-service';
 import { MarketEvolutionStepService } from '../../../../../src/code/domain/strategy/step/market-evolution-step-service';
 import { Strategy } from '../../../../../src/code/domain/strategy/model/strategy';
-import { MarketEvolutionStepInput, SendOrderStepOutput, StrategyStep } from '../../../../../src/code/domain/strategy/model/strategy-step';
+import { CheckOrderStepOutput, MarketEvolutionStepInput, StrategyStep } from '../../../../../src/code/domain/strategy/model/strategy-step';
 import { buildDefaultStrategy } from '../../../../builders/domain/strategy/strategy-test-builder';
-import { buildDefaultSendOrderStepOutput, buildDefaultStrategyStepTemplate, buildMarketEvolutionStepInput, buildStrategyStep } from '../../../../builders/domain/strategy/strategy-step-test-builder';
+import { buildDefaultCheckOrderStepOutput, buildDefaultStrategyStepTemplate, buildMarketEvolutionStepInput, buildStrategyStep } from '../../../../builders/domain/strategy/strategy-step-test-builder';
 import { MarketEvolution } from '../../../../../src/code/domain/technical-analysis/model/market-evolution';
 import { buildMarketEvolution } from '../../../../builders/domain/technical-analysis/market-evolution-test-builder';
 import { Candlestick } from '../../../../../src/code/domain/candlestick/model/candlestick';
@@ -116,7 +116,12 @@ describe('MarketEvolutionStepService', () => {
           const calculateParams = marketEvolutionServiceMock.calculate.mock.calls[0];
           expect(calculateParams.length).toEqual(1);
           expect(calculateParams[0].period).toEqual(candlesticks.length);
-          expect(calculateParams[0].points).toEqual(candlesticks.map((candlestick) => ({ timestamp: candlestick.closingDate.valueOf(), value: candlestick.closingPrice })));
+          expect(calculateParams[0].points).toEqual(
+            candlesticks.map((candlestick) => ({
+              timestamp: candlestick.closingDate.valueOf(),
+              value: candlestick.closingPrice,
+            })),
+          );
 
           expect(strategyStepRepositoryMock.getLastByStrategyIdAndType).toHaveBeenCalledTimes(0);
         });
@@ -148,7 +153,12 @@ describe('MarketEvolutionStepService', () => {
           const calculateParams = marketEvolutionServiceMock.calculate.mock.calls[0];
           expect(calculateParams.length).toEqual(1);
           expect(calculateParams[0].period).toEqual(candlesticks.length);
-          expect(calculateParams[0].points).toEqual(candlesticks.map((candlestick) => ({ timestamp: candlestick.closingDate.valueOf(), value: candlestick.closingPrice })));
+          expect(calculateParams[0].points).toEqual(
+            candlesticks.map((candlestick) => ({
+              timestamp: candlestick.closingDate.valueOf(),
+              value: candlestick.closingPrice,
+            })),
+          );
 
           expect(strategyStepRepositoryMock.getLastByStrategyIdAndType).toHaveBeenCalledTimes(0);
         });
@@ -180,7 +190,12 @@ describe('MarketEvolutionStepService', () => {
           const calculateParams = marketEvolutionServiceMock.calculate.mock.calls[0];
           expect(calculateParams.length).toEqual(1);
           expect(calculateParams[0].period).toEqual(candlesticks.length);
-          expect(calculateParams[0].points).toEqual(candlesticks.map((candlestick) => ({ timestamp: candlestick.closingDate.valueOf(), value: candlestick.closingPrice })));
+          expect(calculateParams[0].points).toEqual(
+            candlesticks.map((candlestick) => ({
+              timestamp: candlestick.closingDate.valueOf(),
+              value: candlestick.closingPrice,
+            })),
+          );
 
           expect(strategyStepRepositoryMock.getLastByStrategyIdAndType).toHaveBeenCalledTimes(0);
         });
@@ -222,7 +237,7 @@ describe('MarketEvolutionStepService', () => {
           const getLastByStrategyIdAndTypeParams = strategyStepRepositoryMock.getLastByStrategyIdAndType.mock.calls[0];
           expect(getLastByStrategyIdAndTypeParams.length).toEqual(2);
           expect(getLastByStrategyIdAndTypeParams[0]).toEqual(strategy.id);
-          expect(getLastByStrategyIdAndTypeParams[1]).toEqual('SendOrder');
+          expect(getLastByStrategyIdAndTypeParams[1]).toEqual('CheckOrder');
 
           expect(marketEvolutionServiceMock.calculate).toHaveBeenCalledTimes(0);
         });
@@ -231,7 +246,7 @@ describe('MarketEvolutionStepService', () => {
       describe('And last order step is not missing', () => {
         describe('And market evolution percentage is bigger than percentage threshold ', () => {
           beforeEach(() => {
-            lastOrderStep = buildStrategyStep(buildDefaultStrategyStepTemplate(), strategy.id, buildDefaultSendOrderStepOutput(true));
+            lastOrderStep = buildStrategyStep(buildDefaultStrategyStepTemplate(), strategy.id, buildDefaultCheckOrderStepOutput(true));
             strategyStepRepositoryMock.getLastByStrategyIdAndType.mockResolvedValue(lastOrderStep);
 
             marketEvolution = buildMarketEvolution(1, 2, -0.0501);
@@ -258,7 +273,7 @@ describe('MarketEvolutionStepService', () => {
             const getLastByStrategyIdAndTypeParams = strategyStepRepositoryMock.getLastByStrategyIdAndType.mock.calls[0];
             expect(getLastByStrategyIdAndTypeParams.length).toEqual(2);
             expect(getLastByStrategyIdAndTypeParams[0]).toEqual(strategy.id);
-            expect(getLastByStrategyIdAndTypeParams[1]).toEqual('SendOrder');
+            expect(getLastByStrategyIdAndTypeParams[1]).toEqual('CheckOrder');
 
             expect(marketEvolutionServiceMock.calculate).toHaveBeenCalledTimes(1);
             const calculateParams = marketEvolutionServiceMock.calculate.mock.calls[0];
@@ -266,14 +281,17 @@ describe('MarketEvolutionStepService', () => {
             expect(calculateParams[0].period).toEqual(2);
             expect(calculateParams[0].points).toEqual([
               { timestamp: candlesticks[0].closingDate.valueOf(), value: candlesticks[0].closingPrice },
-              { timestamp: lastOrderStep.executionEndDate.valueOf(), value: (lastOrderStep.output as SendOrderStepOutput).price },
+              {
+                timestamp: lastOrderStep.executionEndDate.valueOf(),
+                value: (lastOrderStep.output as CheckOrderStepOutput).price,
+              },
             ]);
           });
         });
 
         describe('And market evolution percentage is smaller than percentage threshold ', () => {
           beforeEach(() => {
-            lastOrderStep = buildStrategyStep(buildDefaultStrategyStepTemplate(), strategy.id, buildDefaultSendOrderStepOutput(true));
+            lastOrderStep = buildStrategyStep(buildDefaultStrategyStepTemplate(), strategy.id, buildDefaultCheckOrderStepOutput(true));
             strategyStepRepositoryMock.getLastByStrategyIdAndType.mockResolvedValue(lastOrderStep);
 
             marketEvolution = buildMarketEvolution(1, 2, -0.0499);
@@ -300,7 +318,7 @@ describe('MarketEvolutionStepService', () => {
             const getLastByStrategyIdAndTypeParams = strategyStepRepositoryMock.getLastByStrategyIdAndType.mock.calls[0];
             expect(getLastByStrategyIdAndTypeParams.length).toEqual(2);
             expect(getLastByStrategyIdAndTypeParams[0]).toEqual(strategy.id);
-            expect(getLastByStrategyIdAndTypeParams[1]).toEqual('SendOrder');
+            expect(getLastByStrategyIdAndTypeParams[1]).toEqual('CheckOrder');
 
             expect(marketEvolutionServiceMock.calculate).toHaveBeenCalledTimes(1);
             const calculateParams = marketEvolutionServiceMock.calculate.mock.calls[0];
@@ -308,14 +326,17 @@ describe('MarketEvolutionStepService', () => {
             expect(calculateParams[0].period).toEqual(2);
             expect(calculateParams[0].points).toEqual([
               { timestamp: candlesticks[0].closingDate.valueOf(), value: candlesticks[0].closingPrice },
-              { timestamp: lastOrderStep.executionEndDate.valueOf(), value: (lastOrderStep.output as SendOrderStepOutput).price },
+              {
+                timestamp: lastOrderStep.executionEndDate.valueOf(),
+                value: (lastOrderStep.output as CheckOrderStepOutput).price,
+              },
             ]);
           });
         });
 
         describe('And market evolution percentage is equal to percentage threshold ', () => {
           beforeEach(() => {
-            lastOrderStep = buildStrategyStep(buildDefaultStrategyStepTemplate(), strategy.id, buildDefaultSendOrderStepOutput(true));
+            lastOrderStep = buildStrategyStep(buildDefaultStrategyStepTemplate(), strategy.id, buildDefaultCheckOrderStepOutput(true));
             strategyStepRepositoryMock.getLastByStrategyIdAndType.mockResolvedValue(lastOrderStep);
 
             marketEvolution = buildMarketEvolution(1, 2, -0.05);
@@ -342,7 +363,7 @@ describe('MarketEvolutionStepService', () => {
             const getLastByStrategyIdAndTypeParams = strategyStepRepositoryMock.getLastByStrategyIdAndType.mock.calls[0];
             expect(getLastByStrategyIdAndTypeParams.length).toEqual(2);
             expect(getLastByStrategyIdAndTypeParams[0]).toEqual(strategy.id);
-            expect(getLastByStrategyIdAndTypeParams[1]).toEqual('SendOrder');
+            expect(getLastByStrategyIdAndTypeParams[1]).toEqual('CheckOrder');
 
             expect(marketEvolutionServiceMock.calculate).toHaveBeenCalledTimes(1);
             const calculateParams = marketEvolutionServiceMock.calculate.mock.calls[0];
@@ -350,7 +371,10 @@ describe('MarketEvolutionStepService', () => {
             expect(calculateParams[0].period).toEqual(2);
             expect(calculateParams[0].points).toEqual([
               { timestamp: candlesticks[0].closingDate.valueOf(), value: candlesticks[0].closingPrice },
-              { timestamp: lastOrderStep.executionEndDate.valueOf(), value: (lastOrderStep.output as SendOrderStepOutput).price },
+              {
+                timestamp: lastOrderStep.executionEndDate.valueOf(),
+                value: (lastOrderStep.output as CheckOrderStepOutput).price,
+              },
             ]);
           });
         });

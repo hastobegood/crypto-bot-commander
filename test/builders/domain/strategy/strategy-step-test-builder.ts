@@ -1,4 +1,6 @@
 import {
+  CheckOrderStepInput,
+  CheckOrderStepOutput,
   MarketEvolutionInterval,
   MarketEvolutionSource,
   MarketEvolutionStepInput,
@@ -19,7 +21,7 @@ import {
   StrategyStepTemplate,
   StrategyStepType,
 } from '../../../../src/code/domain/strategy/model/strategy-step';
-import { randomFromList, randomNumber, randomPercentage, randomString } from '../../random-test-builder';
+import { randomBoolean, randomFromList, randomNumber, randomPercentage, randomString } from '../../random-test-builder';
 
 export const buildDefaultStrategyStepTemplate = (): StrategyStepTemplate => {
   return buildStrategyStepTemplate(randomString(), randomString(), 'SendOrder', buildDefaultSendOrderStepInput());
@@ -96,22 +98,45 @@ export const buildMarketEvolutionStepOutput = (success: boolean, lastPrice: numb
 };
 
 export const buildDefaultSendOrderStepInput = (): SendOrderStepInput => {
-  return buildSendOrderStepInput(randomFromList(['Budget', 'LastOrder']), randomPercentage(), randomFromList(['Buy', 'Sell']), 'Market');
+  return buildSendOrderStepInput(randomFromList(['Wallet', 'LastOrder']), randomPercentage(), randomFromList(['Buy', 'Sell']), 'Market');
 };
 
-export const buildSendOrderStepInput = (source: SendOrderSource, percentage: number, side: SendOrderSide, type: SendOrderType): SendOrderStepInput => {
+export const buildSendOrderStepInput = (source: SendOrderSource, percentage: number, side: SendOrderSide, type: SendOrderType, deviation?: number): SendOrderStepInput => {
   return {
     source: source,
     side: side,
     type: type,
     percentage: percentage,
+    deviation: deviation,
   };
 };
 
 export const buildDefaultSendOrderStepOutput = (success: boolean): SendOrderStepOutput => {
+  const baseAsset = randomBoolean();
   return {
     success: success,
     id: randomString(),
+    status: randomString(),
+    externalId: randomString(),
+    externalStatus: randomString(),
+    baseAssetQuantity: baseAsset ? randomNumber(100, 500) : undefined,
+    quoteAssetQuantity: baseAsset ? undefined : randomNumber(100, 500),
+    priceLimit: randomNumber(1_000, 10_000),
+  };
+};
+
+export const buildDefaultCheckOrderStepInput = (): CheckOrderStepInput => {
+  return {
+    id: randomString(),
+    externalId: randomString(),
+  };
+};
+
+export const buildDefaultCheckOrderStepOutput = (success: boolean): CheckOrderStepOutput => {
+  return {
+    success: success,
+    id: randomString(),
+    side: randomFromList(['Buy', 'Sell']),
     status: randomString(),
     externalId: randomString(),
     externalStatus: randomString(),

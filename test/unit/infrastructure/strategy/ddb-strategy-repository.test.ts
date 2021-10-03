@@ -2,8 +2,8 @@ import { DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb';
 import { mocked } from 'ts-jest/utils';
 import { DdbStrategyRepository } from '../../../../src/code/infrastructure/strategy/ddb-strategy-repository';
 import { StrategyRepository } from '../../../../src/code/domain/strategy/strategy-repository';
-import { Strategy } from '../../../../src/code/domain/strategy/model/strategy';
-import { buildDefaultStrategy } from '../../../builders/domain/strategy/strategy-test-builder';
+import { Strategy, StrategyWallet } from '../../../../src/code/domain/strategy/model/strategy';
+import { buildDefaultStrategy, buildDefaultStrategyWallet } from '../../../builders/domain/strategy/strategy-test-builder';
 
 const ddbClientMock = mocked(jest.genMockFromModule<DynamoDBDocumentClient>('@aws-sdk/lib-dynamodb'), true);
 
@@ -250,83 +250,138 @@ describe('DdbStrategyRepository', () => {
       });
     });
   });
-});
 
-describe('Given a strategy budget to update by its ID', () => {
-  describe('When strategy is not found', () => {
-    beforeEach(() => {
-      ddbClientMock.send.mockImplementation(() => {
-        throw new Error('Error !');
+  describe('Given a strategy wallet to retrieve by its ID', () => {
+    let wallet: StrategyWallet;
+
+    describe('When strategy wallet is not found', () => {
+      beforeEach(() => {
+        ddbClientMock.send.mockImplementation(() => ({
+          Item: undefined,
+        }));
+      });
+
+      it('Then null is returned', async () => {
+        const result = await strategyRepository.getWalletById('123');
+        expect(result).toBeNull();
+
+        expect(ddbClientMock.send).toHaveBeenCalledTimes(1);
+        const sendParams = ddbClientMock.send.mock.calls[0];
+        expect(sendParams.length).toEqual(1);
+        expect(sendParams[0].input).toEqual({
+          TableName: 'my-table',
+          Key: {
+            pk: 'Strategy::123::Wallet',
+            sk: 'Details',
+          },
+        });
       });
     });
 
-    it('Then error is thrown', async () => {
-      try {
-        await strategyRepository.updateBudgetById('123', 1.5, -100);
-        fail('An error should have been thrown');
-      } catch (error) {
-        expect(error).toBeDefined();
-        expect((error as Error).message).toEqual(`Unable to update strategy '123' budget '1.5/-100': Error !`);
-      }
+    describe('When strategy wallet is found', () => {
+      beforeEach(() => {
+        wallet = buildDefaultStrategyWallet();
+        ddbClientMock.send.mockImplementation(() => ({
+          Item: {
+            data: wallet,
+          },
+        }));
+      });
 
-      expect(ddbClientMock.send).toHaveBeenCalledTimes(1);
-      const sendParams = ddbClientMock.send.mock.calls[0];
-      expect(sendParams.length).toEqual(1);
-      expect(sendParams[0].input).toEqual({
-        TableName: 'my-table',
-        Key: {
-          pk: `Strategy::123`,
-          sk: 'Details',
-        },
-        UpdateExpression:
-          'SET #data.budget.availableBaseAssetQuantity = #data.budget.availableBaseAssetQuantity + :baseAssetQuantity, #data.budget.profitAndLossBaseAssetQuantity = #data.budget.profitAndLossBaseAssetQuantity + :baseAssetQuantity, #data.budget.availableQuoteAssetQuantity = #data.budget.availableQuoteAssetQuantity + :quoteAssetQuantity, #data.budget.profitAndLossQuoteAssetQuantity = #data.budget.profitAndLossQuoteAssetQuantity + :quoteAssetQuantity',
-        ExpressionAttributeNames: {
-          '#data': 'data',
-        },
-        ExpressionAttributeValues: {
-          ':baseAssetQuantity': 1.5,
-          ':quoteAssetQuantity': -100,
-        },
-        ReturnValues: 'ALL_NEW',
+      it('Then strategy wallet is returned', async () => {
+        const result = await strategyRepository.getWalletById('123');
+        expect(result).toEqual(wallet);
+
+        expect(ddbClientMock.send).toHaveBeenCalledTimes(1);
+        const sendParams = ddbClientMock.send.mock.calls[0];
+        expect(sendParams.length).toEqual(1);
+        expect(sendParams[0].input).toEqual({
+          TableName: 'my-table',
+          Key: {
+            pk: 'Strategy::123::Wallet',
+            sk: 'Details',
+          },
+        });
       });
     });
   });
 
-  describe('When strategy is found', () => {
-    let strategy: Strategy;
+  describe('Given a strategy wallet to update by its ID', () => {
+    describe('When strategy is not found', () => {
+      beforeEach(() => {
+        ddbClientMock.send.mockImplementation(() => {
+          throw new Error('Error !');
+        });
+      });
 
-    beforeEach(() => {
-      strategy = buildDefaultStrategy();
-      ddbClientMock.send.mockImplementation(() => ({
-        Attributes: {
-          data: { ...strategy },
-        },
-      }));
+      it('Then error is thrown', async () => {
+        try {
+          await strategyRepository.updateWalletById('123', 1.5, -100);
+          fail('An error should have been thrown');
+        } catch (error) {
+          expect(error).toBeDefined();
+          expect((error as Error).message).toEqual(`Unable to update strategy '123' wallet '1.5/-100': Error !`);
+        }
+
+        expect(ddbClientMock.send).toHaveBeenCalledTimes(1);
+        const sendParams = ddbClientMock.send.mock.calls[0];
+        expect(sendParams.length).toEqual(1);
+        expect(sendParams[0].input).toEqual({
+          TableName: 'my-table',
+          Key: {
+            pk: `Strategy::123::Wallet`,
+            sk: 'Details',
+          },
+          UpdateExpression:
+            'SET #data.availableBaseAssetQuantity = #data.availableBaseAssetQuantity + :baseAssetQuantity, #data.profitAndLossBaseAssetQuantity = #data.profitAndLossBaseAssetQuantity + :baseAssetQuantity, #data.availableQuoteAssetQuantity = #data.availableQuoteAssetQuantity + :quoteAssetQuantity, #data.profitAndLossQuoteAssetQuantity = #data.profitAndLossQuoteAssetQuantity + :quoteAssetQuantity',
+          ExpressionAttributeNames: {
+            '#data': 'data',
+          },
+          ExpressionAttributeValues: {
+            ':baseAssetQuantity': 1.5,
+            ':quoteAssetQuantity': -100,
+          },
+          ReturnValues: 'ALL_NEW',
+        });
+      });
     });
 
-    it('Then updated strategy is returned', async () => {
-      const result = await strategyRepository.updateBudgetById('123', 1.5, -100);
-      expect(result).toEqual(strategy);
+    describe('When strategy is found', () => {
+      let strategy: Strategy;
 
-      expect(ddbClientMock.send).toHaveBeenCalledTimes(1);
-      const sendParams = ddbClientMock.send.mock.calls[0];
-      expect(sendParams.length).toEqual(1);
-      expect(sendParams[0].input).toEqual({
-        TableName: 'my-table',
-        Key: {
-          pk: `Strategy::123`,
-          sk: 'Details',
-        },
-        UpdateExpression:
-          'SET #data.budget.availableBaseAssetQuantity = #data.budget.availableBaseAssetQuantity + :baseAssetQuantity, #data.budget.profitAndLossBaseAssetQuantity = #data.budget.profitAndLossBaseAssetQuantity + :baseAssetQuantity, #data.budget.availableQuoteAssetQuantity = #data.budget.availableQuoteAssetQuantity + :quoteAssetQuantity, #data.budget.profitAndLossQuoteAssetQuantity = #data.budget.profitAndLossQuoteAssetQuantity + :quoteAssetQuantity',
-        ExpressionAttributeNames: {
-          '#data': 'data',
-        },
-        ExpressionAttributeValues: {
-          ':baseAssetQuantity': 1.5,
-          ':quoteAssetQuantity': -100,
-        },
-        ReturnValues: 'ALL_NEW',
+      beforeEach(() => {
+        strategy = buildDefaultStrategy();
+        ddbClientMock.send.mockImplementation(() => ({
+          Attributes: {
+            data: { ...strategy },
+          },
+        }));
+      });
+
+      it('Then updated strategy is returned', async () => {
+        const result = await strategyRepository.updateWalletById('123', 1.5, -100);
+        expect(result).toEqual(strategy);
+
+        expect(ddbClientMock.send).toHaveBeenCalledTimes(1);
+        const sendParams = ddbClientMock.send.mock.calls[0];
+        expect(sendParams.length).toEqual(1);
+        expect(sendParams[0].input).toEqual({
+          TableName: 'my-table',
+          Key: {
+            pk: `Strategy::123::Wallet`,
+            sk: 'Details',
+          },
+          UpdateExpression:
+            'SET #data.availableBaseAssetQuantity = #data.availableBaseAssetQuantity + :baseAssetQuantity, #data.profitAndLossBaseAssetQuantity = #data.profitAndLossBaseAssetQuantity + :baseAssetQuantity, #data.availableQuoteAssetQuantity = #data.availableQuoteAssetQuantity + :quoteAssetQuantity, #data.profitAndLossQuoteAssetQuantity = #data.profitAndLossQuoteAssetQuantity + :quoteAssetQuantity',
+          ExpressionAttributeNames: {
+            '#data': 'data',
+          },
+          ExpressionAttributeValues: {
+            ':baseAssetQuantity': 1.5,
+            ':quoteAssetQuantity': -100,
+          },
+          ReturnValues: 'ALL_NEW',
+        });
       });
     });
   });

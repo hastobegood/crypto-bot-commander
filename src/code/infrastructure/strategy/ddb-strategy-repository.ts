@@ -1,6 +1,6 @@
 import { DynamoDBDocumentClient, GetCommand, GetCommandInput, QueryCommand, QueryCommandInput, UpdateCommand, UpdateCommandInput } from '@aws-sdk/lib-dynamodb';
 import { StrategyRepository } from '../../domain/strategy/strategy-repository';
-import { Strategy, StrategyStatus } from '../../domain/strategy/model/strategy';
+import { Strategy, StrategyStatus, StrategyWallet } from '../../domain/strategy/model/strategy';
 
 export class DdbStrategyRepository implements StrategyRepository {
   constructor(private tableName: string, private ddbClient: DynamoDBDocumentClient) {}
@@ -98,15 +98,29 @@ export class DdbStrategyRepository implements StrategyRepository {
     return getOutput.Item ? getOutput.Item.data.symbol : null;
   }
 
-  async updateBudgetById(id: string, consumedBaseAssetQuantity: number, consumedQuoteAssetQuantity: number): Promise<Strategy> {
+  async getWalletById(id: string): Promise<StrategyWallet | null> {
+    const getInput: GetCommandInput = {
+      TableName: this.tableName,
+      Key: {
+        pk: `Strategy::${id}::Wallet`,
+        sk: 'Details',
+      },
+    };
+
+    const getOutput = await this.ddbClient.send(new GetCommand(getInput));
+
+    return getOutput.Item ? getOutput.Item.data : null;
+  }
+
+  async updateWalletById(id: string, consumedBaseAssetQuantity: number, consumedQuoteAssetQuantity: number): Promise<Strategy> {
     const updateInput: UpdateCommandInput = {
       TableName: this.tableName,
       Key: {
-        pk: `Strategy::${id}`,
+        pk: `Strategy::${id}::Wallet`,
         sk: 'Details',
       },
       UpdateExpression:
-        'SET #data.budget.availableBaseAssetQuantity = #data.budget.availableBaseAssetQuantity + :baseAssetQuantity, #data.budget.profitAndLossBaseAssetQuantity = #data.budget.profitAndLossBaseAssetQuantity + :baseAssetQuantity, #data.budget.availableQuoteAssetQuantity = #data.budget.availableQuoteAssetQuantity + :quoteAssetQuantity, #data.budget.profitAndLossQuoteAssetQuantity = #data.budget.profitAndLossQuoteAssetQuantity + :quoteAssetQuantity',
+        'SET #data.availableBaseAssetQuantity = #data.availableBaseAssetQuantity + :baseAssetQuantity, #data.profitAndLossBaseAssetQuantity = #data.profitAndLossBaseAssetQuantity + :baseAssetQuantity, #data.availableQuoteAssetQuantity = #data.availableQuoteAssetQuantity + :quoteAssetQuantity, #data.profitAndLossQuoteAssetQuantity = #data.profitAndLossQuoteAssetQuantity + :quoteAssetQuantity',
       ExpressionAttributeNames: {
         '#data': 'data',
       },
@@ -121,7 +135,7 @@ export class DdbStrategyRepository implements StrategyRepository {
       const updateOutput = await this.ddbClient.send(new UpdateCommand(updateInput));
       return this.#convertFromItemFormat(updateOutput.Attributes!.data);
     } catch (error) {
-      throw new Error(`Unable to update strategy '${id}' budget '${consumedBaseAssetQuantity}/${consumedQuoteAssetQuantity}': ${(error as Error).message}`);
+      throw new Error(`Unable to update strategy '${id}' wallet '${consumedBaseAssetQuantity}/${consumedQuoteAssetQuantity}': ${(error as Error).message}`);
     }
   }
 

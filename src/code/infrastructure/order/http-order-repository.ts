@@ -1,8 +1,8 @@
 import { BinanceClient } from '../binance/binance-client';
 import { OrderRepository } from '../../domain/order/order-repository';
-import { Order } from '../../domain/order/model/order';
+import { Order, StatusOrder } from '../../domain/order/model/order';
 import { BinanceOrder } from '../binance/model/binance-order';
-import { fromBinanceOrderStatus, toBinanceSymbol } from '../binance/binance-converter';
+import { fromBinanceOrderSide, fromBinanceOrderStatus, toBinanceSymbol } from '../binance/binance-converter';
 
 export class HttpOrderRepository implements OrderRepository {
   constructor(private binanceClient: BinanceClient) {}
@@ -19,14 +19,6 @@ export class HttpOrderRepository implements OrderRepository {
       transactionDate: new Date(binanceOrder.transactTime),
       status: fromBinanceOrderStatus(binanceOrder.status),
       externalStatus: binanceOrder.status,
-      fills: binanceOrder.fills.map((binanceFill) => {
-        return {
-          price: +binanceFill.price,
-          quantity: +binanceFill.qty,
-          commission: +binanceFill.commission,
-          commissionAsset: binanceFill.commissionAsset,
-        };
-      }),
     };
   }
 
@@ -38,7 +30,7 @@ export class HttpOrderRepository implements OrderRepository {
 
     return {
       quantity: totalQuantity,
-      price: binanceOrder.fills.map((fill) => (+fill.qty / totalQuantity) * +fill.price).reduce((previous, current) => previous + current),
+      price: +binanceOrder.price > 0 ? +binanceOrder.price : +binanceOrder.cummulativeQuoteQty / totalQuantity,
     };
   }
 
@@ -50,10 +42,24 @@ export class HttpOrderRepository implements OrderRepository {
     switch (order.type) {
       case 'Market':
         return this.binanceClient.sendMarketOrder(symbol, side, order.baseAssetQuantity || order.quoteAssetQuantity!, asset);
-      case 'TakeProfit':
-        return this.binanceClient.sendTakeProfitOrder(symbol, side, order.baseAssetQuantity!, order.priceThreshold!);
+      case 'Limit':
+        return this.binanceClient.sendLimitOrder(symbol, side, order.baseAssetQuantity!, order.priceLimit!);
       default:
         throw new Error(`Unsupported '${order.type}' order type`);
     }
+  }
+
+  async check(symbol: string, externalId: string): Promise<StatusOrder> {
+    const binanceOrder = await this.binanceClient.queryOrder(toBinanceSymbol(symbol), externalId);
+    const binanceExecutedQuantityAndPrice = this.#calculateExecutedQuantityAndPrice(binanceOrder);
+
+    return {
+      side: fromBinanceOrderSide(binanceOrder.side),
+      status: fromBinanceOrderStatus(binanceOrder.status),
+      externalId: externalId,
+      externalStatus: binanceOrder.status,
+      executedAssetQuantity: binanceExecutedQuantityAndPrice?.quantity,
+      executedPrice: binanceExecutedQuantityAndPrice?.price,
+    };
   }
 }

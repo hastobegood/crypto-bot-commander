@@ -6,8 +6,10 @@ import { BinanceAccount } from './model/binance-account';
 import { BinanceOrder, BinanceOrderSide } from './model/binance-order';
 import * as crypto from 'crypto';
 import { BinanceSymbolCandlestick } from './model/binance-candlestick';
+import { BinanceExchange } from './model/binance-exchange';
 
 const accountInformationEndpoint = '/v3/account';
+const exchangeInformationEndpoint = '/v3/exchangeInfo';
 const symbolCandlesticksEndpoint = '/v3/klines';
 const orderEndpoint = '/v3/order';
 
@@ -28,6 +30,19 @@ export class BinanceClient {
     const account = await axiosInstance.get<BinanceAccount>(queryUrl, queryConfig);
 
     return account.data;
+  }
+
+  async getExchange(symbol: string): Promise<BinanceExchange> {
+    if (!this.secrets) {
+      this.secrets = await this.#getSecrets();
+    }
+
+    const queryParameters = `symbol=${symbol}`;
+    const queryUrl = `${exchangeInformationEndpoint}?${queryParameters}`;
+    const queryConfig = this.#getQueryConfig();
+    const exchange = await axiosInstance.get<BinanceExchange>(queryUrl, queryConfig);
+
+    return exchange.data;
   }
 
   async getSymbolCandlesticks(symbol: string, startTime: number, endTime: number, interval: string, limit: number): Promise<BinanceSymbolCandlestick[]> {
@@ -57,8 +72,8 @@ export class BinanceClient {
     return this.#sendOrder(queryParameters);
   }
 
-  async sendTakeProfitOrder(symbol: string, side: BinanceOrderSide, quantity: number, price: number): Promise<BinanceOrder> {
-    const queryParameters = `symbol=${symbol}&side=${side}&type=TAKE_PROFIT_LIMIT&quantity=${quantity}&stopPrice=${price}&price=${price}&timeInForce=GTC&newOrderRespType=FULL&timestamp=${new Date().valueOf()}`;
+  async sendLimitOrder(symbol: string, side: BinanceOrderSide, quantity: number, price: number): Promise<BinanceOrder> {
+    const queryParameters = `symbol=${symbol}&side=${side}&type=LIMIT&quantity=${quantity}&price=${price}&timeInForce=GTC&newOrderRespType=FULL&timestamp=${new Date().valueOf()}`;
 
     return this.#sendOrder(queryParameters);
   }
@@ -74,6 +89,20 @@ export class BinanceClient {
     const order = await axiosInstance.post<BinanceOrder>(queryUrl, null, queryConfig);
 
     return order.data;
+  }
+
+  async queryOrder(symbol: string, orderId: string): Promise<BinanceOrder> {
+    if (!this.secrets) {
+      this.secrets = await this.#getSecrets();
+    }
+
+    const queryParameters = `symbol=${symbol}&orderId=${orderId}&timestamp=${new Date().valueOf()}`;
+    const querySignature = this.#getSignature(queryParameters);
+    const queryUrl = `${orderEndpoint}?${queryParameters}&signature=${querySignature}`;
+    const queryConfig = this.#getQueryConfig();
+    const account = await axiosInstance.get<BinanceOrder>(queryUrl, queryConfig);
+
+    return account.data;
   }
 
   async #getSecrets(): Promise<BinanceSecrets> {

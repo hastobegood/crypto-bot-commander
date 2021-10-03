@@ -1,5 +1,5 @@
 export type BinanceOrderSide = 'BUY' | 'SELL';
-export type BinanceOrderType = 'MARKET' | 'TAKE_PROFIT';
+export type BinanceOrderType = 'MARKET' | 'LIMIT';
 export type BinanceOrderStatus = 'NEW' | 'PARTIALLY_FILLED' | 'FILLED' | 'CANCELED' | 'PENDING_CANCEL' | 'REJECTED' | 'EXPIRED';
 
 export interface BinanceOrder {
@@ -9,15 +9,8 @@ export interface BinanceOrder {
   transactTime: number;
   price: string;
   executedQty: string;
+  cummulativeQuoteQty: string;
   status: BinanceOrderStatus;
   side: BinanceOrderSide;
   type: BinanceOrderType;
-  fills: BinanceOrderFill[];
-}
-
-export interface BinanceOrderFill {
-  price: string;
-  qty: string;
-  commission: string;
-  commissionAsset: string;
 }
