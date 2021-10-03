@@ -7,14 +7,14 @@
     "node": "^14"
   },
   "scripts": {
-    "clean": "rm -rf dist .aws-sam coverage",
+    "clean": "rm -rf dist .aws-sam reports",
     "build": "yarn tsc",
     "bundle": "yarn webpack",
     "bundle:analyze": "yarn webpack && yarn webpack-bundle-analyzer dist/webpack/stats.json",
     "deploy:test": "sam build && sam deploy --config-env test",
     "deploy:prod": "sam build && sam deploy --config-env prod",
     "test": "jest",
-    "lint": "yarn eslint . --ext .ts",
+    "lint": "yarn eslint . --ext .ts --format json -o reports/eslint-report.json",
     "lint:fix": "yarn eslint . --ext .ts --fix"
   },
   "dependencies": {
@@ -49,6 +49,7 @@
     "eslint-plugin-prettier": "^4.0.0",
     "fs-extra": "^10.0.0",
     "jest": "^27.2.0",
+    "jest-sonar-reporter": "^2.0.0",
     "mockdate": "^3.0.5",
     "prettier": "^2.4.1",
     "randomstring": "^1.2.1",
@@ -60,5 +61,8 @@
     "webpack-bundle-analyzer": "^4.4.2",
     "webpack-cli": "^4.8.0",
     "webpack-node-externals": "^3.0.0"
+  },
+  "jestSonar": {
+    "reportPath": "reports"
   }
 }
