@@ -5,7 +5,7 @@
 # NodeJS
 node_modules
 dist
-coverage
+reports
 
 # AWS SAM
 .aws-sam

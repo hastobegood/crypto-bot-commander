@@ -20,7 +20,7 @@ const config: Config.InitialOptions = {
   collectCoverageFrom: ['./src/**/*'],
 
   // The directory where Jest should output its coverage files
-  coverageDirectory: 'coverage',
+  coverageDirectory: 'reports',
 
   // An array of regexp pattern strings used to skip coverage collection
   // coveragePathIgnorePatterns: [
@@ -154,7 +154,7 @@ const config: Config.InitialOptions = {
   // testRegex: [],
 
   // This option allows the use of a custom results processor
-  // testResultsProcessor: undefined,
+  testResultsProcessor: 'jest-sonar-reporter',
 
   // This option allows use of a custom test runner
   // testRunner: "jest-circus/runner",
