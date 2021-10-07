@@ -8,7 +8,14 @@ export class DdbStrategyStepRepository implements StrategyStepRepository {
   async save(step: StrategyStep): Promise<StrategyStep> {
     const batchWriteInput: BatchWriteCommandInput = {
       RequestItems: {
-        [this.tableName]: [this.#buildItem(step, `${step.creationDate.valueOf()}::${step.type}::${step.id}`), this.#buildItem(step, 'Last'), this.#buildItem(step, `Last::${step.type}`)],
+        [this.tableName]: [
+          this.#buildItem(step, `${step.creationDate.valueOf()}::${step.type}::${step.id}`, {
+            stepsListPk: `Strategy::${step.strategyId}::Steps`,
+            stepsListSk: step.creationDate.valueOf(),
+          }),
+          this.#buildItem(step, 'Last'),
+          this.#buildItem(step, `Last::${step.type}`),
+        ],
       },
     };
 
@@ -17,7 +24,7 @@ export class DdbStrategyStepRepository implements StrategyStepRepository {
     return step;
   }
 
-  #buildItem(step: StrategyStep, id: string): any {
+  #buildItem(step: StrategyStep, id: string, indexes?: { [key: string]: string | number }): any {
     return {
       PutRequest: {
         Item: {
@@ -25,6 +32,7 @@ export class DdbStrategyStepRepository implements StrategyStepRepository {
           sk: 'Details',
           type: 'StrategyStep',
           data: this.#convertToItemFormat(step),
+          ...indexes,
         },
       },
     };
