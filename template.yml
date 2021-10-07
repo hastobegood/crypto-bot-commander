@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: >-
-  binance-trading
+  crypto-bot
 
 Transform:
   - AWS::Serverless-2016-10-31
@@ -38,10 +38,13 @@ Mappings:
     test:
       DcaTradingConfig: '{ "baseAsset": "BTC", "quoteAsset": "BUSD", "quoteAssetQuantity": 25, "tradeAssets": [ { "asset": "ETH|BNB", "percentage": 0.50 } ] }'
       DcaTradingSchedule: cron(0 18 ? * * *)
+      AvailableSymbols: BNB#USDT
       UpdateAllCandlesticksSchedule: rate(1 minute)
     prod:
       DcaTradingConfig: '{ "baseAsset": "BTC", "quoteAsset": "EUR", "quoteAssetQuantity": 25, "tradeAssets": [ { "asset": "ETH", "percentage": 0.28 }, { "asset":"XRP", "percentage": 0.28 }, { "asset": "ADA|MATIC", "percentage": 0.20 } ] }'
       DcaTradingSchedule: cron(0 18 ? * 1 *)
+      AvailableSymbols: BNB#USDT
+      UpdateAllCandlesticksSchedule: rate(1 minute)
 
 Globals:
   Function:
@@ -68,13 +71,13 @@ Resources:
         Variables:
           BINANCE_URL: !Ref BinanceUrlParameter
           BINANCE_SECRET_NAME: !Ref BinanceSecretNameParameter
-          TRADING_TABLE_NAME: !Ref TradingTable
+          DCA_TRADING_TABLE_NAME: !Ref DcaTradingTable
           DCA_TRADING_CONFIG: !FindInMap [ EnvironmentMap, !Ref EnvironmentParameter, DcaTradingConfig ]
       Events:
         ScheduleEvent:
           Type: Schedule
           Properties:
-            Enabled: false
+            Enabled: true
             Schedule: !FindInMap [ EnvironmentMap, !Ref EnvironmentParameter, DcaTradingSchedule ]
       Policies:
         - AWSSecretsManagerGetSecretValuePolicy:
@@ -86,9 +89,9 @@ Resources:
                 - kms:Decrypt
               Resource: !Sub arn:aws:kms:${AWS::Region}:${AWS::AccountId}:${BinanceSecretEncryptionKeyParameter}
         - DynamoDBReadPolicy:
-            TableName: !Ref TradingTable
+            TableName: !Ref DcaTradingTable
         - DynamoDBWritePolicy:
-            TableName: !Ref TradingTable
+            TableName: !Ref DcaTradingTable
 
   InitializeAllCandlesticksFunction:
     Type: AWS::Serverless::Function
@@ -129,6 +132,7 @@ Resources:
         Variables:
           BINANCE_URL: !Ref BinanceUrlParameter
           BINANCE_SECRET_NAME: !Ref BinanceSecretNameParameter
+          AVAILABLE_SYMBOLS: !FindInMap [ EnvironmentMap, !Ref EnvironmentParameter, AvailableSymbols ]
           CANDLESTICK_TABLE_NAME: !Ref CandlestickTable
           UPDATED_CANDLESTICKS_QUEUE_URL: !Ref UpdatedCandlesticksQueue
       Events:
@@ -221,7 +225,7 @@ Resources:
         - SQSSendMessagePolicy:
             QueueName: !GetAtt ProcessedStrategyStepQueue.QueueName
 
-  TradingTable:
+  DcaTradingTable:
     Type: AWS::DynamoDB::Table
     Properties:
       BillingMode: PAY_PER_REQUEST
@@ -348,12 +352,12 @@ Outputs:
     Description: Evaluate strategy function ARN
     Value: !GetAtt EvaluateStrategyFunction.Arn
 
-  TradingTableName:
-    Description: Trading table name
-    Value: !Ref TradingTable
-  TradingTableArn:
-    Description: Trading table ARN
-    Value: !GetAtt TradingTable.Arn
+  DcaTradingTableName:
+    Description: DCA Trading table name
+    Value: !Ref DcaTradingTable
+  DcaTradingTableArn:
+    Description: DCA Trading table ARN
+    Value: !GetAtt DcaTradingTable.Arn
 
   CandlestickTableName:
     Description: Candlestick table name

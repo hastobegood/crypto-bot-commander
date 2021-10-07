@@ -3,13 +3,21 @@ import { OrderRepository } from '../../domain/order/order-repository';
 import { Order, StatusOrder } from '../../domain/order/model/order';
 import { BinanceOrder } from '../binance/model/binance-order';
 import { fromBinanceOrderSide, fromBinanceOrderStatus, toBinanceSymbol } from '../binance/binance-converter';
+import { extractAssets } from '../../configuration/util/symbol';
 
 export class HttpOrderRepository implements OrderRepository {
   constructor(private binanceClient: BinanceClient) {}
 
   async save(order: Order): Promise<Order> {
     const binanceOrder = await this.#sendOrder(order);
-    const binanceExecutedQuantityAndPrice = this.#calculateExecutedQuantityAndPrice(binanceOrder);
+    const binanceExecutedQuantityAndPrice = this.#calculateExecutedQuantityAndPrice(binanceOrder.executedQty, binanceOrder.price, binanceOrder.cummulativeQuoteQty);
+
+    // when commission is paid with the base asset, commission quantity should be deducted from executed quantity
+    if (binanceExecutedQuantityAndPrice && binanceOrder.fills.length > 0) {
+      const basetAsset = extractAssets(order.symbol).baseAsset;
+      const fills = binanceOrder.fills.filter((fill) => fill.commissionAsset === basetAsset);
+      binanceExecutedQuantityAndPrice.quantity -= fills.reduce((total, current) => total + +current.commission, 0);
+    }
 
     return {
       ...order,
@@ -22,15 +30,15 @@ export class HttpOrderRepository implements OrderRepository {
     };
   }
 
-  #calculateExecutedQuantityAndPrice(binanceOrder: BinanceOrder): { quantity: number; price: number } | undefined {
-    const totalQuantity = +binanceOrder.executedQty;
+  #calculateExecutedQuantityAndPrice(executedQty: string, price: string, cummulativeQuoteQty: string): { quantity: number; price: number } | undefined {
+    const totalQuantity = +executedQty;
     if (totalQuantity === 0) {
       return undefined;
     }
 
     return {
       quantity: totalQuantity,
-      price: +binanceOrder.price > 0 ? +binanceOrder.price : +binanceOrder.cummulativeQuoteQty / totalQuantity,
+      price: +price > 0 ? +price : +cummulativeQuoteQty / totalQuantity,
     };
   }
 
@@ -50,8 +58,16 @@ export class HttpOrderRepository implements OrderRepository {
   }
 
   async check(symbol: string, externalId: string): Promise<StatusOrder> {
-    const binanceOrder = await this.binanceClient.queryOrder(toBinanceSymbol(symbol), externalId);
-    const binanceExecutedQuantityAndPrice = this.#calculateExecutedQuantityAndPrice(binanceOrder);
+    const binanceSymbol = toBinanceSymbol(symbol);
+    const [binanceOrder, binanceTrades] = await Promise.all([this.binanceClient.queryOrder(binanceSymbol, externalId), this.binanceClient.getTrades(binanceSymbol, externalId)]);
+    const binanceExecutedQuantityAndPrice = this.#calculateExecutedQuantityAndPrice(binanceOrder.executedQty, binanceOrder.price, binanceOrder.cummulativeQuoteQty);
+
+    // when commission is paid with the base asset, commission quantity should be deducted from executed quantity
+    if (binanceExecutedQuantityAndPrice && binanceTrades.length > 0) {
+      const basetAsset = extractAssets(symbol).baseAsset;
+      const trades = binanceTrades.filter((binanceTrade) => binanceTrade.commissionAsset === basetAsset);
+      binanceExecutedQuantityAndPrice.quantity -= trades.reduce((total, current) => total + +current.commission, 0);
+    }
 
     return {
       side: fromBinanceOrderSide(binanceOrder.side),

@@ -9,5 +9,5 @@ export interface StrategyRepository {
 
   getWalletById(id: string): Promise<StrategyWallet | null>;
 
-  updateWalletById(id: string, consumedBaseAssetQuantity: number, consumedQuoteAssetQuantity: number): Promise<Strategy>;
+  updateWalletById(id: string, consumedBaseAssetQuantity: number, consumedQuoteAssetQuantity: number): Promise<StrategyWallet>;
 }

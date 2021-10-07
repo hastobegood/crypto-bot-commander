@@ -1,6 +1,6 @@
 export type OrderSide = 'Buy' | 'Sell';
 export type OrderType = 'Market' | 'Limit';
-export type OrderStatus = 'Waiting' | 'Filled' | 'Canceled' | 'Error' | 'Unknown';
+export type OrderStatus = 'Waiting' | 'PartiallyFilled' | 'Filled' | 'Canceled' | 'Error' | 'Unknown';
 
 export interface CreateOrder {
   symbol: string;
@@ -11,7 +11,7 @@ export interface CreateOrder {
   priceLimit?: number;
 }
 
-export interface Order {
+export interface Order extends OrderQuantities {
   id: string;
   externalId?: string;
   symbol: string;
@@ -19,9 +19,6 @@ export interface Order {
   type: OrderType;
   creationDate: Date;
   transactionDate?: Date;
-  baseAssetQuantity?: number;
-  quoteAssetQuantity?: number;
-  priceLimit?: number;
   executedAssetQuantity?: number;
   executedPrice?: number;
   status: OrderStatus;

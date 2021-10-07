@@ -347,20 +347,19 @@ describe('DdbStrategyRepository', () => {
     });
 
     describe('When strategy is found', () => {
-      let strategy: Strategy;
+      let wallet: StrategyWallet;
 
       beforeEach(() => {
-        strategy = buildDefaultStrategy();
         ddbClientMock.send.mockImplementation(() => ({
           Attributes: {
-            data: { ...strategy },
+            data: wallet,
           },
         }));
       });
 
       it('Then updated strategy is returned', async () => {
         const result = await strategyRepository.updateWalletById('123', 1.5, -100);
-        expect(result).toEqual(strategy);
+        expect(result).toEqual(wallet);
 
         expect(ddbClientMock.send).toHaveBeenCalledTimes(1);
         const sendParams = ddbClientMock.send.mock.calls[0];

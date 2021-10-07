@@ -22,6 +22,8 @@ export const fromBinanceOrderStatus = (status: BinanceOrderStatus): OrderStatus 
   switch (status) {
     case 'NEW':
       return 'Waiting';
+    case 'PARTIALLY_FILLED':
+      return 'PartiallyFilled';
     case 'FILLED':
       return 'Filled';
     case 'PENDING_CANCEL':

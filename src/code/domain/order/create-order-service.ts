@@ -26,9 +26,9 @@ export class CreateOrderService {
       symbol: createOrder.symbol,
       side: createOrder.side,
       type: createOrder.type,
+      status: 'Waiting',
       creationDate: creationDate,
       ...(await this.#getQuantities(createOrder)),
-      status: 'Waiting',
     };
   }
 

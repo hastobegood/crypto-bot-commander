@@ -1,7 +1,7 @@
 import { mocked } from 'ts-jest/utils';
 import { StrategyRepository } from '../../../../src/code/domain/strategy/strategy-repository';
-import { Strategy } from '../../../../src/code/domain/strategy/model/strategy';
-import { buildDefaultStrategy } from '../../../builders/domain/strategy/strategy-test-builder';
+import { Strategy, StrategyWallet } from '../../../../src/code/domain/strategy/model/strategy';
+import { buildDefaultStrategy, buildDefaultStrategyWallet } from '../../../builders/domain/strategy/strategy-test-builder';
 import { UpdateStrategyService } from '../../../../src/code/domain/strategy/update-strategy-service';
 
 const strategyRepositoryMock = mocked(jest.genMockFromModule<StrategyRepository>('../../../../src/code/domain/strategy/strategy-repository'), true);
@@ -39,16 +39,16 @@ describe('UpdateStrategyService', () => {
 
   describe('Given a strategy wallet to update by its ID', () => {
     describe('When strategy wallet is updated', () => {
-      let strategy: Strategy;
+      let wallet: StrategyWallet;
 
       beforeEach(() => {
-        strategy = buildDefaultStrategy();
-        strategyRepositoryMock.updateWalletById.mockResolvedValue(strategy);
+        wallet = buildDefaultStrategyWallet();
+        strategyRepositoryMock.updateWalletById.mockResolvedValue(wallet);
       });
 
       it('Then updated strategy is returned', async () => {
         const result = await updateStrategyService.updateWalletById('666', 10, -20);
-        expect(result).toEqual(strategy);
+        expect(result).toEqual(wallet);
 
         expect(strategyRepositoryMock.updateWalletById).toHaveBeenCalledTimes(1);
         const updateWalletByIdParams = strategyRepositoryMock.updateWalletById.mock.calls[0];

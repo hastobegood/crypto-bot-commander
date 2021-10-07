@@ -21,7 +21,8 @@ const candlestickPublisher = new SqsCandlestickPublisher(process.env.UPDATED_CAN
 const publishCandlestickService = new PublishCandlestickService(candlestickPublisher);
 
 const updateAllCandlesticksEventScheduler = new UpdateAllCandlesticksEventScheduler(updateCandlestickService, publishCandlestickService);
+const symbols = process.env.AVAILABLE_SYMBOLS.split(',').map((symbol) => symbol.trim());
 
-export const handler = async (event: ScheduledEvent, context: Context): Promise<void> => {
-  return handleEvent(context, async () => updateAllCandlesticksEventScheduler.process('BNB#USDT'));
+export const handler = async (event: ScheduledEvent, context: Context): Promise<void[]> => {
+  return handleEvent(context, async () => Promise.all(symbols.map((symbol) => updateAllCandlesticksEventScheduler.process(symbol))));
 };

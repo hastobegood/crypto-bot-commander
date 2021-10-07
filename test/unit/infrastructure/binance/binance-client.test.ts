@@ -13,6 +13,8 @@ import { BinanceSymbolCandlestick } from '../../../../src/code/infrastructure/bi
 import { buildDefaultBinanceSymbolCandlesticks } from '../../../builders/infrastructure/binance/binance-symbol-candlestick-test-builder';
 import { BinanceExchange } from '../../../../src/code/infrastructure/binance/model/binance-exchange';
 import { buildDefaultBinanceExchange } from '../../../builders/infrastructure/binance/binance-exchange-test-builder';
+import { BinanceTrade } from '../../../../src/code/infrastructure/binance/model/binance-trade';
+import { buildDefaultBinanceTrades } from '../../../builders/infrastructure/binance/binance-trade-test-builder';
 
 jest.mock('../../../../src/code/configuration/http/axios');
 
@@ -345,6 +347,98 @@ describe('BinanceClient', () => {
         expect(axiosInstanceMock.get).toHaveBeenCalledTimes(1);
         const axiosGetParams = axiosInstanceMock.get.mock.calls[0];
         expect(axiosGetParams[0]).toContain(`/v3/order?symbol=ABC&orderId=123&timestamp=${date.valueOf()}&signature=`);
+        expect(axiosGetParams[1]).toEqual({
+          baseURL: 'my-url',
+          headers: {
+            'X-MBX-APIKEY': binanceSecrets.apiKey,
+          },
+        });
+      });
+    });
+  });
+
+  describe('Given Binance trades to retrieve', () => {
+    describe('When trades are found', () => {
+      let trades: BinanceTrade[];
+
+      beforeEach(() => {
+        trades = buildDefaultBinanceTrades();
+        axiosInstanceMock.get.mockResolvedValue({
+          data: trades,
+        });
+      });
+
+      it('Then secrets are loaded only once', async () => {
+        await binanceClient.getTrades('ABC', '123');
+        await binanceClient.getTrades('ABC', '123');
+        await binanceClient.getTrades('ABC', '123');
+
+        expect(smClientMock.send).toHaveBeenCalledTimes(1);
+      });
+
+      it('Then trades are returned', async () => {
+        const result = await binanceClient.getTrades('ABC', '123');
+        expect(result).toEqual(trades);
+
+        expect(axiosInstanceMock.get).toHaveBeenCalledTimes(1);
+        const axiosGetParams = axiosInstanceMock.get.mock.calls[0];
+        expect(axiosGetParams[0]).toContain(`/v3/myTrades?symbol=ABC&orderId=123&timestamp=${date.valueOf()}&signature=`);
+        expect(axiosGetParams[1]).toEqual({
+          baseURL: 'my-url',
+          headers: {
+            'X-MBX-APIKEY': binanceSecrets.apiKey,
+          },
+        });
+      });
+    });
+
+    describe('When trades are not found', () => {
+      beforeEach(() => {
+        axiosInstanceMock.get.mockResolvedValue({
+          data: [],
+        });
+      });
+
+      it('Then secrets are loaded only once', async () => {
+        await binanceClient.getTrades('ABC', '123');
+        await binanceClient.getTrades('ABC', '123');
+        await binanceClient.getTrades('ABC', '123');
+
+        expect(smClientMock.send).toHaveBeenCalledTimes(1);
+      });
+
+      it('Then empty list is returned', async () => {
+        const result = await binanceClient.getTrades('ABC', '123');
+        expect(result).toEqual([]);
+
+        expect(axiosInstanceMock.get).toHaveBeenCalledTimes(1);
+        const axiosGetParams = axiosInstanceMock.get.mock.calls[0];
+        expect(axiosGetParams[0]).toContain(`/v3/myTrades?symbol=ABC&orderId=123&timestamp=${date.valueOf()}&signature=`);
+        expect(axiosGetParams[1]).toEqual({
+          baseURL: 'my-url',
+          headers: {
+            'X-MBX-APIKEY': binanceSecrets.apiKey,
+          },
+        });
+      });
+    });
+
+    describe('When trades retrieval has failed', () => {
+      beforeEach(() => {
+        axiosInstanceMock.get.mockRejectedValue(new Error('Error'));
+      });
+
+      it('Then error is thrown', async () => {
+        try {
+          await binanceClient.getTrades('ABC', '123');
+          fail();
+        } catch (error) {
+          expect((error as Error).message).toEqual('Error');
+        }
+
+        expect(axiosInstanceMock.get).toHaveBeenCalledTimes(1);
+        const axiosGetParams = axiosInstanceMock.get.mock.calls[0];
+        expect(axiosGetParams[0]).toContain(`/v3/myTrades?symbol=ABC&orderId=123&timestamp=${date.valueOf()}&signature=`);
         expect(axiosGetParams[1]).toEqual({
           baseURL: 'my-url',
           headers: {

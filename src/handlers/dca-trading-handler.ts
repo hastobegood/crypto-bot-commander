@@ -22,7 +22,7 @@ const orderRepository = new HttpOrderRepository(binanceClient);
 const createOrderService = new CreateOrderService(getTickerService, orderRepository);
 
 const dcaTradingConfig = JSON.parse(process.env.DCA_TRADING_CONFIG) as DcaTradingConfig;
-const dcaTradingRepository = new DdbDcaTradingRepository(process.env.TRADING_TABLE_NAME, ddbClient);
+const dcaTradingRepository = new DdbDcaTradingRepository(process.env.DCA_TRADING_TABLE_NAME, ddbClient);
 const processDcaTradingService = new ProcessDcaTradingService(createOrderService, dcaTradingRepository);
 
 const dcaTradingScheduler = new DcaTradingEventScheduler(processDcaTradingService, dcaTradingConfig);
