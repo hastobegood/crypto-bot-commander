@@ -39,6 +39,8 @@ describe('DdbStrategyStepRepository', () => {
                     pk: `Strategy::${step.strategyId}::Step::${step.creationDate.valueOf()}::${step.type}::${step.id}`,
                     sk: 'Details',
                     type: 'StrategyStep',
+                    stepsListPk: `Strategy::${step.strategyId}::Steps`,
+                    stepsListSk: step.creationDate.valueOf(),
                     data: {
                       ...step,
                       creationDate: step.creationDate.toISOString(),
@@ -107,6 +109,8 @@ describe('DdbStrategyStepRepository', () => {
                     pk: `Strategy::${step.strategyId}::Step::${step.creationDate.valueOf()}::${step.type}::${step.id}`,
                     sk: 'Details',
                     type: 'StrategyStep',
+                    stepsListPk: `Strategy::${step.strategyId}::Steps`,
+                    stepsListSk: step.creationDate.valueOf(),
                     data: {
                       ...step,
                       creationDate: step.creationDate.toISOString(),

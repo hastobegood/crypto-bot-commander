@@ -112,7 +112,7 @@ export class DdbStrategyRepository implements StrategyRepository {
     return getOutput.Item ? getOutput.Item.data : null;
   }
 
-  async updateWalletById(id: string, consumedBaseAssetQuantity: number, consumedQuoteAssetQuantity: number): Promise<Strategy> {
+  async updateWalletById(id: string, consumedBaseAssetQuantity: number, consumedQuoteAssetQuantity: number): Promise<StrategyWallet> {
     const updateInput: UpdateCommandInput = {
       TableName: this.tableName,
       Key: {
@@ -133,7 +133,7 @@ export class DdbStrategyRepository implements StrategyRepository {
 
     try {
       const updateOutput = await this.ddbClient.send(new UpdateCommand(updateInput));
-      return this.#convertFromItemFormat(updateOutput.Attributes!.data);
+      return updateOutput.Attributes!.data;
     } catch (error) {
       throw new Error(`Unable to update strategy '${id}' wallet '${consumedBaseAssetQuantity}/${consumedQuoteAssetQuantity}': ${(error as Error).message}`);
     }

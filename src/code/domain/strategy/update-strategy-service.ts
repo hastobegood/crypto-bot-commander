@@ -1,5 +1,5 @@
 import { StrategyRepository } from './strategy-repository';
-import { Strategy, StrategyStatus } from './model/strategy';
+import { Strategy, StrategyStatus, StrategyWallet } from './model/strategy';
 
 export class UpdateStrategyService {
   constructor(private strategyRepository: StrategyRepository) {}
@@ -8,7 +8,7 @@ export class UpdateStrategyService {
     return this.strategyRepository.updateStatusById(id, status);
   }
 
-  async updateWalletById(id: string, consumedBaseAssetQuantity: number, consumedQuoteAssetQuantity: number): Promise<Strategy> {
+  async updateWalletById(id: string, consumedBaseAssetQuantity: number, consumedQuoteAssetQuantity: number): Promise<StrategyWallet> {
     return await this.strategyRepository.updateWalletById(id, consumedBaseAssetQuantity, consumedQuoteAssetQuantity);
   }
 }

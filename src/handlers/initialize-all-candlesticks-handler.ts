@@ -1,5 +1,5 @@
 import 'source-map-support/register';
-import { Context, ScheduledEvent } from 'aws-lambda';
+import { Context } from 'aws-lambda';
 import { handleEvent } from './handler-utils';
 import { ddbClient } from '../code/configuration/aws/dynamodb';
 import { BinanceClient } from '../code/infrastructure/binance/binance-client';
@@ -17,6 +17,12 @@ const initializeCandlestickService = new InitializeCandlestickService(candlestic
 
 const initializeAllCandlesticksApiController = new InitializeAllCandlesticksApiController(initializeCandlestickService);
 
-export const handler = async (event: ScheduledEvent, context: Context): Promise<void> => {
-  return handleEvent(context, async () => initializeAllCandlesticksApiController.process('BNB#USDT', 2021, 9));
+export const handler = async (event: InitializeAllCandlesticksEvent, context: Context): Promise<void> => {
+  return handleEvent(context, async () => initializeAllCandlesticksApiController.process(event.symbol, event.year, event.month));
 };
+
+interface InitializeAllCandlesticksEvent {
+  symbol: string;
+  year: number;
+  month: number;
+}

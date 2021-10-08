@@ -7,11 +7,13 @@ import { BinanceOrder, BinanceOrderSide } from './model/binance-order';
 import * as crypto from 'crypto';
 import { BinanceSymbolCandlestick } from './model/binance-candlestick';
 import { BinanceExchange } from './model/binance-exchange';
+import { BinanceTrade } from './model/binance-trade';
 
 const accountInformationEndpoint = '/v3/account';
 const exchangeInformationEndpoint = '/v3/exchangeInfo';
 const symbolCandlesticksEndpoint = '/v3/klines';
 const orderEndpoint = '/v3/order';
+const tradeEndpoint = '/v3/myTrades';
 
 export class BinanceClient {
   private secrets?: BinanceSecrets;
@@ -91,7 +93,7 @@ export class BinanceClient {
     return order.data;
   }
 
-  async queryOrder(symbol: string, orderId: string): Promise<BinanceOrder> {
+  async queryOrder(symbol: string, orderId: string): Promise<Pick<BinanceOrder, 'side' | 'status' | 'price' | 'executedQty' | 'cummulativeQuoteQty'>> {
     if (!this.secrets) {
       this.secrets = await this.#getSecrets();
     }
@@ -100,9 +102,23 @@ export class BinanceClient {
     const querySignature = this.#getSignature(queryParameters);
     const queryUrl = `${orderEndpoint}?${queryParameters}&signature=${querySignature}`;
     const queryConfig = this.#getQueryConfig();
-    const account = await axiosInstance.get<BinanceOrder>(queryUrl, queryConfig);
+    const order = await axiosInstance.get<BinanceOrder>(queryUrl, queryConfig);
 
-    return account.data;
+    return order.data;
+  }
+
+  async getTrades(symbol: string, orderId: string): Promise<BinanceTrade[]> {
+    if (!this.secrets) {
+      this.secrets = await this.#getSecrets();
+    }
+
+    const queryParameters = `symbol=${symbol}&orderId=${orderId}&timestamp=${new Date().valueOf()}`;
+    const querySignature = this.#getSignature(queryParameters);
+    const queryUrl = `${tradeEndpoint}?${queryParameters}&signature=${querySignature}`;
+    const queryConfig = this.#getQueryConfig();
+    const trades = await axiosInstance.get<BinanceTrade[]>(queryUrl, queryConfig);
+
+    return trades.data;
   }
 
   async #getSecrets(): Promise<BinanceSecrets> {
