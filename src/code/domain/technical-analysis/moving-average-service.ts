@@ -1,6 +1,6 @@
 import { Point } from './model/point';
 import { CalculateMovingAverage, MovingAverage, MovingAverageType } from './model/moving-average';
-import { roundNumber } from '../../configuration/util/math';
+import { round } from '../../configuration/util/math';
 import { sortPoints, TechnicalAnalysisService, TechnicalAnalysisType } from './technical-analysis-service';
 
 export class MovingAverageService implements TechnicalAnalysisService<CalculateMovingAverage, MovingAverage> {
@@ -10,7 +10,7 @@ export class MovingAverageService implements TechnicalAnalysisService<CalculateM
 
   async calculate(calculateMovingAverage: CalculateMovingAverage): Promise<MovingAverage> {
     return {
-      value: roundNumber(this.#calculate(calculateMovingAverage.type, calculateMovingAverage.period, sortPoints(calculateMovingAverage.points)), 8),
+      value: round(this.#calculate(calculateMovingAverage.type, calculateMovingAverage.period, sortPoints(calculateMovingAverage.points)), 8),
     };
   }
 

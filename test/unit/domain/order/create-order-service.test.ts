@@ -4,7 +4,7 @@ import { OrderRepository } from '../../../../src/code/domain/order/order-reposit
 import { CreateOrder, Order } from '../../../../src/code/domain/order/model/order';
 import { buildDefaultCreateLimitOrder, buildDefaultCreateMarketOrder, buildDefaultLimitOrder, buildDefaultMarketOrder } from '../../../builders/domain/order/order-test-builder';
 import { CreateOrderService } from '../../../../src/code/domain/order/create-order-service';
-import { truncateNumber } from '../../../../src/code/configuration/util/math';
+import { truncate } from '../../../../src/code/configuration/util/math';
 import { GetTickerService } from '../../../../src/code/domain/ticker/get-ticker-service';
 import { Ticker } from '../../../../src/code/domain/ticker/model/ticker';
 import { buildDefaultTicker } from '../../../builders/domain/ticker/ticker-test-builder';
@@ -64,8 +64,8 @@ describe('CreateOrderService', () => {
           side: createOrder.side,
           type: createOrder.type,
           creationDate: creationDate,
-          baseAssetQuantity: createOrder.baseAssetQuantity ? truncateNumber(createOrder.baseAssetQuantity, ticker.quantityPrecision) : undefined,
-          quoteAssetQuantity: createOrder.quoteAssetQuantity ? truncateNumber(createOrder.quoteAssetQuantity, ticker.quoteAssetPrecision) : undefined,
+          baseAssetQuantity: createOrder.baseAssetQuantity ? truncate(createOrder.baseAssetQuantity, ticker.quantityPrecision) : undefined,
+          quoteAssetQuantity: createOrder.quoteAssetQuantity ? truncate(createOrder.quoteAssetQuantity, ticker.quoteAssetPrecision) : undefined,
           status: 'Waiting',
         });
       });
@@ -159,8 +159,8 @@ describe('CreateOrderService', () => {
           side: createOrder.side,
           type: createOrder.type,
           creationDate: creationDate,
-          baseAssetQuantity: truncateNumber(createOrder.baseAssetQuantity!, ticker.quantityPrecision),
-          priceLimit: truncateNumber(createOrder.priceLimit!, ticker.pricePrecision),
+          baseAssetQuantity: truncate(createOrder.baseAssetQuantity!, ticker.quantityPrecision),
+          priceLimit: truncate(createOrder.priceLimit!, ticker.pricePrecision),
           status: 'Waiting',
         });
       });
