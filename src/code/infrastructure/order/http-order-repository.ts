@@ -4,6 +4,7 @@ import { Order, StatusOrder } from '../../domain/order/model/order';
 import { BinanceOrder } from '../binance/model/binance-order';
 import { fromBinanceOrderSide, fromBinanceOrderStatus, toBinanceSymbol } from '../binance/binance-converter';
 import { extractAssets } from '../../configuration/util/symbol';
+import { round } from '../../configuration/util/math';
 
 export class HttpOrderRepository implements OrderRepository {
   constructor(private binanceClient: BinanceClient) {}
@@ -22,8 +23,8 @@ export class HttpOrderRepository implements OrderRepository {
     return {
       ...order,
       externalId: binanceOrder.orderId.toString(),
-      executedAssetQuantity: binanceExecutedQuantityAndPrice?.quantity,
-      executedPrice: binanceExecutedQuantityAndPrice?.price,
+      executedAssetQuantity: binanceExecutedQuantityAndPrice?.quantity ? round(binanceExecutedQuantityAndPrice.quantity, 15) : undefined,
+      executedPrice: binanceExecutedQuantityAndPrice?.price ? round(binanceExecutedQuantityAndPrice.price, 15) : undefined,
       transactionDate: new Date(binanceOrder.transactTime),
       status: fromBinanceOrderStatus(binanceOrder.status),
       externalStatus: binanceOrder.status,
@@ -74,8 +75,8 @@ export class HttpOrderRepository implements OrderRepository {
       status: fromBinanceOrderStatus(binanceOrder.status),
       externalId: externalId,
       externalStatus: binanceOrder.status,
-      executedAssetQuantity: binanceExecutedQuantityAndPrice?.quantity,
-      executedPrice: binanceExecutedQuantityAndPrice?.price,
+      executedAssetQuantity: binanceExecutedQuantityAndPrice?.quantity ? round(binanceExecutedQuantityAndPrice.quantity, 15) : undefined,
+      executedPrice: binanceExecutedQuantityAndPrice?.price ? round(binanceExecutedQuantityAndPrice.price, 15) : undefined,
     };
   }
 }

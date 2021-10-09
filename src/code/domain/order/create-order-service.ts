@@ -1,7 +1,7 @@
 import { logger } from '../../configuration/log/logger';
 import { CreateOrder, Order, OrderQuantities } from './model/order';
 import { OrderRepository } from './order-repository';
-import { truncateNumber } from '../../configuration/util/math';
+import { truncate } from '../../configuration/util/math';
 import { GetTickerService } from '../ticker/get-ticker-service';
 
 export class CreateOrderService {
@@ -59,9 +59,9 @@ export class CreateOrderService {
     const ticker = await this.getTickerService.getBySymbol(createOrder.symbol);
 
     return {
-      baseAssetQuantity: createOrder.baseAssetQuantity ? truncateNumber(createOrder.baseAssetQuantity, ticker.quantityPrecision) : undefined,
-      quoteAssetQuantity: createOrder.quoteAssetQuantity ? truncateNumber(createOrder.quoteAssetQuantity, ticker.quoteAssetPrecision) : undefined,
-      priceLimit: createOrder.priceLimit ? truncateNumber(createOrder.priceLimit, ticker.pricePrecision) : undefined,
+      baseAssetQuantity: createOrder.baseAssetQuantity ? truncate(createOrder.baseAssetQuantity, ticker.quantityPrecision) : undefined,
+      quoteAssetQuantity: createOrder.quoteAssetQuantity ? truncate(createOrder.quoteAssetQuantity, ticker.quoteAssetPrecision) : undefined,
+      priceLimit: createOrder.priceLimit ? truncate(createOrder.priceLimit, ticker.pricePrecision) : undefined,
     };
   }
 }

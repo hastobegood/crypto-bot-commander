@@ -9,6 +9,7 @@ import { fromBinanceOrderSide, fromBinanceOrderStatus, toBinanceSymbol } from '.
 import { extractAssets } from '../../../../src/code/configuration/util/symbol';
 import { BinanceTrade } from '../../../../src/code/infrastructure/binance/model/binance-trade';
 import { buildDefaultBinanceTrade } from '../../../builders/infrastructure/binance/binance-trade-test-builder';
+import { round } from 'lodash';
 
 const binanceClientMock = mocked(jest.genMockFromModule<BinanceClient>('../../../../src/code/infrastructure/binance/binance-client'), true);
 
@@ -65,8 +66,8 @@ describe('HttpOrderRepository', () => {
           expect(result).toEqual({
             ...order,
             externalId: binanceOrder.orderId.toString(),
-            executedAssetQuantity: +binanceOrder.executedQty - (+binanceOrderFill1.commission + +binanceOrderFill2.commission),
-            executedPrice: +binanceOrder.cummulativeQuoteQty / +binanceOrder.executedQty,
+            executedAssetQuantity: round(+binanceOrder.executedQty - (+binanceOrderFill1.commission + +binanceOrderFill2.commission), 15),
+            executedPrice: round(+binanceOrder.cummulativeQuoteQty / +binanceOrder.executedQty, 15),
             transactionDate: new Date(binanceOrder.transactTime),
             status: fromBinanceOrderStatus(binanceOrder.status),
             externalStatus: binanceOrder.status,
@@ -99,7 +100,7 @@ describe('HttpOrderRepository', () => {
             ...order,
             externalId: binanceOrder.orderId.toString(),
             executedAssetQuantity: +binanceOrder.executedQty,
-            executedPrice: +binanceOrder.cummulativeQuoteQty / +binanceOrder.executedQty,
+            executedPrice: round(+binanceOrder.cummulativeQuoteQty / +binanceOrder.executedQty, 15),
             transactionDate: new Date(binanceOrder.transactTime),
             status: fromBinanceOrderStatus(binanceOrder.status),
             externalStatus: binanceOrder.status,
@@ -181,7 +182,7 @@ describe('HttpOrderRepository', () => {
           status: fromBinanceOrderStatus(binanceOrder.status),
           externalId: '123',
           externalStatus: binanceOrder.status,
-          executedAssetQuantity: +binanceOrder.executedQty - (+binanceTrade1.commission + +binanceTrade3.commission),
+          executedAssetQuantity: round(+binanceOrder.executedQty - (+binanceTrade1.commission + +binanceTrade3.commission), 15),
           executedPrice: +binanceOrder.price,
         });
 
