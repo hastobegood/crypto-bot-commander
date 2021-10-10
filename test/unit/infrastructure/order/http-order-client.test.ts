@@ -4,7 +4,7 @@ import { BinanceOrder, BinanceOrderFill } from '../../../../src/code/infrastruct
 import { Order, OrderType } from '../../../../src/code/domain/order/model/order';
 import { buildDefaultLimitOrder, buildDefaultMarketOrder, buildDefaultOrder } from '../../../builders/domain/order/order-test-builder';
 import { buildDefaultBinanceLimitOrder, buildDefaultBinanceMarketOrder, buildDefaultBinanceOrderFill } from '../../../builders/infrastructure/binance/binance-order-test-builder';
-import { HttpOrderRepository } from '../../../../src/code/infrastructure/order/http-order-repository';
+import { HttpOrderClient } from '../../../../src/code/infrastructure/order/http-order-client';
 import { fromBinanceOrderSide, fromBinanceOrderStatus, toBinanceSymbol } from '../../../../src/code/infrastructure/binance/binance-converter';
 import { extractAssets } from '../../../../src/code/configuration/util/symbol';
 import { BinanceTrade } from '../../../../src/code/infrastructure/binance/model/binance-trade';
@@ -13,27 +13,27 @@ import { round } from 'lodash';
 
 const binanceClientMock = mocked(jest.genMockFromModule<BinanceClient>('../../../../src/code/infrastructure/binance/binance-client'), true);
 
-let orderRepository: HttpOrderRepository;
+let orderRepository: HttpOrderClient;
 beforeEach(() => {
   binanceClientMock.sendMarketOrder = jest.fn();
   binanceClientMock.sendLimitOrder = jest.fn();
   binanceClientMock.queryOrder = jest.fn();
   binanceClientMock.getTrades = jest.fn();
 
-  orderRepository = new HttpOrderRepository(binanceClientMock);
+  orderRepository = new HttpOrderClient(binanceClientMock);
 });
 
-describe('HttpOrderRepository', () => {
+describe('HttpOrderClient', () => {
   let order: Order;
 
-  describe('Given an unknown order to save', () => {
+  describe('Given an unknown order to send', () => {
     beforeEach(() => {
       order = { ...buildDefaultOrder(), type: 'XXX' as OrderType };
     });
 
     it('Then error is thrown', async () => {
       try {
-        await orderRepository.save(order);
+        await orderRepository.send(order);
         fail();
       } catch (error) {
         expect(error).toBeDefined();
@@ -42,7 +42,7 @@ describe('HttpOrderRepository', () => {
     });
   });
 
-  describe('Given a market order to save', () => {
+  describe('Given a market order to send', () => {
     beforeEach(() => {
       order = buildDefaultMarketOrder();
     });
@@ -61,8 +61,8 @@ describe('HttpOrderRepository', () => {
           binanceClientMock.sendMarketOrder.mockResolvedValue(binanceOrder);
         });
 
-        it('Then saved order with commission deducted from executed quantity is returned', async () => {
-          const result = await orderRepository.save(order);
+        it('Then sent order with commission deducted from executed quantity is returned', async () => {
+          const result = await orderRepository.send(order);
           expect(result).toEqual({
             ...order,
             externalId: binanceOrder.orderId.toString(),
@@ -94,8 +94,8 @@ describe('HttpOrderRepository', () => {
           binanceClientMock.sendMarketOrder.mockResolvedValue(binanceOrder);
         });
 
-        it('Then saved order without commission deducted from executed quantity is returned', async () => {
-          const result = await orderRepository.save(order);
+        it('Then sent order without commission deducted from executed quantity is returned', async () => {
+          const result = await orderRepository.send(order);
           expect(result).toEqual({
             ...order,
             externalId: binanceOrder.orderId.toString(),
@@ -120,7 +120,7 @@ describe('HttpOrderRepository', () => {
     });
   });
 
-  describe('Given a limit order to save', () => {
+  describe('Given a limit order to send', () => {
     beforeEach(() => {
       order = buildDefaultLimitOrder();
     });
@@ -133,8 +133,8 @@ describe('HttpOrderRepository', () => {
         binanceClientMock.sendLimitOrder.mockResolvedValue(binanceOrder);
       });
 
-      it('Then saved order is returned', async () => {
-        const result = await orderRepository.save(order);
+      it('Then sent order is returned', async () => {
+        const result = await orderRepository.send(order);
         expect(result).toEqual({
           ...order,
           externalId: binanceOrder.orderId.toString(),
@@ -158,7 +158,7 @@ describe('HttpOrderRepository', () => {
     });
   });
 
-  describe('Given a status order to check', () => {
+  describe('Given an order to check', () => {
     describe('When Binance order is checked', () => {
       let binanceOrder: BinanceOrder;
       let binanceTrade1: BinanceTrade;
@@ -175,7 +175,7 @@ describe('HttpOrderRepository', () => {
         binanceClientMock.getTrades.mockResolvedValue([binanceTrade1, binanceTrade2, binanceTrade3]);
       });
 
-      it('Then status order is returned', async () => {
+      it('Then order review is returned', async () => {
         const result = await orderRepository.check('ABC#DEF', '123');
         expect(result).toEqual({
           side: fromBinanceOrderSide(binanceOrder.side),

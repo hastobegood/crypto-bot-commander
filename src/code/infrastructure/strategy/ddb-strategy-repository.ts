@@ -45,7 +45,7 @@ export class DdbStrategyRepository implements StrategyRepository {
     return results;
   }
 
-  async updateStatusById(id: string, status: StrategyStatus): Promise<Strategy> {
+  async updateStatusById(id: string, status: StrategyStatus): Promise<void> {
     const symbol = await this.#getSymbolById(id);
     if (!symbol) {
       throw new Error(`Unable to find strategy with ID '${id}'`);
@@ -69,12 +69,10 @@ export class DdbStrategyRepository implements StrategyRepository {
         ':gsiPk': `Strategy::${symbol}::${status}`,
         ':gsiSk': id,
       },
-      ReturnValues: 'ALL_NEW',
     };
 
     try {
-      const updateOutput = await this.ddbClient.send(new UpdateCommand(updateInput));
-      return this.#convertFromItemFormat(updateOutput.Attributes!.data);
+      await this.ddbClient.send(new UpdateCommand(updateInput));
     } catch (error) {
       throw new Error(`Unable to update strategy '${id}' status '${status}': ${(error as Error).message}`);
     }
@@ -112,7 +110,7 @@ export class DdbStrategyRepository implements StrategyRepository {
     return getOutput.Item ? getOutput.Item.data : null;
   }
 
-  async updateWalletById(id: string, consumedBaseAssetQuantity: number, consumedQuoteAssetQuantity: number): Promise<StrategyWallet> {
+  async updateWalletById(id: string, consumedBaseAssetQuantity: number, consumedQuoteAssetQuantity: number): Promise<void> {
     const updateInput: UpdateCommandInput = {
       TableName: this.tableName,
       Key: {
@@ -128,12 +126,10 @@ export class DdbStrategyRepository implements StrategyRepository {
         ':baseAssetQuantity': consumedBaseAssetQuantity,
         ':quoteAssetQuantity': consumedQuoteAssetQuantity,
       },
-      ReturnValues: 'ALL_NEW',
     };
 
     try {
-      const updateOutput = await this.ddbClient.send(new UpdateCommand(updateInput));
-      return updateOutput.Attributes!.data;
+      await this.ddbClient.send(new UpdateCommand(updateInput));
     } catch (error) {
       throw new Error(`Unable to update strategy '${id}' wallet '${consumedBaseAssetQuantity}/${consumedQuoteAssetQuantity}': ${(error as Error).message}`);
     }

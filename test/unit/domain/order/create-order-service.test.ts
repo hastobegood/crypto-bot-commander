@@ -8,16 +8,25 @@ import { truncate } from '../../../../src/code/configuration/util/math';
 import { GetTickerService } from '../../../../src/code/domain/ticker/get-ticker-service';
 import { Ticker } from '../../../../src/code/domain/ticker/model/ticker';
 import { buildDefaultTicker } from '../../../builders/domain/ticker/ticker-test-builder';
+import { OrderClient } from '../../../../src/code/domain/order/order-client';
+import { randomString } from '../../../builders/random-test-builder';
+
+const idMock = randomString();
+jest.mock('uuid', () => {
+  return { v4: () => idMock };
+});
 
 const getTickerServiceMock = mocked(jest.genMockFromModule<GetTickerService>('../../../../src/code/domain/ticker/get-ticker-service'), true);
+const orderClientMock = mocked(jest.genMockFromModule<OrderClient>('../../../../src/code/domain/order/order-client'), true);
 const orderRepositoryMock = mocked(jest.genMockFromModule<OrderRepository>('../../../../src/code/domain/order/order-repository'), true);
 
 let createOrderService: CreateOrderService;
 beforeEach(() => {
   getTickerServiceMock.getBySymbol = jest.fn();
+  orderClientMock.send = jest.fn();
   orderRepositoryMock.save = jest.fn();
 
-  createOrderService = new CreateOrderService(getTickerServiceMock, orderRepositoryMock);
+  createOrderService = new CreateOrderService(getTickerServiceMock, orderClientMock, orderRepositoryMock);
 });
 
 describe('CreateOrderService', () => {
@@ -43,6 +52,7 @@ describe('CreateOrderService', () => {
 
       beforeEach(() => {
         order = buildDefaultMarketOrder();
+        orderClientMock.send.mockResolvedValue(order);
         orderRepositoryMock.save.mockResolvedValue(order);
       });
 
@@ -55,11 +65,11 @@ describe('CreateOrderService', () => {
         expect(getBySymbolParams.length).toEqual(1);
         expect(getBySymbolParams[0]).toEqual(createOrder.symbol);
 
-        expect(orderRepositoryMock.save).toHaveBeenCalledTimes(1);
-        const saveParams = orderRepositoryMock.save.mock.calls[0];
-        expect(saveParams.length).toEqual(1);
-        expect(saveParams[0]).toEqual({
-          id: `${createOrder.symbol}/${createOrder.side}/${createOrder.type}/${creationDate.valueOf()}`,
+        expect(orderClientMock.send).toHaveBeenCalledTimes(1);
+        const sendParams = orderClientMock.send.mock.calls[0];
+        expect(sendParams.length).toEqual(1);
+        expect(sendParams[0]).toEqual({
+          id: idMock,
           symbol: createOrder.symbol,
           side: createOrder.side,
           type: createOrder.type,
@@ -68,6 +78,11 @@ describe('CreateOrderService', () => {
           quoteAssetQuantity: createOrder.quoteAssetQuantity ? truncate(createOrder.quoteAssetQuantity, ticker.quoteAssetPrecision) : undefined,
           status: 'Waiting',
         });
+
+        expect(orderRepositoryMock.save).toHaveBeenCalledTimes(1);
+        const saveParams = orderRepositoryMock.save.mock.calls[0];
+        expect(saveParams.length).toEqual(1);
+        expect(saveParams[0]).toEqual(order);
       });
 
       describe('And order base and quote asset quantity are missing', () => {
@@ -85,6 +100,7 @@ describe('CreateOrderService', () => {
           }
 
           expect(getTickerServiceMock.getBySymbol).toHaveBeenCalledTimes(0);
+          expect(orderClientMock.send).toHaveBeenCalledTimes(0);
           expect(orderRepositoryMock.save).toHaveBeenCalledTimes(0);
         });
       });
@@ -104,6 +120,7 @@ describe('CreateOrderService', () => {
           }
 
           expect(getTickerServiceMock.getBySymbol).toHaveBeenCalledTimes(0);
+          expect(orderClientMock.send).toHaveBeenCalledTimes(0);
           expect(orderRepositoryMock.save).toHaveBeenCalledTimes(0);
         });
       });
@@ -122,6 +139,7 @@ describe('CreateOrderService', () => {
           }
 
           expect(getTickerServiceMock.getBySymbol).toHaveBeenCalledTimes(0);
+          expect(orderClientMock.send).toHaveBeenCalledTimes(0);
           expect(orderRepositoryMock.save).toHaveBeenCalledTimes(0);
         });
       });
@@ -138,6 +156,7 @@ describe('CreateOrderService', () => {
 
       beforeEach(() => {
         order = buildDefaultLimitOrder();
+        orderClientMock.send.mockResolvedValue(order);
         orderRepositoryMock.save.mockResolvedValue(order);
       });
 
@@ -150,11 +169,11 @@ describe('CreateOrderService', () => {
         expect(getBySymbolParams.length).toEqual(1);
         expect(getBySymbolParams[0]).toEqual(createOrder.symbol);
 
-        expect(orderRepositoryMock.save).toHaveBeenCalledTimes(1);
-        const saveParams = orderRepositoryMock.save.mock.calls[0];
-        expect(saveParams.length).toEqual(1);
-        expect(saveParams[0]).toEqual({
-          id: `${createOrder.symbol}/${createOrder.side}/${createOrder.type}/${creationDate.valueOf()}`,
+        expect(orderClientMock.send).toHaveBeenCalledTimes(1);
+        const sendParams = orderClientMock.send.mock.calls[0];
+        expect(sendParams.length).toEqual(1);
+        expect(sendParams[0]).toEqual({
+          id: idMock,
           symbol: createOrder.symbol,
           side: createOrder.side,
           type: createOrder.type,
@@ -163,6 +182,11 @@ describe('CreateOrderService', () => {
           priceLimit: truncate(createOrder.priceLimit!, ticker.pricePrecision),
           status: 'Waiting',
         });
+
+        expect(orderRepositoryMock.save).toHaveBeenCalledTimes(1);
+        const saveParams = orderRepositoryMock.save.mock.calls[0];
+        expect(saveParams.length).toEqual(1);
+        expect(saveParams[0]).toEqual(order);
       });
 
       describe('And order base asset quantity is missing', () => {
@@ -179,6 +203,7 @@ describe('CreateOrderService', () => {
           }
 
           expect(getTickerServiceMock.getBySymbol).toHaveBeenCalledTimes(0);
+          expect(orderClientMock.send).toHaveBeenCalledTimes(0);
           expect(orderRepositoryMock.save).toHaveBeenCalledTimes(0);
         });
       });
@@ -197,6 +222,7 @@ describe('CreateOrderService', () => {
           }
 
           expect(getTickerServiceMock.getBySymbol).toHaveBeenCalledTimes(0);
+          expect(orderClientMock.send).toHaveBeenCalledTimes(0);
           expect(orderRepositoryMock.save).toHaveBeenCalledTimes(0);
         });
       });
@@ -215,6 +241,7 @@ describe('CreateOrderService', () => {
           }
 
           expect(getTickerServiceMock.getBySymbol).toHaveBeenCalledTimes(0);
+          expect(orderClientMock.send).toHaveBeenCalledTimes(0);
           expect(orderRepositoryMock.save).toHaveBeenCalledTimes(0);
         });
       });

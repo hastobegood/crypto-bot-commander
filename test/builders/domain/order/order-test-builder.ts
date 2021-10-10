@@ -1,4 +1,4 @@
-import { CreateOrder, Order, StatusOrder } from '../../../../src/code/domain/order/model/order';
+import { CreateOrder, Order, OrderReview } from '../../../../src/code/domain/order/model/order';
 import { randomBoolean, randomFromList, randomNumber, randomString, randomSymbol } from '../../random-test-builder';
 
 export const buildDefaultCreateMarketOrder = (): CreateOrder => {
@@ -74,7 +74,7 @@ export const buildDefaultLimitOrder = (): Order => {
   };
 };
 
-export const buildDefaultStatusOrder = (): StatusOrder => {
+export const buildDefaultOrderReview = (): OrderReview => {
   return {
     side: randomFromList(['Buy', 'Sell']),
     status: 'Filled',

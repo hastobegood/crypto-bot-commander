@@ -5,6 +5,7 @@ import { StrategyStepRepository } from './strategy-step-repository';
 import { CreateOrderService } from '../../order/create-order-service';
 import { GetCandlestickService } from '../../candlestick/get-candlestick-service';
 import { GetStrategyService } from '../get-strategy-service';
+import { OrderQuantities } from '../../order/model/order';
 
 export class SendOrderStepService implements StrategyStepService {
   constructor(private getStrategyService: GetStrategyService, private createOrderService: CreateOrderService, private getCandlestickService: GetCandlestickService, private strategyStepRepository: StrategyStepRepository) {}
@@ -35,16 +36,16 @@ export class SendOrderStepService implements StrategyStepService {
     return {
       success: true,
       id: order.id,
-      externalId: order.externalId!,
+      externalId: order.externalId,
       status: order.status,
-      externalStatus: order.externalStatus!,
+      externalStatus: order.externalStatus,
       baseAssetQuantity: order.baseAssetQuantity,
       quoteAssetQuantity: order.quoteAssetQuantity,
       priceLimit: order.priceLimit,
     };
   }
 
-  async #getQuantities(strategy: Strategy, wallet: StrategyWallet, sendOrderStepInput: SendOrderStepInput): Promise<{ baseAssetQuantity?: number; quoteAssetQuantity?: number; priceLimit?: number }> {
+  async #getQuantities(strategy: Strategy, wallet: StrategyWallet, sendOrderStepInput: SendOrderStepInput): Promise<OrderQuantities> {
     switch (sendOrderStepInput.source) {
       case 'Wallet':
         return this.#getQuantitiesFromWallet(strategy, wallet, sendOrderStepInput);
@@ -55,7 +56,7 @@ export class SendOrderStepService implements StrategyStepService {
     }
   }
 
-  async #getQuantitiesFromWallet(strategy: Strategy, wallet: StrategyWallet, sendOrderStepInput: SendOrderStepInput): Promise<{ baseAssetQuantity?: number; quoteAssetQuantity?: number; priceLimit?: number }> {
+  async #getQuantitiesFromWallet(strategy: Strategy, wallet: StrategyWallet, sendOrderStepInput: SendOrderStepInput): Promise<OrderQuantities> {
     if (sendOrderStepInput.type === 'Market') {
       return {
         baseAssetQuantity: sendOrderStepInput.side === 'Sell' ? wallet.availableBaseAssetQuantity * sendOrderStepInput.percentage : undefined,

@@ -15,7 +15,7 @@ import { GetCandlestickService } from '../code/domain/candlestick/get-candlestic
 import { MarketEvolutionStepService } from '../code/domain/strategy/step/market-evolution-step-service';
 import { MarketEvolutionService } from '../code/domain/technical-analysis/market-evolution-service';
 import { SendOrderStepService } from '../code/domain/strategy/step/send-order-step-service';
-import { HttpOrderRepository } from '../code/infrastructure/order/http-order-repository';
+import { HttpOrderClient } from '../code/infrastructure/order/http-order-client';
 import { CreateOrderService } from '../code/domain/order/create-order-service';
 import { EvaluateStrategyMessageConsumer } from '../code/application/strategy/evaluate-strategy-message-consumer';
 import { MovingAverageCrossoverStepService } from '../code/domain/strategy/step/moving-average-crossover-step-service';
@@ -23,9 +23,11 @@ import { MovingAverageService } from '../code/domain/technical-analysis/moving-a
 import { SqsStrategyStepPublisher } from '../code/infrastructure/strategy/step/sqs-strategy-step-publisher';
 import { DdbCandlestickRepository } from '../code/infrastructure/candlestick/ddb-candlestick-repository';
 import { CheckOrderStepService } from '../code/domain/strategy/step/check-order-step-service';
-import { StatusOrderService } from '../code/domain/order/status-order-service';
+import { CheckOrderService } from '../code/domain/order/check-order-service';
 import { HttpTickerRepository } from '../code/infrastructure/ticker/http-ticker-repository';
 import { GetTickerService } from '../code/domain/ticker/get-ticker-service';
+import { DdbOrderRepository } from '../code/infrastructure/order/ddb-order-repository';
+import { UpdateOrderService } from '../code/domain/order/update-order-service';
 
 const binanceClient = new BinanceClient(smClient, process.env.BINANCE_SECRET_NAME, process.env.BINANCE_URL);
 
@@ -35,9 +37,11 @@ const getCandlestickService = new GetCandlestickService(candlestickRepository);
 const tickerRepository = new HttpTickerRepository(binanceClient);
 const getTickerService = new GetTickerService(tickerRepository);
 
-const orderRepository = new HttpOrderRepository(binanceClient);
-const createOrderService = new CreateOrderService(getTickerService, orderRepository);
-const statusOrderService = new StatusOrderService(orderRepository);
+const orderClient = new HttpOrderClient(binanceClient);
+const orderRepository = new DdbOrderRepository(process.env.ORDER_TABLE_NAME, ddbClient);
+const createOrderService = new CreateOrderService(getTickerService, orderClient, orderRepository);
+const updateOrderService = new UpdateOrderService(orderRepository);
+const checkOrderService = new CheckOrderService(orderClient);
 
 const strategyRepository = new DdbStrategyRepository(process.env.STRATEGY_TABLE_NAME, ddbClient);
 const getStrategyService = new GetStrategyService(strategyRepository);
@@ -50,7 +54,7 @@ const marketEvolutionStepService = new MarketEvolutionStepService(getCandlestick
 const movingAverageService = new MovingAverageService();
 const movingAverageCrossoverService = new MovingAverageCrossoverStepService(getCandlestickService, movingAverageService);
 const sendOrderStepService = new SendOrderStepService(getStrategyService, createOrderService, getCandlestickService, strategyStepRepository);
-const checkOrderStepService = new CheckOrderStepService(statusOrderService, updateStrategyService);
+const checkOrderStepService = new CheckOrderStepService(checkOrderService, updateOrderService, updateStrategyService);
 const evaluateStrategyService = new EvaluateStrategyService([marketEvolutionStepService, movingAverageCrossoverService, sendOrderStepService, checkOrderStepService], strategyStepRepository, strategyStepPublisher);
 
 const evaluateStrategyMessageConsumer = new EvaluateStrategyMessageConsumer(getStrategyService, updateStrategyService, evaluateStrategyService);

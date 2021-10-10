@@ -1,35 +1,44 @@
 import { CheckOrderStepInput, CheckOrderStepOutput, StrategyStepType } from '../model/strategy-step';
 import { StrategyStepService } from './strategy-step-service';
 import { Strategy } from '../model/strategy';
-import { StatusOrderService } from '../../order/status-order-service';
+import { CheckOrderService } from '../../order/check-order-service';
 import { UpdateStrategyService } from '../update-strategy-service';
+import { UpdateOrderService } from '../../order/update-order-service';
+import { OrderReview } from '../../order/model/order';
 
 export class CheckOrderStepService implements StrategyStepService {
-  constructor(private statusOrderService: StatusOrderService, private updateStrategyService: UpdateStrategyService) {}
+  constructor(private checkOrderService: CheckOrderService, private updateOrderService: UpdateOrderService, private updateStrategyService: UpdateStrategyService) {}
 
   getType(): StrategyStepType {
     return 'CheckOrder';
   }
 
   async process(strategy: Strategy, checkOrderStepInput: CheckOrderStepInput): Promise<CheckOrderStepOutput> {
-    const status = await this.statusOrderService.check(strategy.symbol, checkOrderStepInput.externalId);
-    const success = status.status === 'Filled' && !!status.executedAssetQuantity && !!status.executedPrice;
+    const review = await this.checkOrderService.check(strategy.symbol, checkOrderStepInput.externalId);
+    const success = review.status === 'Filled' && !!review.executedAssetQuantity && !!review.executedPrice;
 
     if (success) {
-      const consumedBaseAssetQuantity = status.side === 'Buy' ? status.executedAssetQuantity! : status.executedAssetQuantity! * -1;
-      const consumedQuoteAssetQuantity = status.side === 'Buy' ? status.executedAssetQuantity! * status.executedPrice! * -1 : status.executedAssetQuantity! * status.executedPrice!;
-      await this.updateStrategyService.updateWalletById(strategy.id, consumedBaseAssetQuantity, consumedQuoteAssetQuantity);
+      await Promise.all([this.#updateOrderStatus(checkOrderStepInput, review), this.#updateStrategyWallet(strategy, review)]);
     }
 
     return {
       success: success,
       id: checkOrderStepInput.id,
-      side: status.side,
-      status: status.status,
+      status: review.status,
       externalId: checkOrderStepInput.externalId,
-      externalStatus: status.externalStatus,
-      quantity: status.executedAssetQuantity,
-      price: status.executedPrice,
+      externalStatus: review.externalStatus,
+      quantity: review.executedAssetQuantity,
+      price: review.executedPrice,
     };
+  }
+
+  async #updateOrderStatus(checkOrderStepInput: CheckOrderStepInput, review: OrderReview): Promise<void> {
+    return this.updateOrderService.updateStatusById(checkOrderStepInput.id, review.status, review.externalStatus, review.executedAssetQuantity!, review.executedPrice!);
+  }
+
+  async #updateStrategyWallet(strategy: Strategy, review: OrderReview): Promise<void> {
+    const consumedBaseAssetQuantity = review.side === 'Buy' ? review.executedAssetQuantity! : review.executedAssetQuantity! * -1;
+    const consumedQuoteAssetQuantity = review.side === 'Buy' ? review.executedAssetQuantity! * review.executedPrice! * -1 : review.executedAssetQuantity! * review.executedPrice!;
+    return this.updateStrategyService.updateWalletById(strategy.id, consumedBaseAssetQuantity, consumedQuoteAssetQuantity);
   }
 }

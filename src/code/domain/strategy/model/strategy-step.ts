@@ -85,8 +85,6 @@ export interface SendOrderStepOutput extends StrategyStepOutput {
   priceLimit?: number;
 }
 
-export type CheckOrderSide = 'Buy' | 'Sell';
-
 export interface CheckOrderStepInput extends StrategyStepInput {
   id: string;
   externalId: string;
@@ -94,7 +92,6 @@ export interface CheckOrderStepInput extends StrategyStepInput {
 
 export interface CheckOrderStepOutput extends StrategyStepOutput {
   id: string;
-  side: CheckOrderSide;
   status: string;
   externalId: string;
   externalStatus: string;
