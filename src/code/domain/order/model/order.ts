@@ -11,18 +11,21 @@ export interface CreateOrder {
   priceLimit?: number;
 }
 
-export interface Order extends OrderQuantities {
+export interface BaseOrder extends OrderQuantities {
   id: string;
-  externalId?: string;
   symbol: string;
+  status: OrderStatus;
   side: OrderSide;
   type: OrderType;
   creationDate: Date;
-  transactionDate?: Date;
+}
+
+export interface Order extends BaseOrder {
+  externalId: string;
+  externalStatus: string;
+  transactionDate: Date;
   executedAssetQuantity?: number;
   executedPrice?: number;
-  status: OrderStatus;
-  externalStatus?: string;
 }
 
 export interface OrderQuantities {
@@ -31,7 +34,7 @@ export interface OrderQuantities {
   priceLimit?: number;
 }
 
-export interface StatusOrder {
+export interface OrderReview {
   side: OrderSide;
   status: OrderStatus;
   externalId: string;

@@ -1,28 +1,29 @@
 import { logger } from '../../configuration/log/logger';
-import { CreateOrder, Order, OrderQuantities } from './model/order';
+import { v4 } from 'uuid';
+import { BaseOrder, CreateOrder, Order, OrderQuantities } from './model/order';
 import { OrderRepository } from './order-repository';
 import { truncate } from '../../configuration/util/math';
 import { GetTickerService } from '../ticker/get-ticker-service';
+import { OrderClient } from './order-client';
 
 export class CreateOrderService {
-  constructor(private getTickerService: GetTickerService, private orderRepository: OrderRepository) {}
+  constructor(private getTickerService: GetTickerService, private orderClient: OrderClient, private orderRepository: OrderRepository) {}
 
   async create(createOrder: CreateOrder): Promise<Order> {
-    let order = await this.#buildOrder(createOrder);
+    const baseOrder = await this.#buildBaseOrder(createOrder);
 
-    logger.info(order, 'Create order');
-    order = await this.orderRepository.save(order);
+    logger.info(baseOrder, 'Create order');
+    const order = await this.orderRepository.save(await this.orderClient.send(baseOrder));
     logger.info(order, 'Order created');
 
     return order;
   }
 
-  async #buildOrder(createOrder: CreateOrder): Promise<Order> {
+  async #buildBaseOrder(createOrder: CreateOrder): Promise<BaseOrder> {
     const creationDate = new Date();
-    const id = `${createOrder.symbol}/${createOrder.side}/${createOrder.type}/${creationDate.valueOf()}`;
 
     return {
-      id: id,
+      id: v4(),
       symbol: createOrder.symbol,
       side: createOrder.side,
       type: createOrder.type,

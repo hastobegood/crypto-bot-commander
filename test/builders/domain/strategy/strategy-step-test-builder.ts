@@ -136,7 +136,6 @@ export const buildDefaultCheckOrderStepOutput = (success: boolean): CheckOrderSt
   return {
     success: success,
     id: randomString(),
-    side: randomFromList(['Buy', 'Sell']),
     status: randomString(),
     externalId: randomString(),
     externalStatus: randomString(),

@@ -1,5 +1,5 @@
-import { fromBinanceOrderStatus, toBinanceSymbol } from '../../../../src/code/infrastructure/binance/binance-converter';
-import { BinanceOrderStatus } from '../../../../src/code/infrastructure/binance/model/binance-order';
+import { fromBinanceOrderSide, fromBinanceOrderStatus, toBinanceSymbol } from '../../../../src/code/infrastructure/binance/binance-converter';
+import { BinanceOrderSide, BinanceOrderStatus } from '../../../../src/code/infrastructure/binance/model/binance-order';
 
 describe('BinanceConverter', () => {
   describe('Given a Binance order status', () => {
@@ -22,12 +22,33 @@ describe('BinanceConverter', () => {
     });
   });
 
+  describe('Given a Binance order side', () => {
+    describe('When known value', () => {
+      it('Then converted value is returned', async () => {
+        expect(fromBinanceOrderSide('BUY')).toEqual('Buy');
+        expect(fromBinanceOrderSide('SELL')).toEqual('Sell');
+      });
+    });
+
+    describe('When unknown value', () => {
+      it('Then error is thrown', async () => {
+        try {
+          fromBinanceOrderSide('XXX' as BinanceOrderSide);
+          fail();
+        } catch (error) {
+          expect(error).toBeDefined();
+          expect((error as Error).message).toEqual("Unsupported 'XXX' Binance order side");
+        }
+      });
+    });
+  });
+
   describe('Given a symbol', () => {
     describe('When invalid value', () => {
       it('Then error is thrown', async () => {
         try {
           toBinanceSymbol('ABCDEF');
-          fail('An error should have been thrown');
+          fail();
         } catch (error) {
           expect(error).toBeDefined();
           expect((error as Error).message).toEqual("Unable to extract assets, symbol 'ABCDEF' is invalid");
@@ -35,7 +56,7 @@ describe('BinanceConverter', () => {
 
         try {
           toBinanceSymbol('AB#CD#EF');
-          fail('An error should have been thrown');
+          fail();
         } catch (error) {
           expect(error).toBeDefined();
           expect((error as Error).message).toEqual("Unable to extract assets, symbol 'AB#CD#EF' is invalid");

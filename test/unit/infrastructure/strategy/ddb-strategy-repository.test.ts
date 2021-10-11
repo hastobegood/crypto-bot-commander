@@ -208,8 +208,7 @@ describe('DdbStrategyRepository', () => {
       });
 
       it('Then updated strategy is returned', async () => {
-        const result = await strategyRepository.updateStatusById('123', 'Inactive');
-        expect(result).toEqual(strategy);
+        await strategyRepository.updateStatusById('123', 'Inactive');
 
         expect(ddbClientMock.send).toHaveBeenCalledTimes(2);
         let sendParams = ddbClientMock.send.mock.calls[0];
@@ -245,7 +244,6 @@ describe('DdbStrategyRepository', () => {
             ':gsiPk': `Strategy::${strategy.symbol}::Inactive`,
             ':gsiSk': '123',
           },
-          ReturnValues: 'ALL_NEW',
         });
       });
     });
@@ -341,7 +339,6 @@ describe('DdbStrategyRepository', () => {
             ':baseAssetQuantity': 1.5,
             ':quoteAssetQuantity': -100,
           },
-          ReturnValues: 'ALL_NEW',
         });
       });
     });
@@ -358,8 +355,7 @@ describe('DdbStrategyRepository', () => {
       });
 
       it('Then updated strategy is returned', async () => {
-        const result = await strategyRepository.updateWalletById('123', 1.5, -100);
-        expect(result).toEqual(wallet);
+        await strategyRepository.updateWalletById('123', 1.5, -100);
 
         expect(ddbClientMock.send).toHaveBeenCalledTimes(1);
         const sendParams = ddbClientMock.send.mock.calls[0];
@@ -379,7 +375,6 @@ describe('DdbStrategyRepository', () => {
             ':baseAssetQuantity': 1.5,
             ':quoteAssetQuantity': -100,
           },
-          ReturnValues: 'ALL_NEW',
         });
       });
     });

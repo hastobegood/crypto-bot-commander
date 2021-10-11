@@ -19,8 +19,8 @@ describe('HttpTickerRepository', () => {
   let binanceExchangePriceFilter: BinanceExchangeFilter;
 
   beforeEach(() => {
-    binanceExchangeLotSizeFilter = buildBinanceExchangeLotSizeFilter('0.000001');
-    binanceExchangePriceFilter = buildBinanceExchangePriceFilter('0.1');
+    binanceExchangeLotSizeFilter = buildBinanceExchangeLotSizeFilter('0.00000100');
+    binanceExchangePriceFilter = buildBinanceExchangePriceFilter('1.00000000');
     binanceExchange = buildDefaultBinanceExchange();
     binanceExchange.symbols[0].filters = [binanceExchangeLotSizeFilter, binanceExchangePriceFilter];
   });
@@ -38,7 +38,7 @@ describe('HttpTickerRepository', () => {
           baseAssetPrecision: binanceExchange.symbols[0].baseAssetPrecision,
           quoteAssetPrecision: binanceExchange.symbols[0].quoteAssetPrecision,
           quantityPrecision: 6,
-          pricePrecision: 1,
+          pricePrecision: 0,
         });
 
         expect(binanceClientMock.getExchange).toHaveBeenCalledTimes(1);

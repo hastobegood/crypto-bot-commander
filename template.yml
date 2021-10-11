@@ -72,6 +72,7 @@ Resources:
           BINANCE_URL: !Ref BinanceUrlParameter
           BINANCE_SECRET_NAME: !Ref BinanceSecretNameParameter
           DCA_TRADING_TABLE_NAME: !Ref DcaTradingTable
+          ORDER_TABLE_NAME: !Ref OrderTable
           DCA_TRADING_CONFIG: !FindInMap [ EnvironmentMap, !Ref EnvironmentParameter, DcaTradingConfig ]
       Events:
         ScheduleEvent:
@@ -92,6 +93,8 @@ Resources:
             TableName: !Ref DcaTradingTable
         - DynamoDBWritePolicy:
             TableName: !Ref DcaTradingTable
+        - DynamoDBWritePolicy:
+            TableName: !Ref OrderTable
 
   InitializeAllCandlesticksFunction:
     Type: AWS::Serverless::Function
@@ -197,6 +200,7 @@ Resources:
           BINANCE_SECRET_NAME: !Ref BinanceSecretNameParameter
           CANDLESTICK_TABLE_NAME: !Ref CandlestickTable
           STRATEGY_TABLE_NAME: !Ref StrategyTable
+          ORDER_TABLE_NAME: !Ref OrderTable
           PROCESSED_STRATEGY_STEP_QUEUE_URL: !Ref ProcessedStrategyStepQueue
       Events:
         SqsEvent:
@@ -220,6 +224,8 @@ Resources:
             TableName: !Ref StrategyTable
         - DynamoDBWritePolicy:
             TableName: !Ref StrategyTable
+        - DynamoDBWritePolicy:
+            TableName: !Ref OrderTable
         - SQSPollerPolicy:
             QueueName: !GetAtt ActiveStrategiesQueue.QueueName
         - SQSSendMessagePolicy:
@@ -301,6 +307,23 @@ Resources:
           Projection:
             ProjectionType: ALL
 
+  OrderTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      BillingMode: PAY_PER_REQUEST
+      SSESpecification:
+        SSEEnabled: true
+      KeySchema:
+        - AttributeName: pk
+          KeyType: HASH
+        - AttributeName: sk
+          KeyType: RANGE
+      AttributeDefinitions:
+        - AttributeName: pk
+          AttributeType: S
+        - AttributeName: sk
+          AttributeType: S
+
   UpdatedCandlesticksQueue:
     Type: AWS::SQS::Queue
     Properties:
@@ -377,6 +400,20 @@ Outputs:
   CandlestickTableArn:
     Description: Candlestick table ARN
     Value: !GetAtt CandlestickTable.Arn
+
+  StrategyTableName:
+    Description: Strategy table name
+    Value: !Ref StrategyTable
+  StrategyTableArn:
+    Description: Strategy table ARN
+    Value: !GetAtt StrategyTable.Arn
+
+  OrderTableName:
+    Description: Order table name
+    Value: !Ref OrderTable
+  OrderTableArn:
+    Description: Order table ARN
+    Value: !GetAtt OrderTable.Arn
 
   StrategyTableName:
     Description: Strategy table name

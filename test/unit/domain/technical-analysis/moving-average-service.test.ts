@@ -1,5 +1,5 @@
 import { Point } from '../../../../src/code/domain/technical-analysis/model/point';
-import { CalculateMovingAverage } from '../../../../src/code/domain/technical-analysis/model/moving-average';
+import { CalculateMovingAverage, MovingAverageType } from '../../../../src/code/domain/technical-analysis/model/moving-average';
 import { buildCalculateMovingAverage } from '../../../builders/domain/technical-analysis/moving-average-test-builder';
 import { MovingAverageService } from '../../../../src/code/domain/technical-analysis/moving-average-service';
 
@@ -29,6 +29,22 @@ describe('MovingAverageService', () => {
     });
   });
 
+  describe('Given an unknown moving average to calculate', () => {
+    beforeEach(() => {
+      calculateMovingAverage = buildCalculateMovingAverage('XXX' as MovingAverageType, 5, points);
+    });
+
+    it('Then error is thrown', async () => {
+      try {
+        await movingAverageService.calculate(calculateMovingAverage);
+        fail();
+      } catch (error) {
+        expect(error).toBeDefined();
+        expect((error as Error).message).toEqual("Unsupported 'XXX' moving average type");
+      }
+    });
+  });
+
   describe('Given a simple moving average to calculate', () => {
     describe('When period is smaller than number of points', () => {
       beforeEach(() => {
@@ -51,7 +67,7 @@ describe('MovingAverageService', () => {
       it('Then error is thrown', async () => {
         try {
           await movingAverageService.calculate(calculateMovingAverage);
-          fail('An error should have been thrown');
+          fail();
         } catch (error) {
           expect(error).toBeDefined();
           expect((error as Error).message).toEqual('Not enough point to calculate simple moving average');
@@ -67,7 +83,7 @@ describe('MovingAverageService', () => {
       it('Then error is thrown', async () => {
         try {
           await movingAverageService.calculate(calculateMovingAverage);
-          fail('An error should have been thrown');
+          fail();
         } catch (error) {
           expect(error).toBeDefined();
           expect((error as Error).message).toEqual('Not enough point to calculate simple moving average');
@@ -111,7 +127,7 @@ describe('MovingAverageService', () => {
       it('Then error is thrown', async () => {
         try {
           await movingAverageService.calculate(calculateMovingAverage);
-          fail('An error should have been thrown');
+          fail();
         } catch (error) {
           expect(error).toBeDefined();
           expect((error as Error).message).toEqual('Not enough point to calculate cumulative moving average');
@@ -155,7 +171,7 @@ describe('MovingAverageService', () => {
       it('Then error is thrown', async () => {
         try {
           await movingAverageService.calculate(calculateMovingAverage);
-          fail('An error should have been thrown');
+          fail();
         } catch (error) {
           expect(error).toBeDefined();
           expect((error as Error).message).toEqual('Not enough point to calculate exponential moving average');

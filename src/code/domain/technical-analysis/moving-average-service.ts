@@ -23,7 +23,7 @@ export class MovingAverageService implements TechnicalAnalysisService<CalculateM
       case 'EMA':
         return this.#calculateExponentialMovingAverage(period, points);
       default:
-        throw new Error(`Unsupported ${type} moving average type`);
+        throw new Error(`Unsupported '${type}' moving average type`);
     }
   }
 

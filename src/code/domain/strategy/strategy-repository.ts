@@ -5,9 +5,9 @@ export interface StrategyRepository {
 
   getAllIdsBySymbolAndActiveStatus(symbol: string): Promise<string[]>;
 
-  updateStatusById(id: string, status: StrategyStatus): Promise<Strategy>;
+  updateStatusById(id: string, status: StrategyStatus): Promise<void>;
 
   getWalletById(id: string): Promise<StrategyWallet | null>;
 
-  updateWalletById(id: string, consumedBaseAssetQuantity: number, consumedQuoteAssetQuantity: number): Promise<StrategyWallet>;
+  updateWalletById(id: string, consumedBaseAssetQuantity: number, consumedQuoteAssetQuantity: number): Promise<void>;
 }

@@ -1,7 +1,7 @@
-import { Order, StatusOrder } from './model/order';
+import { Order, OrderStatus } from './model/order';
 
 export interface OrderRepository {
   save(order: Order): Promise<Order>;
 
-  check(symbol: string, externalId: string): Promise<StatusOrder>;
+  updateStatusById(id: string, status: OrderStatus, externalStatus: string, executedAssetQuantity: number, executedPrice: number): Promise<void>;
 }

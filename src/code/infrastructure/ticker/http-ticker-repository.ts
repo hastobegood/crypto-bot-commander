@@ -8,17 +8,18 @@ export class HttpTickerRepository implements TickerRepository {
 
   async getBySymbol(symbol: string): Promise<Ticker> {
     const binanceExchange = await this.binanceClient.getExchange(toBinanceSymbol(symbol));
+    const binanceSymbol = binanceExchange.symbols[0];
 
     return {
       symbol: symbol,
-      baseAssetPrecision: binanceExchange.symbols[0].baseAssetPrecision,
-      quoteAssetPrecision: binanceExchange.symbols[0].quoteAssetPrecision,
-      quantityPrecision: this.#extractPrecision(binanceExchange.symbols[0].filters.find((filter) => filter.filterType === 'LOT_SIZE')!.stepSize!),
-      pricePrecision: this.#extractPrecision(binanceExchange.symbols[0].filters.find((filter) => filter.filterType === 'PRICE_FILTER')!.tickSize!),
+      baseAssetPrecision: binanceSymbol.baseAssetPrecision,
+      quoteAssetPrecision: binanceSymbol.quoteAssetPrecision,
+      quantityPrecision: this.#extractPrecision(binanceSymbol.filters.find((filter) => filter.filterType === 'LOT_SIZE')!.stepSize!),
+      pricePrecision: this.#extractPrecision(binanceSymbol.filters.find((filter) => filter.filterType === 'PRICE_FILTER')!.tickSize!),
     };
   }
 
   #extractPrecision(value: string): number {
-    return (+value).toString().split('.')[1].length;
+    return (+value).toString().split('.')[1]?.length || 0;
   }
 }
