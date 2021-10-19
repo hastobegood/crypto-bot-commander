@@ -38,12 +38,12 @@ Mappings:
     test:
       DcaTradingConfig: '{ "baseAsset": "BTC", "quoteAsset": "BUSD", "quoteAssetQuantity": 25, "tradeAssets": [ { "asset": "ETH|BNB", "percentage": 0.50 } ] }'
       DcaTradingSchedule: cron(0 18 ? * * *)
-      AvailableSymbols: BNB#BUSD
+      AvailableSymbols: BNB#BUSD,BNB#USDT,BTC#BUSD,BTC#USDT
       UpdateAllCandlesticksSchedule: rate(1 minute)
     prod:
       DcaTradingConfig: '{ "baseAsset": "BTC", "quoteAsset": "EUR", "quoteAssetQuantity": 25, "tradeAssets": [ { "asset": "ETH", "percentage": 0.28 }, { "asset":"XRP", "percentage": 0.28 }, { "asset": "ADA|MATIC", "percentage": 0.20 } ] }'
       DcaTradingSchedule: cron(0 18 ? * 1 *)
-      AvailableSymbols: BNB#BUSD
+      AvailableSymbols: BNB#BUSD,BTC#BUSD,ETH#BUSD,XRP#BUSD
       UpdateAllCandlesticksSchedule: rate(1 minute)
 
 Globals:

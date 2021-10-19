@@ -103,9 +103,9 @@ describe('EvaluateStrategyMessageConsumer', () => {
       describe('And evaluation has succeeded', () => {
         let strategyEvaluation: StrategyEvaluation;
 
-        describe('And evaluation is a success', () => {
+        describe('And strategy has not ended and evaluation is a success', () => {
           beforeEach(() => {
-            strategyEvaluation = buildStrategyEvaluation(true);
+            strategyEvaluation = buildStrategyEvaluation(true, false);
             evaluateStrategyServiceMock.evaluate.mockResolvedValue(strategyEvaluation);
           });
 
@@ -126,9 +126,36 @@ describe('EvaluateStrategyMessageConsumer', () => {
           });
         });
 
-        describe('And evaluation is not a success', () => {
+        describe('And eAnd strategy has ended and valuation is a success', () => {
           beforeEach(() => {
-            strategyEvaluation = buildStrategyEvaluation(false);
+            strategyEvaluation = buildStrategyEvaluation(true, true);
+            evaluateStrategyServiceMock.evaluate.mockResolvedValue(strategyEvaluation);
+          });
+
+          it('Then strategy status is updated', async () => {
+            await evaluateStrategyMessageConsumer.process(activeStrategyMessage);
+
+            expect(getStrategyServiceMock.getById).toHaveBeenCalledTimes(1);
+            const getByIdParams = getStrategyServiceMock.getById.mock.calls[0];
+            expect(getByIdParams.length).toEqual(1);
+            expect(getByIdParams[0]).toEqual(activeStrategyMessage.content.id);
+
+            expect(evaluateStrategyServiceMock.evaluate).toHaveBeenCalledTimes(1);
+            const evaluateParams = evaluateStrategyServiceMock.evaluate.mock.calls[0];
+            expect(evaluateParams.length).toEqual(1);
+            expect(evaluateParams[0]).toEqual(strategy);
+
+            expect(updateStrategyServiceMock.updateStatusById).toHaveBeenCalledTimes(1);
+            const updateStatusByIdParams = updateStrategyServiceMock.updateStatusById.mock.calls[0];
+            expect(updateStatusByIdParams.length).toEqual(2);
+            expect(updateStatusByIdParams[0]).toEqual(activeStrategyMessage.content.id);
+            expect(updateStatusByIdParams[1]).toEqual('Inactive');
+          });
+        });
+
+        describe('And eAnd strategy has ended and valuation is not a success', () => {
+          beforeEach(() => {
+            strategyEvaluation = buildStrategyEvaluation(false, true);
             evaluateStrategyServiceMock.evaluate.mockResolvedValue(strategyEvaluation);
           });
 

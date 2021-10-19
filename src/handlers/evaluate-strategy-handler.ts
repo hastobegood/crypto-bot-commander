@@ -28,6 +28,7 @@ import { HttpTickerRepository } from '../code/infrastructure/ticker/http-ticker-
 import { GetTickerService } from '../code/domain/ticker/get-ticker-service';
 import { DdbOrderRepository } from '../code/infrastructure/order/ddb-order-repository';
 import { UpdateOrderService } from '../code/domain/order/update-order-service';
+import { OrConditionStepService } from '../code/domain/strategy/step/or-condition-step-service';
 
 const binanceClient = new BinanceClient(smClient, process.env.BINANCE_SECRET_NAME, process.env.BINANCE_URL);
 
@@ -47,15 +48,17 @@ const strategyRepository = new DdbStrategyRepository(process.env.STRATEGY_TABLE_
 const getStrategyService = new GetStrategyService(strategyRepository);
 const updateStrategyService = new UpdateStrategyService(strategyRepository);
 
+const marketEvolutionService = new MarketEvolutionService();
+const movingAverageService = new MovingAverageService();
+
 const strategyStepRepository = new DdbStrategyStepRepository(process.env.STRATEGY_TABLE_NAME, ddbClient);
 const strategyStepPublisher = new SqsStrategyStepPublisher(process.env.PROCESSED_STRATEGY_STEP_QUEUE_URL, sqsClient);
-const marketEvolutionService = new MarketEvolutionService();
 const marketEvolutionStepService = new MarketEvolutionStepService(getCandlestickService, marketEvolutionService, strategyStepRepository);
-const movingAverageService = new MovingAverageService();
 const movingAverageCrossoverService = new MovingAverageCrossoverStepService(getCandlestickService, movingAverageService);
 const sendOrderStepService = new SendOrderStepService(getStrategyService, createOrderService, getCandlestickService, strategyStepRepository);
 const checkOrderStepService = new CheckOrderStepService(checkOrderService, updateOrderService, updateStrategyService);
-const evaluateStrategyService = new EvaluateStrategyService([marketEvolutionStepService, movingAverageCrossoverService, sendOrderStepService, checkOrderStepService], strategyStepRepository, strategyStepPublisher);
+const orConditionStepService = new OrConditionStepService([marketEvolutionStepService, movingAverageCrossoverService]);
+const evaluateStrategyService = new EvaluateStrategyService([marketEvolutionStepService, movingAverageCrossoverService, sendOrderStepService, checkOrderStepService, orConditionStepService], strategyStepRepository, strategyStepPublisher);
 
 const evaluateStrategyMessageConsumer = new EvaluateStrategyMessageConsumer(getStrategyService, updateStrategyService, evaluateStrategyService);
 

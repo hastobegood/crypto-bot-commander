@@ -1,10 +1,10 @@
-export type StrategyStepType = 'SendOrder' | 'CheckOrder' | 'MarketEvolution' | 'MovingAverageCrossover';
+export type StrategyStepType = 'OrCondition' | 'SendOrder' | 'CheckOrder' | 'MarketEvolution' | 'MovingAverageCrossover';
 
 export interface StrategyStepTemplate {
   id: string;
   type: StrategyStepType;
   input: StrategyStepInput;
-  nextId: string;
+  nextId?: string;
 }
 
 export interface StrategyStep extends StrategyStepTemplate {
@@ -27,6 +27,18 @@ export interface StrategyStepOutput {
 export interface StrategyStepError {
   message: string;
   details: string;
+}
+
+export type OrConditionStep = { id: string; priority: number };
+
+export interface OrConditionStepInput extends StrategyStepInput {
+  steps: OrConditionStep[];
+}
+
+export interface OrConditionStepOutput extends StrategyStepOutput {
+  id?: string;
+  nextId?: string;
+  steps: (OrConditionStep & StrategyStepOutput)[];
 }
 
 export type MarketEvolutionSource = 'Market' | 'LastOrder';

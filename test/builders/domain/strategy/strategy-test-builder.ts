@@ -14,8 +14,8 @@ export const buildDefaultStrategy = (): Strategy => {
 
 export const buildDefaultStrategyTemplate = (): StrategyTemplate => {
   return {
-    '1': buildStrategyStepTemplate('1', '2', 'MarketEvolution', buildDefaultMarketEvolutionStepInput()),
-    '2': buildStrategyStepTemplate('2', '1', 'SendOrder', buildDefaultSendOrderStepInput()),
+    '1': buildStrategyStepTemplate('1', 'MarketEvolution', buildDefaultMarketEvolutionStepInput(), '2'),
+    '2': buildStrategyStepTemplate('2', 'SendOrder', buildDefaultSendOrderStepInput(), '1'),
   };
 };
 

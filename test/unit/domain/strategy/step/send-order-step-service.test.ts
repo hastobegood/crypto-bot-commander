@@ -463,7 +463,7 @@ describe('SendOrderStepService', () => {
 
       describe('And last candlestick is missing', () => {
         beforeEach(() => {
-          sendOrderStepInput = buildSendOrderStepInput('Wallet', 0.8, 'Buy', 'Limit', 0.1);
+          sendOrderStepInput = buildSendOrderStepInput('Wallet', 0.8, 'Buy', 'Limit', 0);
         });
 
         it('Then error is thrown', async () => {

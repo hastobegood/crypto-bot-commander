@@ -1,4 +1,4 @@
-import { StrategyStepInput, StrategyStepOutput, StrategyStepType } from '../model/strategy-step';
+import { StrategyStepInput, StrategyStepOutput, StrategyStepTemplate, StrategyStepType } from '../model/strategy-step';
 import { Strategy } from '../model/strategy';
 
 export interface StrategyStepService {
@@ -6,3 +6,11 @@ export interface StrategyStepService {
 
   process(strategy: Strategy, stepInput: StrategyStepInput): Promise<StrategyStepOutput>;
 }
+
+export const getStrategyStepService = (strategyStepServices: StrategyStepService[], stepTemplate: StrategyStepTemplate): StrategyStepService => {
+  const stepService = strategyStepServices.find((stepService) => stepService.getType() === stepTemplate.type);
+  if (!stepService) {
+    throw new Error(`Unsupported '${stepTemplate.type}' strategy step type`);
+  }
+  return stepService;
+};
