@@ -10,6 +10,9 @@ import {
   MovingAverageCrossoverStepOutput,
   MovingAverageSignal,
   MovingAverageType,
+  OrConditionStep,
+  OrConditionStepInput,
+  OrConditionStepOutput,
   SendOrderSide,
   SendOrderSource,
   SendOrderStepInput,
@@ -24,22 +27,22 @@ import {
 import { randomBoolean, randomFromList, randomNumber, randomPercentage, randomString } from '../../random-test-builder';
 
 export const buildDefaultStrategyStepTemplate = (): StrategyStepTemplate => {
-  return buildStrategyStepTemplate(randomString(), randomString(), 'SendOrder', buildDefaultSendOrderStepInput());
+  return buildStrategyStepTemplate(randomString(), 'SendOrder', buildDefaultSendOrderStepInput(), randomString());
 };
 
 export const buildDefaultMarketEvolutionStepTemplate = (): StrategyStepTemplate => {
-  return buildStrategyStepTemplate(randomString(), randomString(), 'MarketEvolution', buildDefaultMarketEvolutionStepInput());
+  return buildStrategyStepTemplate(randomString(), 'MarketEvolution', buildDefaultMarketEvolutionStepInput(), randomString());
 };
 
 export const buildDefaultSendOrderStepTemplate = (): StrategyStepTemplate => {
-  return buildStrategyStepTemplate(randomString(), randomString(), 'SendOrder', buildDefaultSendOrderStepInput());
+  return buildStrategyStepTemplate(randomString(), 'SendOrder', buildDefaultSendOrderStepInput(), randomString());
 };
 
 export const buildDefaultMovingAverageCrossoverStepTemplate = (): StrategyStepTemplate => {
-  return buildStrategyStepTemplate(randomString(), randomString(), 'MovingAverageCrossover', buildDefaultMovingAverageCrossoverStepInput());
+  return buildStrategyStepTemplate(randomString(), 'MovingAverageCrossover', buildDefaultMovingAverageCrossoverStepInput(), randomString());
 };
 
-export const buildStrategyStepTemplate = (id: string, nextId: string, type: StrategyStepType, input: StrategyStepInput): StrategyStepTemplate => {
+export const buildStrategyStepTemplate = (id: string, type: StrategyStepType, input: StrategyStepInput, nextId?: string): StrategyStepTemplate => {
   return {
     id: id,
     type: type,
@@ -94,6 +97,31 @@ export const buildMarketEvolutionStepOutput = (success: boolean, lastPrice: numb
     lastPrice: lastPrice,
     currentPrice: currentPrice,
     percentage: percentage,
+  };
+};
+
+export const buildDefaultOrConditionStepInput = (): OrConditionStepInput => {
+  return buildOrConditionStepInput([
+    { id: randomString(), priority: randomNumber() },
+    { id: randomString(), priority: randomNumber() },
+  ]);
+};
+
+export const buildOrConditionStepInput = (steps: OrConditionStep[]): OrConditionStepInput => {
+  return {
+    steps: steps,
+  };
+};
+
+export const buildDefaultOrConditionStepOutput = (success: boolean): OrConditionStepOutput => {
+  return {
+    success: success,
+    id: randomString(10),
+    nextId: randomString(10),
+    steps: [
+      { ...{ id: randomString(), priority: randomNumber() }, ...buildDefaultMarketEvolutionStepOutput(true) },
+      { ...{ id: randomString(), priority: randomNumber() }, ...buildDefaultMarketEvolutionStepOutput(false) },
+    ],
   };
 };
 

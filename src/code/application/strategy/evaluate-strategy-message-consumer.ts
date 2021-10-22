@@ -1,5 +1,5 @@
 import { logger } from '../../configuration/log/logger';
-import { Strategy } from '../../domain/strategy/model/strategy';
+import { Strategy, StrategyStatus } from '../../domain/strategy/model/strategy';
 import { ActiveStrategyMessage } from '../../infrastructure/strategy/sqs-strategy-publisher';
 import { GetStrategyService } from '../../domain/strategy/get-strategy-service';
 import { UpdateStrategyService } from '../../domain/strategy/update-strategy-service';
@@ -13,13 +13,13 @@ export class EvaluateStrategyMessageConsumer {
       logger.info(activeStrategyMessage, 'Evaluating strategy');
       const strategy = await this.#getStrategyById(activeStrategyMessage.content.id);
       const strategyEvaluation = await this.evaluateStrategyService.evaluate(strategy);
-      if (!strategyEvaluation.success) {
-        await this.#updateStrategyStatusById(activeStrategyMessage.content.id);
+      if (strategyEvaluation.end) {
+        await this.#updateStrategyStatusById(activeStrategyMessage.content.id, strategyEvaluation.success ? 'Inactive' : 'Error');
       }
       logger.info(activeStrategyMessage, 'Strategy evaluated');
     } catch (error) {
       logger.error(activeStrategyMessage, 'Unable to evaluate strategy');
-      await this.#updateStrategyStatusById(activeStrategyMessage.content.id);
+      await this.#updateStrategyStatusById(activeStrategyMessage.content.id, 'Error');
       throw error;
     }
   }
@@ -32,7 +32,7 @@ export class EvaluateStrategyMessageConsumer {
     return strategy;
   }
 
-  async #updateStrategyStatusById(id: string): Promise<void> {
-    await this.updateStrategyService.updateStatusById(id, 'Error');
+  async #updateStrategyStatusById(id: string, status: StrategyStatus): Promise<void> {
+    await this.updateStrategyService.updateStatusById(id, status);
   }
 }

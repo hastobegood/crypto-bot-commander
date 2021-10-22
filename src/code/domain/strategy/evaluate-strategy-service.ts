@@ -1,7 +1,7 @@
 import { logger } from '../../configuration/log/logger';
 import { getStepTemplateById, Strategy } from './model/strategy';
-import { CheckOrderStepInput, SendOrderStepOutput, StrategyStep, StrategyStepTemplate } from './model/strategy-step';
-import { StrategyStepService } from './step/strategy-step-service';
+import { CheckOrderStepInput, OrConditionStepOutput, SendOrderStepOutput, StrategyStep, StrategyStepTemplate } from './model/strategy-step';
+import { getStrategyStepService, StrategyStepService } from './step/strategy-step-service';
 import { StrategyStepRepository } from './step/strategy-step-repository';
 import { serializeError } from 'serialize-error';
 import { StrategyEvaluation } from './model/strategy-evaluation';
@@ -16,15 +16,16 @@ export class EvaluateStrategyService {
     }
 
     let lastStep = await this.strategyStepRepository.getLastByStrategyId(strategy.id);
-    let stepTemplate = lastStep || getStepTemplateById(strategy, '1');
+    let stepTemplate: StrategyStepTemplate | undefined = lastStep || getStepTemplateById(strategy, '1');
 
     do {
       lastStep = await this.#processStep(strategy, stepTemplate, lastStep);
       stepTemplate = this.#getNextStepTemplate(strategy, lastStep);
-    } while (lastStep.output.success);
+    } while (stepTemplate);
 
     return {
-      success: !lastStep?.error,
+      success: !lastStep.error,
+      end: !!lastStep.error || (lastStep.output.success && !lastStep.nextId),
     };
   }
 
@@ -42,7 +43,7 @@ export class EvaluateStrategyService {
 
     try {
       logger.info(step, 'Processing strategy step');
-      step.output = await this.#getStepService(stepTemplate).process(strategy, stepTemplate.input);
+      step.output = await getStrategyStepService(this.strategyStepServices, stepTemplate).process(strategy, stepTemplate.input);
       logger.info(step, 'Strategy step processed');
     } catch (error) {
       step.error = { message: (error as Error).message, details: JSON.stringify(serializeError(error)) };
@@ -62,15 +63,11 @@ export class EvaluateStrategyService {
     }
   }
 
-  #getStepService(stepTemplate: StrategyStepTemplate): StrategyStepService {
-    const stepService = this.strategyStepServices.find((stepService) => stepService.getType() === stepTemplate.type);
-    if (!stepService) {
-      throw new Error(`Unsupported '${stepTemplate.type}' strategy step type`);
+  #getNextStepTemplate(strategy: Strategy, lastStep: StrategyStep): StrategyStepTemplate | undefined {
+    if (!lastStep.output.success) {
+      return undefined;
     }
-    return stepService;
-  }
 
-  #getNextStepTemplate(strategy: Strategy, lastStep: StrategyStep): StrategyStepTemplate {
     if (lastStep.type === 'SendOrder') {
       const sendOrderStepOutput = lastStep.output as SendOrderStepOutput;
       const checkOrderStepInput: CheckOrderStepInput = {
@@ -86,6 +83,10 @@ export class EvaluateStrategyService {
       };
     }
 
-    return getStepTemplateById(strategy, lastStep.nextId);
+    if (lastStep.type === 'OrCondition') {
+      lastStep.nextId = (lastStep.output as OrConditionStepOutput).nextId!;
+    }
+
+    return lastStep.nextId ? getStepTemplateById(strategy, lastStep.nextId) : undefined;
   }
 }

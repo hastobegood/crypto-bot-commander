@@ -15,7 +15,7 @@ export class SendOrderStepService implements StrategyStepService {
   }
 
   async process(strategy: Strategy, sendOrderStepInput: SendOrderStepInput): Promise<SendOrderStepOutput> {
-    if (sendOrderStepInput.type === 'Limit' && !sendOrderStepInput.deviation) {
+    if (sendOrderStepInput.type === 'Limit' && sendOrderStepInput.deviation === undefined) {
       throw new Error(`Unable to send limit order without deviation`);
     }
 
