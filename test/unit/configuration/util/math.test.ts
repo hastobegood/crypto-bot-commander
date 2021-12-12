@@ -40,12 +40,12 @@ describe('Math', () => {
       expect(round(0.5, 0)).toEqual(1);
       expect(round(1.25, 1)).toEqual(1.3);
       expect(round(234.20405, 4)).toEqual(234.2041);
-      expect(round(234.204050000000000000000000000000006, 4)).toEqual(234.2041);
+      expect(round(234.2040500000006, 4)).toEqual(234.2041);
 
       expect(round(-0.5, 0)).toEqual(-1);
       expect(round(-1.25, 1)).toEqual(-1.3);
       expect(round(-234.20405, 4)).toEqual(-234.2041);
-      expect(round(-234.204050000000000000000000000000006, 4)).toEqual(-234.2041);
+      expect(round(-234.204050000006, 4)).toEqual(-234.2041);
 
       expect(round(0.1 + 0.2, 1)).toEqual(0.3);
       expect(round(-0.1 + -0.2, 1)).toEqual(-0.3);
@@ -91,12 +91,12 @@ describe('Math', () => {
       expect(truncate(0.5, 0)).toEqual(0);
       expect(truncate(1.25, 1)).toEqual(1.2);
       expect(truncate(234.20405, 4)).toEqual(234.204);
-      expect(truncate(234.204050000000000000000000000000006, 4)).toEqual(234.204);
+      expect(truncate(234.2040500000006, 4)).toEqual(234.204);
 
       expect(truncate(-0.5, 0)).toEqual(-0);
       expect(truncate(-1.25, 1)).toEqual(-1.2);
       expect(truncate(-234.20405, 4)).toEqual(-234.204);
-      expect(truncate(-234.204050000000000000000000000000006, 4)).toEqual(-234.204);
+      expect(truncate(-234.204050000006, 4)).toEqual(-234.204);
 
       expect(truncate(0.1 + 0.2, 1)).toEqual(0.3);
       expect(truncate(-0.1 + -0.2, 1)).toEqual(-0.3);

@@ -37,7 +37,7 @@ export class DdbStrategyRepository implements StrategyRepository {
     do {
       const queryOutput = await this.ddbClient.send(new QueryCommand(queryInput));
       if (queryOutput.Items) {
-        results.push(...queryOutput.Items?.map((item) => item.symbolStatusSk));
+        results.push(...queryOutput.Items.map((item) => item.symbolStatusSk));
       }
       queryInput.ExclusiveStartKey = queryOutput.LastEvaluatedKey;
     } while (queryInput.ExclusiveStartKey);

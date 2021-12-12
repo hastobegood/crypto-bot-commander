@@ -36,13 +36,9 @@ Conditions:
 Mappings:
   EnvironmentMap:
     test:
-      DcaTradingConfig: '{ "baseAsset": "BTC", "quoteAsset": "BUSD", "quoteAssetQuantity": 25, "tradeAssets": [ { "asset": "ETH|BNB", "percentage": 0.50 } ] }'
-      DcaTradingSchedule: cron(0 18 ? * * *)
       AvailableSymbols: BNB#BUSD,BNB#USDT,BTC#BUSD,BTC#USDT
       UpdateAllCandlesticksSchedule: rate(1 minute)
     prod:
-      DcaTradingConfig: '{ "baseAsset": "BTC", "quoteAsset": "EUR", "quoteAssetQuantity": 25, "tradeAssets": [ { "asset": "ETH", "percentage": 0.28 }, { "asset":"XRP", "percentage": 0.28 }, { "asset": "ADA|MATIC", "percentage": 0.20 } ] }'
-      DcaTradingSchedule: cron(0 18 ? * 1 *)
       AvailableSymbols: BNB#BUSD,BTC#BUSD,ETH#BUSD,XRP#BUSD
       UpdateAllCandlesticksSchedule: rate(1 minute)
 
@@ -60,42 +56,6 @@ Globals:
         TRACING: !Ref TracingParameter
 
 Resources:
-  DcaTradingFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      Description: DCA trading function
-      CodeUri: dist/webpack/dca-trading-handler
-      Handler: app.handler
-      ReservedConcurrentExecutions: 1
-      Environment:
-        Variables:
-          BINANCE_URL: !Ref BinanceUrlParameter
-          BINANCE_SECRET_NAME: !Ref BinanceSecretNameParameter
-          DCA_TRADING_TABLE_NAME: !Ref DcaTradingTable
-          ORDER_TABLE_NAME: !Ref OrderTable
-          DCA_TRADING_CONFIG: !FindInMap [ EnvironmentMap, !Ref EnvironmentParameter, DcaTradingConfig ]
-      Events:
-        ScheduleEvent:
-          Type: Schedule
-          Properties:
-            Enabled: true
-            Schedule: !FindInMap [ EnvironmentMap, !Ref EnvironmentParameter, DcaTradingSchedule ]
-      Policies:
-        - AWSSecretsManagerGetSecretValuePolicy:
-            SecretArn: !Sub arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${BinanceSecretNameParameter}*
-        - Version: 2012-10-17
-          Statement:
-            - Effect: Allow
-              Action:
-                - kms:Decrypt
-              Resource: !Sub arn:aws:kms:${AWS::Region}:${AWS::AccountId}:${BinanceSecretEncryptionKeyParameter}
-        - DynamoDBReadPolicy:
-            TableName: !Ref DcaTradingTable
-        - DynamoDBWritePolicy:
-            TableName: !Ref DcaTradingTable
-        - DynamoDBWritePolicy:
-            TableName: !Ref OrderTable
-
   InitializeAllCandlesticksFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -231,23 +191,6 @@ Resources:
         - SQSSendMessagePolicy:
             QueueName: !GetAtt ProcessedStrategyStepQueue.QueueName
 
-  DcaTradingTable:
-    Type: AWS::DynamoDB::Table
-    Properties:
-      BillingMode: PAY_PER_REQUEST
-      SSESpecification:
-        SSEEnabled: true
-      KeySchema:
-        - AttributeName: pk
-          KeyType: HASH
-        - AttributeName: sk
-          KeyType: RANGE
-      AttributeDefinitions:
-        - AttributeName: pk
-          AttributeType: S
-        - AttributeName: sk
-          AttributeType: S
-
   CandlestickTable:
     Type: AWS::DynamoDB::Table
     Properties:
@@ -352,13 +295,6 @@ Resources:
       FifoThroughputLimit: perMessageGroupId
 
 Outputs:
-  DcaTradingFunctionName:
-    Description: DCA trading function name
-    Value: !Ref DcaTradingFunction
-  DcaTradingFunctionArn:
-    Description: DCA trading function ARN
-    Value: !GetAtt DcaTradingFunction.Arn
-
   InitializeAllCandlesticksFunctionName:
     Description: Initialize all candlesticks function name
     Value: !Ref InitializeAllCandlesticksFunction
@@ -386,13 +322,6 @@ Outputs:
   EvaluateStrategyFunctionArn:
     Description: Evaluate strategy function ARN
     Value: !GetAtt EvaluateStrategyFunction.Arn
-
-  DcaTradingTableName:
-    Description: DCA Trading table name
-    Value: !Ref DcaTradingTable
-  DcaTradingTableArn:
-    Description: DCA Trading table ARN
-    Value: !GetAtt DcaTradingTable.Arn
 
   CandlestickTableName:
     Description: Candlestick table name
