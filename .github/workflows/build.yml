@@ -74,7 +74,7 @@ jobs:
           key: node_modules-${{ hashFiles('yarn.lock') }}
           path: node_modules
       - name: Run tests
-        run: yarn test
+        run: yarn test:coverage
       - name: Upload reports
         uses: actions/upload-artifact@v2
         with:

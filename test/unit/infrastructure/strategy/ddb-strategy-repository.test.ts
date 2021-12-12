@@ -118,6 +118,10 @@ describe('DdbStrategyRepository', () => {
           }))
           .mockImplementationOnce(() => ({
             Items: [{ data: { ...strategy3 }, symbolStatusSk: strategy3.id }],
+            LastEvaluatedKey: '999',
+          }))
+          .mockImplementationOnce(() => ({
+            Items: undefined,
           }));
       });
 
@@ -125,7 +129,7 @@ describe('DdbStrategyRepository', () => {
         const result = await strategyRepository.getAllIdsBySymbolAndActiveStatus('ABC');
         expect(result).toEqual([strategy1.id, strategy2.id, strategy3.id]);
 
-        expect(ddbClientMock.send).toHaveBeenCalledTimes(2);
+        expect(ddbClientMock.send).toHaveBeenCalledTimes(3);
         let sendParams = ddbClientMock.send.mock.calls[0];
         expect(sendParams.length).toEqual(1);
         expect(sendParams[0].input).toEqual({
@@ -140,6 +144,19 @@ describe('DdbStrategyRepository', () => {
           },
         });
         sendParams = ddbClientMock.send.mock.calls[1];
+        expect(sendParams.length).toEqual(1);
+        expect(sendParams[0].input).toEqual({
+          TableName: 'my-table',
+          IndexName: 'SymbolStatus-Index',
+          KeyConditionExpression: '#gsiPk = :gsiPk',
+          ExpressionAttributeNames: {
+            '#gsiPk': 'symbolStatusPk',
+          },
+          ExpressionAttributeValues: {
+            ':gsiPk': 'Strategy::ABC::Active',
+          },
+        });
+        sendParams = ddbClientMock.send.mock.calls[2];
         expect(sendParams.length).toEqual(1);
         expect(sendParams[0].input).toEqual({
           TableName: 'my-table',
