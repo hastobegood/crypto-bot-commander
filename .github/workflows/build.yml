@@ -49,7 +49,7 @@ jobs:
           key: node_modules-${{ hashFiles('yarn.lock') }}
           path: node_modules
       - name: Run linter
-        run: yarn lint
+        run: yarn lint:report
       - name: Upload report
         uses: actions/upload-artifact@v2
         with:
