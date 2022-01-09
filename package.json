@@ -23,7 +23,7 @@
     "@aws-sdk/client-dynamodb": "^3.43.0",
     "@aws-sdk/client-secrets-manager": "^3.43.0",
     "@aws-sdk/client-sqs": "^3.43.0",
-    "@aws-sdk/lib-dynamodb": "^3.43.0",
+    "@aws-sdk/lib-dynamodb": "^3.46.0",
     "aws-xray-sdk-core": "^3.3.4",
     "axios": "^0.24.0",
     "lodash": "^4.17.21",
