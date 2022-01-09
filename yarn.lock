@@ -73,43 +73,43 @@
     "@aws-sdk/types" "3.46.0"
     tslib "^2.3.0"
 
-"@aws-sdk/client-dynamodb@^3.43.0":
-  version "3.44.0"
-  resolved "https://registry.yarnpkg.com/@aws-sdk/client-dynamodb/-/client-dynamodb-3.44.0.tgz#d370f3d31969a574545d2fcb9a47559982a37fd2"
-  integrity sha512-SOZWrw0SostQXT7sQS3orTzsWPTptk29X/jEiU5EL8BLW9jRGIM62G06/bZnjB2+MqtXlkp2v1Gd5jumH3c7Ig==
+"@aws-sdk/client-dynamodb@^3.46.0":
+  version "3.46.0"
+  resolved "https://registry.yarnpkg.com/@aws-sdk/client-dynamodb/-/client-dynamodb-3.46.0.tgz#887fc02e85efff7cf52a2491b3bdceb715fe8ca6"
+  integrity sha512-JeS+IcTj4NEX/zf4wK/f3HPgD9b2VyYcVrI5NLccaMdhg17xtJ3Z7gk7BT4/SpF0VWZkUjRIFQzkBEKB3YTx4g==
   dependencies:
     "@aws-crypto/sha256-browser" "2.0.0"
     "@aws-crypto/sha256-js" "2.0.0"
-    "@aws-sdk/client-sts" "3.43.0"
-    "@aws-sdk/config-resolver" "3.40.0"
-    "@aws-sdk/credential-provider-node" "3.41.0"
-    "@aws-sdk/fetch-http-handler" "3.40.0"
-    "@aws-sdk/hash-node" "3.40.0"
-    "@aws-sdk/invalid-dependency" "3.40.0"
-    "@aws-sdk/middleware-content-length" "3.40.0"
-    "@aws-sdk/middleware-endpoint-discovery" "3.40.0"
-    "@aws-sdk/middleware-host-header" "3.40.0"
-    "@aws-sdk/middleware-logger" "3.40.0"
-    "@aws-sdk/middleware-retry" "3.40.0"
-    "@aws-sdk/middleware-serde" "3.40.0"
-    "@aws-sdk/middleware-signing" "3.40.0"
-    "@aws-sdk/middleware-stack" "3.40.0"
-    "@aws-sdk/middleware-user-agent" "3.40.0"
-    "@aws-sdk/node-config-provider" "3.40.0"
-    "@aws-sdk/node-http-handler" "3.40.0"
-    "@aws-sdk/protocol-http" "3.40.0"
-    "@aws-sdk/smithy-client" "3.41.0"
-    "@aws-sdk/types" "3.40.0"
-    "@aws-sdk/url-parser" "3.40.0"
-    "@aws-sdk/util-base64-browser" "3.37.0"
-    "@aws-sdk/util-base64-node" "3.37.0"
-    "@aws-sdk/util-body-length-browser" "3.37.0"
-    "@aws-sdk/util-body-length-node" "3.37.0"
-    "@aws-sdk/util-user-agent-browser" "3.40.0"
-    "@aws-sdk/util-user-agent-node" "3.40.0"
-    "@aws-sdk/util-utf8-browser" "3.37.0"
-    "@aws-sdk/util-utf8-node" "3.37.0"
-    "@aws-sdk/util-waiter" "3.40.0"
+    "@aws-sdk/client-sts" "3.46.0"
+    "@aws-sdk/config-resolver" "3.46.0"
+    "@aws-sdk/credential-provider-node" "3.46.0"
+    "@aws-sdk/fetch-http-handler" "3.46.0"
+    "@aws-sdk/hash-node" "3.46.0"
+    "@aws-sdk/invalid-dependency" "3.46.0"
+    "@aws-sdk/middleware-content-length" "3.46.0"
+    "@aws-sdk/middleware-endpoint-discovery" "3.46.0"
+    "@aws-sdk/middleware-host-header" "3.46.0"
+    "@aws-sdk/middleware-logger" "3.46.0"
+    "@aws-sdk/middleware-retry" "3.46.0"
+    "@aws-sdk/middleware-serde" "3.46.0"
+    "@aws-sdk/middleware-signing" "3.46.0"
+    "@aws-sdk/middleware-stack" "3.46.0"
+    "@aws-sdk/middleware-user-agent" "3.46.0"
+    "@aws-sdk/node-config-provider" "3.46.0"
+    "@aws-sdk/node-http-handler" "3.46.0"
+    "@aws-sdk/protocol-http" "3.46.0"
+    "@aws-sdk/smithy-client" "3.46.0"
+    "@aws-sdk/types" "3.46.0"
+    "@aws-sdk/url-parser" "3.46.0"
+    "@aws-sdk/util-base64-browser" "3.46.0"
+    "@aws-sdk/util-base64-node" "3.46.0"
+    "@aws-sdk/util-body-length-browser" "3.46.0"
+    "@aws-sdk/util-body-length-node" "3.46.0"
+    "@aws-sdk/util-user-agent-browser" "3.46.0"
+    "@aws-sdk/util-user-agent-node" "3.46.0"
+    "@aws-sdk/util-utf8-browser" "3.46.0"
+    "@aws-sdk/util-utf8-node" "3.46.0"
+    "@aws-sdk/util-waiter" "3.46.0"
     tslib "^2.3.0"
     uuid "^8.3.2"
 
@@ -526,10 +526,10 @@
     "@aws-sdk/types" "3.46.0"
     tslib "^2.3.0"
 
-"@aws-sdk/endpoint-cache@3.36.0":
-  version "3.36.0"
-  resolved "https://registry.yarnpkg.com/@aws-sdk/endpoint-cache/-/endpoint-cache-3.36.0.tgz#73425c91bc3236ab32b3a3149067a08454477528"
-  integrity sha512-riqT+0ETKJQyp86K8eZQZdbnZmswHpEEz4VdSoXfj+VpGe3UtasUbyqsTIW2gCi2SFypSNbjrRk3QMFmWQJxXA==
+"@aws-sdk/endpoint-cache@3.46.0":
+  version "3.46.0"
+  resolved "https://registry.yarnpkg.com/@aws-sdk/endpoint-cache/-/endpoint-cache-3.46.0.tgz#fc6a24dafaf3ad7e2ad2807018636c804d99a188"
+  integrity sha512-j9oI7YumvSr3fJN9NWSijM9zeHQztCu8HJ08I8NesWlxuwnsAlquWZ9ZW3ODi1+O964fWKWjk6raDO/7LL/HsQ==
   dependencies:
     mnemonist "0.38.3"
     tslib "^2.3.0"
@@ -640,15 +640,15 @@
     "@aws-sdk/types" "3.46.0"
     tslib "^2.3.0"
 
-"@aws-sdk/middleware-endpoint-discovery@3.40.0":
-  version "3.40.0"
-  resolved "https://registry.yarnpkg.com/@aws-sdk/middleware-endpoint-discovery/-/middleware-endpoint-discovery-3.40.0.tgz#2032bcf0466fd3d6e54ba231582192a2659b5de5"
-  integrity sha512-6jWcSL17V57jqQZNYJCm4PUwDjE6D8kP2+O5gx+ey9znerRWUiYzZibVH27wwVuBSj7lZ+C9YU09urxPWH6RXg==
+"@aws-sdk/middleware-endpoint-discovery@3.46.0":
+  version "3.46.0"
+  resolved "https://registry.yarnpkg.com/@aws-sdk/middleware-endpoint-discovery/-/middleware-endpoint-discovery-3.46.0.tgz#7438f54494e3542095ae75d0e922cfc0d7710676"
+  integrity sha512-IT2Aue0ZL07ggQD0RZEysebyakzcjAeLfQOdwQJ/huZNDV0IaE9T2sl6UPjNcGon0eYGf0A1sGRygW+6tDMHJA==
   dependencies:
-    "@aws-sdk/config-resolver" "3.40.0"
-    "@aws-sdk/endpoint-cache" "3.36.0"
-    "@aws-sdk/protocol-http" "3.40.0"
-    "@aws-sdk/types" "3.40.0"
+    "@aws-sdk/config-resolver" "3.46.0"
+    "@aws-sdk/endpoint-cache" "3.46.0"
+    "@aws-sdk/protocol-http" "3.46.0"
+    "@aws-sdk/types" "3.46.0"
     tslib "^2.3.0"
 
 "@aws-sdk/middleware-host-header@3.40.0":
@@ -1222,13 +1222,13 @@
     "@aws-sdk/util-buffer-from" "3.46.0"
     tslib "^2.3.0"
 
-"@aws-sdk/util-waiter@3.40.0":
-  version "3.40.0"
-  resolved "https://registry.yarnpkg.com/@aws-sdk/util-waiter/-/util-waiter-3.40.0.tgz#91c537efc9d0129fb24d9bdab86acbfd797ddf1f"
-  integrity sha512-jdxwNEZdID49ZvyAnxaeNm5w2moIfMLOwj/q6TxKlxYoXMs16FQWkhyfGue0vEASzchS49ewbyt+KBqpT31Ebg==
+"@aws-sdk/util-waiter@3.46.0":
+  version "3.46.0"
+  resolved "https://registry.yarnpkg.com/@aws-sdk/util-waiter/-/util-waiter-3.46.0.tgz#83e73b6568ff01af2a6259ecc4d6b4955b68fa20"
+  integrity sha512-rn1bf9whuHfarNTFSRnFIupRlfN+L28hRZL8PClgyxa0WqpzG0goN6M+opuYnbKrTazyqktxpUTg/fHHoQiveA==
   dependencies:
-    "@aws-sdk/abort-controller" "3.40.0"
-    "@aws-sdk/types" "3.40.0"
+    "@aws-sdk/abort-controller" "3.46.0"
+    "@aws-sdk/types" "3.46.0"
     tslib "^2.3.0"
 
 "@babel/code-frame@^7.12.13", "@babel/code-frame@^7.16.0":
