@@ -1,5 +1,17 @@
 # aws-sam-binance-trading
 
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=hastobegood_crypto-bot-commander&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=hastobegood_crypto-bot-commander)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=hastobegood_crypto-bot-commander&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=hastobegood_crypto-bot-commander)
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=hastobegood_crypto-bot-commander&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=hastobegood_crypto-bot-commander)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=hastobegood_crypto-bot-commander&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=hastobegood_crypto-bot-commander)
+
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=hastobegood_crypto-bot-commander&metric=coverage)](https://sonarcloud.io/summary/new_code?id=hastobegood_crypto-bot-commander)
+[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=hastobegood_crypto-bot-commander&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=hastobegood_crypto-bot-commander)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=hastobegood_crypto-bot-commander&metric=bugs)](https://sonarcloud.io/summary/new_code?id=hastobegood_crypto-bot-commander)
+[![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=hastobegood_crypto-bot-commander&metric=sqale_index)](https://sonarcloud.io/summary/new_code?id=hastobegood_crypto-bot-commander)
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=hastobegood_crypto-bot-commander&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=hastobegood_crypto-bot-commander)
+[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=hastobegood_crypto-bot-commander&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=hastobegood_crypto-bot-commander)
+
 AWS SAM template used to deploy a Binance trading application
 
 ## Getting started
