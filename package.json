@@ -27,7 +27,7 @@
     "aws-xray-sdk-core": "^3.3.4",
     "axios": "^0.24.0",
     "lodash": "^4.17.21",
-    "pino": "^7.5.1",
+    "pino": "^7.6.3",
     "serialize-error": "^8.1.0",
     "source-map-support": "^0.5.21",
     "uuid": "^8.3.2"
