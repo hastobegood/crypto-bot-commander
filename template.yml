@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: >-
-  crypto-bot
+  crypto-bot-commander
 
 Transform:
   - AWS::Serverless-2016-10-31
