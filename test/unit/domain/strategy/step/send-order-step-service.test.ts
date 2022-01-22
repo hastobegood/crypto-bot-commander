@@ -1,16 +1,15 @@
 import { mocked } from 'ts-jest/utils';
+import { Candlestick } from '@hastobegood/crypto-bot-artillery/candlestick';
+import { Order } from '@hastobegood/crypto-bot-artillery/order';
+import { buildDefaultCandlestick, buildDefaultLimitOrder, buildDefaultOrder } from '@hastobegood/crypto-bot-artillery/test/builders';
 import { StrategyStepRepository } from '../../../../../src/code/domain/strategy/step/strategy-step-repository';
 import { Strategy, StrategyWallet } from '../../../../../src/code/domain/strategy/model/strategy';
 import { CheckOrderStepOutput, SendOrderStepInput, StrategyStep } from '../../../../../src/code/domain/strategy/model/strategy-step';
 import { buildDefaultStrategy, buildDefaultStrategyWallet } from '../../../../builders/domain/strategy/strategy-test-builder';
 import { SendOrderStepService } from '../../../../../src/code/domain/strategy/step/send-order-step-service';
-import { Order } from '../../../../../src/code/domain/order/model/order';
 import { buildDefaultCheckOrderStepOutput, buildDefaultStrategyStepTemplate, buildSendOrderStepInput, buildStrategyStep } from '../../../../builders/domain/strategy/strategy-step-test-builder';
-import { buildDefaultLimitOrder, buildDefaultOrder } from '../../../../builders/domain/order/order-test-builder';
 import { CreateOrderService } from '../../../../../src/code/domain/order/create-order-service';
 import { GetCandlestickService } from '../../../../../src/code/domain/candlestick/get-candlestick-service';
-import { Candlestick } from '../../../../../src/code/domain/candlestick/model/candlestick';
-import { buildDefaultCandlestick } from '../../../../builders/domain/candlestick/candlestick-test-builder';
 import { GetStrategyService } from '../../../../../src/code/domain/strategy/get-strategy-service';
 
 const createOrderServiceMock = mocked(jest.genMockFromModule<CreateOrderService>('../../../../../src/code/domain/order/create-order-service'), true);
@@ -100,12 +99,14 @@ describe('SendOrderStepService', () => {
           expect(result).toEqual({
             success: true,
             id: order.id,
+            side: order.side,
+            type: order.type,
             status: order.status,
             externalId: order.externalId,
             externalStatus: order.externalStatus,
-            baseAssetQuantity: order.baseAssetQuantity,
-            quoteAssetQuantity: order.quoteAssetQuantity,
-            priceLimit: order.priceLimit,
+            baseAssetQuantity: order.quote ? undefined : order.requestedQuantity,
+            quoteAssetQuantity: order.quote ? order.requestedQuantity : undefined,
+            priceLimit: order.requestedPrice,
           });
 
           expect(strategyStepRepositoryMock.getLastByStrategyIdAndType).toHaveBeenCalledTimes(0);
@@ -114,11 +115,12 @@ describe('SendOrderStepService', () => {
           const createParams = createOrderServiceMock.create.mock.calls[0];
           expect(createParams.length).toEqual(1);
           expect(createParams[0]).toEqual({
+            exchange: strategy.exchange,
             symbol: strategy.symbol,
             side: 'Buy',
             type: 'Market',
-            baseAssetQuantity: undefined,
-            quoteAssetQuantity: 80,
+            quote: true,
+            requestedQuantity: 80,
           });
         });
       });
@@ -130,7 +132,7 @@ describe('SendOrderStepService', () => {
           order = {
             ...buildDefaultOrder(),
             status: 'Error',
-            executedAssetQuantity: undefined,
+            executedQuantity: undefined,
             executedPrice: undefined,
           };
           createOrderServiceMock.create.mockResolvedValue(order);
@@ -141,12 +143,14 @@ describe('SendOrderStepService', () => {
           expect(result).toEqual({
             success: true,
             id: order.id,
+            side: order.side,
+            type: order.type,
             status: order.status,
             externalId: order.externalId,
             externalStatus: order.externalStatus,
-            baseAssetQuantity: order.baseAssetQuantity,
-            quoteAssetQuantity: order.quoteAssetQuantity,
-            priceLimit: order.priceLimit,
+            baseAssetQuantity: order.quote ? undefined : order.requestedQuantity,
+            quoteAssetQuantity: order.quote ? order.requestedQuantity : undefined,
+            priceLimit: order.requestedPrice,
           });
 
           expect(strategyStepRepositoryMock.getLastByStrategyIdAndType).toHaveBeenCalledTimes(0);
@@ -155,11 +159,12 @@ describe('SendOrderStepService', () => {
           const createParams = createOrderServiceMock.create.mock.calls[0];
           expect(createParams.length).toEqual(1);
           expect(createParams[0]).toEqual({
+            exchange: strategy.exchange,
             symbol: strategy.symbol,
             side: 'Buy',
             type: 'Market',
-            baseAssetQuantity: undefined,
-            quoteAssetQuantity: 80,
+            quote: true,
+            requestedQuantity: 80,
           });
         });
       });
@@ -177,12 +182,14 @@ describe('SendOrderStepService', () => {
           expect(result).toEqual({
             success: true,
             id: order.id,
+            side: order.side,
+            type: order.type,
             status: order.status,
             externalId: order.externalId,
             externalStatus: order.externalStatus,
-            baseAssetQuantity: order.baseAssetQuantity,
-            quoteAssetQuantity: order.quoteAssetQuantity,
-            priceLimit: order.priceLimit,
+            baseAssetQuantity: order.quote ? undefined : order.requestedQuantity,
+            quoteAssetQuantity: order.quote ? order.requestedQuantity : undefined,
+            priceLimit: order.requestedPrice,
           });
 
           expect(strategyStepRepositoryMock.getLastByStrategyIdAndType).toHaveBeenCalledTimes(0);
@@ -191,11 +198,12 @@ describe('SendOrderStepService', () => {
           const createParams = createOrderServiceMock.create.mock.calls[0];
           expect(createParams.length).toEqual(1);
           expect(createParams[0]).toEqual({
+            exchange: strategy.exchange,
             symbol: strategy.symbol,
             side: 'Sell',
             type: 'Market',
-            baseAssetQuantity: 5,
-            quoteAssetQuantity: undefined,
+            quote: false,
+            requestedQuantity: 5,
           });
         });
       });
@@ -207,7 +215,7 @@ describe('SendOrderStepService', () => {
           order = {
             ...buildDefaultOrder(),
             status: 'Error',
-            executedAssetQuantity: undefined,
+            executedQuantity: undefined,
             executedPrice: undefined,
           };
           createOrderServiceMock.create.mockResolvedValue(order);
@@ -218,12 +226,14 @@ describe('SendOrderStepService', () => {
           expect(result).toEqual({
             success: true,
             id: order.id,
+            side: order.side,
+            type: order.type,
             status: order.status,
             externalId: order.externalId,
             externalStatus: order.externalStatus,
-            baseAssetQuantity: order.baseAssetQuantity,
-            quoteAssetQuantity: order.quoteAssetQuantity,
-            priceLimit: order.priceLimit,
+            baseAssetQuantity: order.quote ? undefined : order.requestedQuantity,
+            quoteAssetQuantity: order.quote ? order.requestedQuantity : undefined,
+            priceLimit: order.requestedPrice,
           });
 
           expect(strategyStepRepositoryMock.getLastByStrategyIdAndType).toHaveBeenCalledTimes(0);
@@ -232,11 +242,12 @@ describe('SendOrderStepService', () => {
           const createParams = createOrderServiceMock.create.mock.calls[0];
           expect(createParams.length).toEqual(1);
           expect(createParams[0]).toEqual({
+            exchange: strategy.exchange,
             symbol: strategy.symbol,
             side: 'Sell',
             type: 'Market',
-            baseAssetQuantity: 5,
-            quoteAssetQuantity: undefined,
+            quote: false,
+            requestedQuantity: 5,
           });
         });
       });
@@ -299,12 +310,14 @@ describe('SendOrderStepService', () => {
             expect(result).toEqual({
               success: true,
               id: order.id,
+              side: order.side,
+              type: order.type,
               status: order.status,
               externalId: order.externalId,
               externalStatus: order.externalStatus,
-              baseAssetQuantity: order.baseAssetQuantity,
-              quoteAssetQuantity: order.quoteAssetQuantity,
-              priceLimit: order.priceLimit,
+              baseAssetQuantity: order.quote ? undefined : order.requestedQuantity,
+              quoteAssetQuantity: order.quote ? order.requestedQuantity : undefined,
+              priceLimit: order.requestedPrice,
             });
 
             expect(strategyStepRepositoryMock.getLastByStrategyIdAndType).toHaveBeenCalledTimes(1);
@@ -317,11 +330,12 @@ describe('SendOrderStepService', () => {
             const createParams = createOrderServiceMock.create.mock.calls[0];
             expect(createParams.length).toEqual(1);
             expect(createParams[0]).toEqual({
+              exchange: strategy.exchange,
               symbol: strategy.symbol,
               side: 'Buy',
               type: 'Market',
-              baseAssetQuantity: (lastOrderStep.output as CheckOrderStepOutput).quantity! * sendOrderStepInput.percentage,
-              quoteAssetQuantity: undefined,
+              quote: false,
+              requestedQuantity: (lastOrderStep.output as CheckOrderStepOutput).quantity! * sendOrderStepInput.percentage,
             });
           });
         });
@@ -370,12 +384,14 @@ describe('SendOrderStepService', () => {
             expect(result).toEqual({
               success: true,
               id: order.id,
+              side: order.side,
+              type: order.type,
               status: order.status,
               externalId: order.externalId,
               externalStatus: order.externalStatus,
-              baseAssetQuantity: order.baseAssetQuantity,
-              quoteAssetQuantity: order.quoteAssetQuantity,
-              priceLimit: order.priceLimit,
+              baseAssetQuantity: order.quote ? undefined : order.requestedQuantity,
+              quoteAssetQuantity: order.quote ? order.requestedQuantity : undefined,
+              priceLimit: order.requestedPrice,
             });
 
             expect(strategyStepRepositoryMock.getLastByStrategyIdAndType).toHaveBeenCalledTimes(1);
@@ -388,11 +404,12 @@ describe('SendOrderStepService', () => {
             const createParams = createOrderServiceMock.create.mock.calls[0];
             expect(createParams.length).toEqual(1);
             expect(createParams[0]).toEqual({
+              exchange: strategy.exchange,
               symbol: strategy.symbol,
               side: 'Sell',
               type: 'Market',
-              baseAssetQuantity: (lastOrderStep.output as CheckOrderStepOutput).quantity! * sendOrderStepInput.percentage,
-              quoteAssetQuantity: undefined,
+              quote: false,
+              requestedQuantity: (lastOrderStep.output as CheckOrderStepOutput).quantity! * sendOrderStepInput.percentage,
             });
           });
         });
@@ -477,8 +494,9 @@ describe('SendOrderStepService', () => {
 
           expect(getCandlestickServiceMock.getLastBySymbol).toHaveBeenCalledTimes(1);
           const getLastBySymbolParams = getCandlestickServiceMock.getLastBySymbol.mock.calls[0];
-          expect(getLastBySymbolParams.length).toEqual(1);
-          expect(getLastBySymbolParams[0]).toEqual(strategy.symbol);
+          expect(getLastBySymbolParams.length).toEqual(2);
+          expect(getLastBySymbolParams[0]).toEqual(strategy.exchange);
+          expect(getLastBySymbolParams[1]).toEqual(strategy.symbol);
 
           expect(strategyStepRepositoryMock.getLastByStrategyIdAndType).toHaveBeenCalledTimes(0);
           expect(createOrderServiceMock.create).toHaveBeenCalledTimes(0);
@@ -501,18 +519,21 @@ describe('SendOrderStepService', () => {
           expect(result).toEqual({
             success: true,
             id: order.id,
+            side: order.side,
+            type: order.type,
             status: order.status,
             externalId: order.externalId,
             externalStatus: order.externalStatus,
-            baseAssetQuantity: order.baseAssetQuantity,
-            quoteAssetQuantity: order.quoteAssetQuantity,
-            priceLimit: order.priceLimit,
+            baseAssetQuantity: order.quote ? undefined : order.requestedQuantity,
+            quoteAssetQuantity: order.quote ? order.requestedQuantity : undefined,
+            priceLimit: order.requestedPrice,
           });
 
           expect(getCandlestickServiceMock.getLastBySymbol).toHaveBeenCalledTimes(1);
           const getLastBySymbolParams = getCandlestickServiceMock.getLastBySymbol.mock.calls[0];
-          expect(getLastBySymbolParams.length).toEqual(1);
-          expect(getLastBySymbolParams[0]).toEqual(strategy.symbol);
+          expect(getLastBySymbolParams.length).toEqual(2);
+          expect(getLastBySymbolParams[0]).toEqual(strategy.exchange);
+          expect(getLastBySymbolParams[1]).toEqual(strategy.symbol);
 
           expect(strategyStepRepositoryMock.getLastByStrategyIdAndType).toHaveBeenCalledTimes(0);
 
@@ -520,11 +541,13 @@ describe('SendOrderStepService', () => {
           const createParams = createOrderServiceMock.create.mock.calls[0];
           expect(createParams.length).toEqual(1);
           expect(createParams[0]).toEqual({
+            exchange: strategy.exchange,
             symbol: strategy.symbol,
             side: 'Buy',
             type: 'Limit',
-            baseAssetQuantity: 80 / (lastCandlestick.closingPrice * (1 + sendOrderStepInput.deviation!)),
-            priceLimit: lastCandlestick.closingPrice * (1 + sendOrderStepInput.deviation!),
+            quote: false,
+            requestedQuantity: 80 / (lastCandlestick.closingPrice * (1 + sendOrderStepInput.deviation!)),
+            requestedPrice: lastCandlestick.closingPrice * (1 + sendOrderStepInput.deviation!),
           });
         });
       });
@@ -539,7 +562,7 @@ describe('SendOrderStepService', () => {
           order = {
             ...buildDefaultLimitOrder(),
             status: 'Waiting',
-            executedAssetQuantity: undefined,
+            executedQuantity: undefined,
             executedPrice: undefined,
           };
           createOrderServiceMock.create.mockResolvedValue(order);
@@ -550,18 +573,21 @@ describe('SendOrderStepService', () => {
           expect(result).toEqual({
             success: true,
             id: order.id,
+            side: order.side,
+            type: order.type,
             status: order.status,
             externalId: order.externalId,
             externalStatus: order.externalStatus,
-            baseAssetQuantity: order.baseAssetQuantity,
-            quoteAssetQuantity: order.quoteAssetQuantity,
-            priceLimit: order.priceLimit,
+            baseAssetQuantity: order.quote ? undefined : order.requestedQuantity,
+            quoteAssetQuantity: order.quote ? order.requestedQuantity : undefined,
+            priceLimit: order.requestedPrice,
           });
 
           expect(getCandlestickServiceMock.getLastBySymbol).toHaveBeenCalledTimes(1);
           const getLastBySymbolParams = getCandlestickServiceMock.getLastBySymbol.mock.calls[0];
-          expect(getLastBySymbolParams.length).toEqual(1);
-          expect(getLastBySymbolParams[0]).toEqual(strategy.symbol);
+          expect(getLastBySymbolParams.length).toEqual(2);
+          expect(getLastBySymbolParams[0]).toEqual(strategy.exchange);
+          expect(getLastBySymbolParams[1]).toEqual(strategy.symbol);
 
           expect(strategyStepRepositoryMock.getLastByStrategyIdAndType).toHaveBeenCalledTimes(0);
 
@@ -569,11 +595,13 @@ describe('SendOrderStepService', () => {
           const createParams = createOrderServiceMock.create.mock.calls[0];
           expect(createParams.length).toEqual(1);
           expect(createParams[0]).toEqual({
+            exchange: strategy.exchange,
             symbol: strategy.symbol,
             side: 'Buy',
             type: 'Limit',
-            baseAssetQuantity: 80 / (lastCandlestick.closingPrice * (1 + sendOrderStepInput.deviation!)),
-            priceLimit: lastCandlestick.closingPrice * (1 + sendOrderStepInput.deviation!),
+            quote: false,
+            requestedQuantity: 80 / (lastCandlestick.closingPrice * (1 + sendOrderStepInput.deviation!)),
+            requestedPrice: lastCandlestick.closingPrice * (1 + sendOrderStepInput.deviation!),
           });
         });
       });
@@ -594,18 +622,21 @@ describe('SendOrderStepService', () => {
           expect(result).toEqual({
             success: true,
             id: order.id,
+            side: order.side,
+            type: order.type,
             status: order.status,
             externalId: order.externalId,
             externalStatus: order.externalStatus,
-            baseAssetQuantity: order.baseAssetQuantity,
-            quoteAssetQuantity: order.quoteAssetQuantity,
-            priceLimit: order.priceLimit,
+            baseAssetQuantity: order.quote ? undefined : order.requestedQuantity,
+            quoteAssetQuantity: order.quote ? order.requestedQuantity : undefined,
+            priceLimit: order.requestedPrice,
           });
 
           expect(getCandlestickServiceMock.getLastBySymbol).toHaveBeenCalledTimes(1);
           const getLastBySymbolParams = getCandlestickServiceMock.getLastBySymbol.mock.calls[0];
-          expect(getLastBySymbolParams.length).toEqual(1);
-          expect(getLastBySymbolParams[0]).toEqual(strategy.symbol);
+          expect(getLastBySymbolParams.length).toEqual(2);
+          expect(getLastBySymbolParams[0]).toEqual(strategy.exchange);
+          expect(getLastBySymbolParams[1]).toEqual(strategy.symbol);
 
           expect(strategyStepRepositoryMock.getLastByStrategyIdAndType).toHaveBeenCalledTimes(0);
 
@@ -613,12 +644,13 @@ describe('SendOrderStepService', () => {
           const createParams = createOrderServiceMock.create.mock.calls[0];
           expect(createParams.length).toEqual(1);
           expect(createParams[0]).toEqual({
+            exchange: strategy.exchange,
             symbol: strategy.symbol,
             side: 'Sell',
             type: 'Limit',
-            baseAssetQuantity: 5,
-            quoteAssetQuantity: undefined,
-            priceLimit: lastCandlestick.closingPrice * (1 + sendOrderStepInput.deviation!),
+            quote: false,
+            requestedQuantity: 5,
+            requestedPrice: lastCandlestick.closingPrice * (1 + sendOrderStepInput.deviation!),
           });
         });
       });
@@ -633,7 +665,7 @@ describe('SendOrderStepService', () => {
           order = {
             ...buildDefaultOrder(),
             status: 'Waiting',
-            executedAssetQuantity: undefined,
+            executedQuantity: undefined,
             executedPrice: undefined,
           };
           createOrderServiceMock.create.mockResolvedValue(order);
@@ -644,18 +676,21 @@ describe('SendOrderStepService', () => {
           expect(result).toEqual({
             success: true,
             id: order.id,
+            side: order.side,
+            type: order.type,
             status: order.status,
             externalId: order.externalId,
             externalStatus: order.externalStatus,
-            baseAssetQuantity: order.baseAssetQuantity,
-            quoteAssetQuantity: order.quoteAssetQuantity,
-            priceLimit: order.priceLimit,
+            baseAssetQuantity: order.quote ? undefined : order.requestedQuantity,
+            quoteAssetQuantity: order.quote ? order.requestedQuantity : undefined,
+            priceLimit: order.requestedPrice,
           });
 
           expect(getCandlestickServiceMock.getLastBySymbol).toHaveBeenCalledTimes(1);
           const getLastBySymbolParams = getCandlestickServiceMock.getLastBySymbol.mock.calls[0];
-          expect(getLastBySymbolParams.length).toEqual(1);
-          expect(getLastBySymbolParams[0]).toEqual(strategy.symbol);
+          expect(getLastBySymbolParams.length).toEqual(2);
+          expect(getLastBySymbolParams[0]).toEqual(strategy.exchange);
+          expect(getLastBySymbolParams[1]).toEqual(strategy.symbol);
 
           expect(strategyStepRepositoryMock.getLastByStrategyIdAndType).toHaveBeenCalledTimes(0);
 
@@ -663,12 +698,13 @@ describe('SendOrderStepService', () => {
           const createParams = createOrderServiceMock.create.mock.calls[0];
           expect(createParams.length).toEqual(1);
           expect(createParams[0]).toEqual({
+            exchange: strategy.exchange,
             symbol: strategy.symbol,
             side: 'Sell',
             type: 'Limit',
-            baseAssetQuantity: 5,
-            quoteAssetQuantity: undefined,
-            priceLimit: lastCandlestick.closingPrice * (1 + sendOrderStepInput.deviation!),
+            quote: false,
+            requestedQuantity: 5,
+            requestedPrice: lastCandlestick.closingPrice * (1 + sendOrderStepInput.deviation!),
           });
         });
       });
@@ -733,12 +769,14 @@ describe('SendOrderStepService', () => {
             expect(result).toEqual({
               success: true,
               id: order.id,
+              side: order.side,
+              type: order.type,
               status: order.status,
               externalId: order.externalId,
               externalStatus: order.externalStatus,
-              baseAssetQuantity: order.baseAssetQuantity,
-              quoteAssetQuantity: order.quoteAssetQuantity,
-              priceLimit: order.priceLimit,
+              baseAssetQuantity: order.quote ? undefined : order.requestedQuantity,
+              quoteAssetQuantity: order.quote ? order.requestedQuantity : undefined,
+              priceLimit: order.requestedPrice,
             });
 
             expect(strategyStepRepositoryMock.getLastByStrategyIdAndType).toHaveBeenCalledTimes(1);
@@ -751,12 +789,13 @@ describe('SendOrderStepService', () => {
             const createParams = createOrderServiceMock.create.mock.calls[0];
             expect(createParams.length).toEqual(1);
             expect(createParams[0]).toEqual({
+              exchange: strategy.exchange,
               symbol: strategy.symbol,
               side: 'Buy',
               type: 'Limit',
-              baseAssetQuantity: (lastOrderStep.output as CheckOrderStepOutput).quantity! * sendOrderStepInput.percentage,
-              quoteAssetQuantity: undefined,
-              priceLimit: (lastOrderStep.output as CheckOrderStepOutput).price! * (1 + sendOrderStepInput.deviation!),
+              quote: false,
+              requestedQuantity: (lastOrderStep.output as CheckOrderStepOutput).quantity! * sendOrderStepInput.percentage,
+              requestedPrice: (lastOrderStep.output as CheckOrderStepOutput).price! * (1 + sendOrderStepInput.deviation!),
             });
           });
         });
@@ -805,12 +844,14 @@ describe('SendOrderStepService', () => {
             expect(result).toEqual({
               success: true,
               id: order.id,
+              side: order.side,
+              type: order.type,
               status: order.status,
               externalId: order.externalId,
               externalStatus: order.externalStatus,
-              baseAssetQuantity: order.baseAssetQuantity,
-              quoteAssetQuantity: order.quoteAssetQuantity,
-              priceLimit: order.priceLimit,
+              baseAssetQuantity: order.quote ? undefined : order.requestedQuantity,
+              quoteAssetQuantity: order.quote ? order.requestedQuantity : undefined,
+              priceLimit: order.requestedPrice,
             });
 
             expect(strategyStepRepositoryMock.getLastByStrategyIdAndType).toHaveBeenCalledTimes(1);
@@ -823,12 +864,13 @@ describe('SendOrderStepService', () => {
             const createParams = createOrderServiceMock.create.mock.calls[0];
             expect(createParams.length).toEqual(1);
             expect(createParams[0]).toEqual({
+              exchange: strategy.exchange,
               symbol: strategy.symbol,
               side: 'Sell',
               type: 'Limit',
-              baseAssetQuantity: (lastOrderStep.output as CheckOrderStepOutput).quantity! * sendOrderStepInput.percentage,
-              quoteAssetQuantity: undefined,
-              priceLimit: (lastOrderStep.output as CheckOrderStepOutput).price! * (1 + sendOrderStepInput.deviation!),
+              quote: false,
+              requestedQuantity: (lastOrderStep.output as CheckOrderStepOutput).quantity! * sendOrderStepInput.percentage,
+              requestedPrice: (lastOrderStep.output as CheckOrderStepOutput).price! * (1 + sendOrderStepInput.deviation!),
             });
           });
         });

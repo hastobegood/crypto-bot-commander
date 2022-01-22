@@ -1,7 +1,7 @@
-import { Candlestick } from './model/candlestick';
+import { Candlestick, CandlestickExchange } from '@hastobegood/crypto-bot-artillery/candlestick';
 
 export interface CandlestickRepository {
-  saveAllBySymbol(symbol: string, candlesticks: Candlestick[]): Promise<void>;
+  saveAllBySymbol(exchange: CandlestickExchange, symbol: string, candlesticks: Candlestick[]): Promise<void>;
 
-  getAllBySymbol(symbol: string, startDate: number, endDate: number): Promise<Candlestick[]>;
+  getAllBySymbol(exchange: CandlestickExchange, symbol: string, startDate: number, endDate: number): Promise<Candlestick[]>;
 }

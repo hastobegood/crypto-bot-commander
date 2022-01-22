@@ -1,5 +1,6 @@
 import { StrategyStepTemplate } from './strategy-step';
 
+export type StrategyExchange = 'Binance';
 export type StrategyStatus = 'Active' | 'Inactive' | 'Error';
 
 export interface StrategyTemplate {
@@ -8,6 +9,7 @@ export interface StrategyTemplate {
 
 export interface Strategy {
   id: string;
+  exchange: StrategyExchange;
   symbol: string;
   status: StrategyStatus;
   template: StrategyTemplate;

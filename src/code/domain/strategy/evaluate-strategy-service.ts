@@ -1,4 +1,4 @@
-import { logger } from '../../configuration/log/logger';
+import { logger } from '@hastobegood/crypto-bot-artillery/common';
 import { getStepTemplateById, Strategy } from './model/strategy';
 import { CheckOrderStepInput, OrConditionStepOutput, SendOrderStepOutput, StrategyStep, StrategyStepTemplate } from './model/strategy-step';
 import { getStrategyStepService, StrategyStepService } from './step/strategy-step-service';
@@ -73,6 +73,8 @@ export class EvaluateStrategyService {
       const checkOrderStepInput: CheckOrderStepInput = {
         id: sendOrderStepOutput.id,
         externalId: sendOrderStepOutput.externalId,
+        side: sendOrderStepOutput.side,
+        type: sendOrderStepOutput.type,
       };
 
       return {

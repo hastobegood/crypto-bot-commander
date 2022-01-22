@@ -1,13 +1,13 @@
 import { mocked } from 'ts-jest/utils';
+import { Candlestick } from '@hastobegood/crypto-bot-artillery/candlestick';
+import { buildCandlestick } from '@hastobegood/crypto-bot-artillery/test/builders';
 import { Strategy } from '../../../../../src/code/domain/strategy/model/strategy';
 import { MovingAverageCrossover, MovingAverageCrossoverStepInput, MovingAverageSignal } from '../../../../../src/code/domain/strategy/model/strategy-step';
 import { buildDefaultStrategy } from '../../../../builders/domain/strategy/strategy-test-builder';
-import { Candlestick } from '../../../../../src/code/domain/candlestick/model/candlestick';
 import { GetCandlestickService } from '../../../../../src/code/domain/candlestick/get-candlestick-service';
 import { MovingAverageService } from '../../../../../src/code/domain/technical-analysis/moving-average-service';
 import { MovingAverageCrossoverStepService } from '../../../../../src/code/domain/strategy/step/moving-average-crossover-step-service';
 import { buildDefaultMovingAverageCrossoverStepInput } from '../../../../builders/domain/strategy/strategy-step-test-builder';
-import { buildCandlestick } from '../../../../builders/domain/candlestick/candlestick-test-builder';
 import { MovingAverage } from '../../../../../src/code/domain/technical-analysis/model/moving-average';
 import { buildDefaultMovingAverage, buildMovingAverage } from '../../../../builders/domain/technical-analysis/moving-average-test-builder';
 
@@ -45,7 +45,11 @@ describe('MovingAverageCrossoverStepService', () => {
   describe('Given a moving average crossover step to process', () => {
     describe('When short term period is greater than long term period', () => {
       beforeEach(() => {
-        movingAverageCrossoverStepInput = { ...buildDefaultMovingAverageCrossoverStepInput(), shortTermPeriod: 5, longTermPeriod: 4 };
+        movingAverageCrossoverStepInput = {
+          ...buildDefaultMovingAverageCrossoverStepInput(),
+          shortTermPeriod: 5,
+          longTermPeriod: 4,
+        };
       });
 
       it('Then error is thrown', async () => {
@@ -64,7 +68,10 @@ describe('MovingAverageCrossoverStepService', () => {
 
     describe('When moving average crossover is unknown', () => {
       beforeEach(() => {
-        movingAverageCrossoverStepInput = { ...buildDefaultMovingAverageCrossoverStepInput(), crossover: 'Unknown' as MovingAverageCrossover };
+        movingAverageCrossoverStepInput = {
+          ...buildDefaultMovingAverageCrossoverStepInput(),
+          crossover: 'Unknown' as MovingAverageCrossover,
+        };
 
         shortTermMovingAverage = buildDefaultMovingAverage();
         longTermMovingAverage = buildDefaultMovingAverage();
@@ -87,7 +94,10 @@ describe('MovingAverageCrossoverStepService', () => {
 
     describe('When moving average signal is unknown', () => {
       beforeEach(() => {
-        movingAverageCrossoverStepInput = { ...buildDefaultMovingAverageCrossoverStepInput(), signal: 'Hodl' as MovingAverageSignal };
+        movingAverageCrossoverStepInput = {
+          ...buildDefaultMovingAverageCrossoverStepInput(),
+          signal: 'Hodl' as MovingAverageSignal,
+        };
 
         shortTermMovingAverage = buildDefaultMovingAverage();
         longTermMovingAverage = buildDefaultMovingAverage();
@@ -110,16 +120,20 @@ describe('MovingAverageCrossoverStepService', () => {
 
     describe('When crossover is from current price', () => {
       beforeEach(() => {
-        movingAverageCrossoverStepInput = { ...buildDefaultMovingAverageCrossoverStepInput(), crossover: 'CurrentPrice' };
+        movingAverageCrossoverStepInput = {
+          ...buildDefaultMovingAverageCrossoverStepInput(),
+          crossover: 'CurrentPrice',
+        };
       });
 
       afterEach(() => {
         expect(getCandlestickServiceMock.getAllBySymbol).toHaveBeenCalledTimes(1);
         const getAllBySymbolParams = getCandlestickServiceMock.getAllBySymbol.mock.calls[0];
-        expect(getAllBySymbolParams.length).toEqual(3);
-        expect(getAllBySymbolParams[0]).toEqual(strategy.symbol);
-        expect(getAllBySymbolParams[1]).toEqual(movingAverageCrossoverStepInput.longTermPeriod);
-        expect(getAllBySymbolParams[2]).toEqual('1d');
+        expect(getAllBySymbolParams.length).toEqual(4);
+        expect(getAllBySymbolParams[0]).toEqual(strategy.exchange);
+        expect(getAllBySymbolParams[1]).toEqual(strategy.symbol);
+        expect(getAllBySymbolParams[2]).toEqual(movingAverageCrossoverStepInput.longTermPeriod);
+        expect(getAllBySymbolParams[3]).toEqual('1d');
 
         expect(movingAverageServiceMock.calculate).toHaveBeenCalledTimes(2);
         let calculateParams = movingAverageServiceMock.calculate.mock.calls[0];
@@ -267,16 +281,20 @@ describe('MovingAverageCrossoverStepService', () => {
 
     describe('When crossover is from short term price', () => {
       beforeEach(() => {
-        movingAverageCrossoverStepInput = { ...buildDefaultMovingAverageCrossoverStepInput(), crossover: 'ShortTermPrice' };
+        movingAverageCrossoverStepInput = {
+          ...buildDefaultMovingAverageCrossoverStepInput(),
+          crossover: 'ShortTermPrice',
+        };
       });
 
       afterEach(() => {
         expect(getCandlestickServiceMock.getAllBySymbol).toHaveBeenCalledTimes(1);
         const getAllBySymbolParams = getCandlestickServiceMock.getAllBySymbol.mock.calls[0];
-        expect(getAllBySymbolParams.length).toEqual(3);
-        expect(getAllBySymbolParams[0]).toEqual(strategy.symbol);
-        expect(getAllBySymbolParams[1]).toEqual(movingAverageCrossoverStepInput.longTermPeriod);
-        expect(getAllBySymbolParams[2]).toEqual('1d');
+        expect(getAllBySymbolParams.length).toEqual(4);
+        expect(getAllBySymbolParams[0]).toEqual(strategy.exchange);
+        expect(getAllBySymbolParams[1]).toEqual(strategy.symbol);
+        expect(getAllBySymbolParams[2]).toEqual(movingAverageCrossoverStepInput.longTermPeriod);
+        expect(getAllBySymbolParams[3]).toEqual('1d');
 
         expect(movingAverageServiceMock.calculate).toHaveBeenCalledTimes(2);
         let calculateParams = movingAverageServiceMock.calculate.mock.calls[0];

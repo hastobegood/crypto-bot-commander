@@ -1,7 +1,7 @@
+import { Candlestick } from '@hastobegood/crypto-bot-artillery/candlestick';
 import { Point } from '../../technical-analysis/model/point';
 import { MovingAverageCrossover, MovingAverageCrossoverStepInput, MovingAverageCrossoverStepOutput, MovingAverageSignal, StrategyStepType } from '../model/strategy-step';
 import { StrategyStepService } from './strategy-step-service';
-import { Candlestick } from '../../candlestick/model/candlestick';
 import { Strategy } from '../model/strategy';
 import { GetCandlestickService } from '../../candlestick/get-candlestick-service';
 import { MovingAverageService } from '../../technical-analysis/moving-average-service';
@@ -25,8 +25,14 @@ export class MovingAverageCrossoverStepService implements StrategyStepService {
     };
 
     const movingAverages = await Promise.all([
-      this.movingAverageService.calculate({ ...calculateMovingAverage, period: movingAverageCrossoverStepInput.shortTermPeriod }),
-      this.movingAverageService.calculate({ ...calculateMovingAverage, period: movingAverageCrossoverStepInput.longTermPeriod }),
+      this.movingAverageService.calculate({
+        ...calculateMovingAverage,
+        period: movingAverageCrossoverStepInput.shortTermPeriod,
+      }),
+      this.movingAverageService.calculate({
+        ...calculateMovingAverage,
+        period: movingAverageCrossoverStepInput.longTermPeriod,
+      }),
     ]);
 
     const currentPrice = points.reduce((previousPoint, currentPoint) => (currentPoint.timestamp > previousPoint.timestamp ? currentPoint : previousPoint)).value;
@@ -42,7 +48,7 @@ export class MovingAverageCrossoverStepService implements StrategyStepService {
   }
 
   async #getPoints(strategy: Strategy, period: number): Promise<Point[]> {
-    return this.#buildPoints(await this.getCandlestickService.getAllBySymbol(strategy.symbol, period, '1d'));
+    return this.#buildPoints(await this.getCandlestickService.getAllBySymbol(strategy.exchange, strategy.symbol, period, '1d'));
   }
 
   #buildPoints(candlesticks: Candlestick[]): Point[] {

@@ -1,10 +1,10 @@
+import { randomString } from '@hastobegood/crypto-bot-artillery/test/builders';
 import { ActiveStrategyMessage } from '../../../../src/code/infrastructure/strategy/sqs-strategy-publisher';
-import { randomString } from '../../random-test-builder';
 
 export const buildDefaultActiveStrategyMessage = (): ActiveStrategyMessage => {
   return {
     content: {
-      id: randomString(10),
+      id: randomString(),
     },
   };
 };

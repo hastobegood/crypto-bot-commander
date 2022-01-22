@@ -1,12 +1,12 @@
+import { randomNumber } from '@hastobegood/crypto-bot-artillery/test/builders';
 import { Point } from '../../../../src/code/domain/technical-analysis/model/point';
-import { randomNumber } from '../../random-test-builder';
 
 export const buildDefaultPoints = (): Point[] => {
   return [buildDefaultPoint(), buildDefaultPoint(), buildDefaultPoint()];
 };
 
 export const buildDefaultPoint = (): Point => {
-  return buildPoint(randomNumber(1, 1_000), randomNumber(10_000, 100_000));
+  return buildPoint(new Date().valueOf(), randomNumber());
 };
 
 export const buildPoint = (timestamp: number, value: number): Point => {

@@ -1,4 +1,6 @@
 import { mocked } from 'ts-jest/utils';
+import { Candlestick } from '@hastobegood/crypto-bot-artillery/candlestick';
+import { buildDefaultCandlestick, buildDefaultCandlesticks } from '@hastobegood/crypto-bot-artillery/test/builders';
 import { StrategyStepRepository } from '../../../../../src/code/domain/strategy/step/strategy-step-repository';
 import { MarketEvolutionService } from '../../../../../src/code/domain/technical-analysis/market-evolution-service';
 import { MarketEvolutionStepService } from '../../../../../src/code/domain/strategy/step/market-evolution-step-service';
@@ -8,8 +10,6 @@ import { buildDefaultStrategy } from '../../../../builders/domain/strategy/strat
 import { buildDefaultCheckOrderStepOutput, buildDefaultStrategyStepTemplate, buildMarketEvolutionStepInput, buildStrategyStep } from '../../../../builders/domain/strategy/strategy-step-test-builder';
 import { MarketEvolution } from '../../../../../src/code/domain/technical-analysis/model/market-evolution';
 import { buildMarketEvolution } from '../../../../builders/domain/technical-analysis/market-evolution-test-builder';
-import { Candlestick } from '../../../../../src/code/domain/candlestick/model/candlestick';
-import { buildDefaultCandlestick, buildDefaultCandlesticks } from '../../../../builders/domain/candlestick/candlestick-test-builder';
 import { GetCandlestickService } from '../../../../../src/code/domain/candlestick/get-candlestick-service';
 
 const getCandlestickServiceMock = mocked(jest.genMockFromModule<GetCandlestickService>('../../../../../src/code/domain/candlestick/get-candlestick-service'), true);
@@ -46,7 +46,7 @@ describe('MarketEvolutionStepService', () => {
       beforeEach(() => {
         marketEvolutionStepInput = buildMarketEvolutionStepInput('Market', -0.05, '1h', 24);
 
-        candlesticks = buildDefaultCandlesticks();
+        candlesticks = buildDefaultCandlesticks().values;
         getCandlestickServiceMock.getAllBySymbol.mockResolvedValue(candlesticks);
       });
 
@@ -107,10 +107,11 @@ describe('MarketEvolutionStepService', () => {
 
           expect(getCandlestickServiceMock.getAllBySymbol).toHaveBeenCalledTimes(1);
           const getAllBySymbolParams = getCandlestickServiceMock.getAllBySymbol.mock.calls[0];
-          expect(getAllBySymbolParams.length).toEqual(3);
-          expect(getAllBySymbolParams[0]).toEqual(strategy.symbol);
-          expect(getAllBySymbolParams[1]).toEqual(marketEvolutionStepInput.period);
-          expect(getAllBySymbolParams[2]).toEqual(marketEvolutionStepInput.interval);
+          expect(getAllBySymbolParams.length).toEqual(4);
+          expect(getAllBySymbolParams[0]).toEqual(strategy.exchange);
+          expect(getAllBySymbolParams[1]).toEqual(strategy.symbol);
+          expect(getAllBySymbolParams[2]).toEqual(marketEvolutionStepInput.period);
+          expect(getAllBySymbolParams[3]).toEqual(marketEvolutionStepInput.interval);
 
           expect(marketEvolutionServiceMock.calculate).toHaveBeenCalledTimes(1);
           const calculateParams = marketEvolutionServiceMock.calculate.mock.calls[0];
@@ -144,10 +145,11 @@ describe('MarketEvolutionStepService', () => {
 
           expect(getCandlestickServiceMock.getAllBySymbol).toHaveBeenCalledTimes(1);
           const getAllBySymbolParams = getCandlestickServiceMock.getAllBySymbol.mock.calls[0];
-          expect(getAllBySymbolParams.length).toEqual(3);
-          expect(getAllBySymbolParams[0]).toEqual(strategy.symbol);
-          expect(getAllBySymbolParams[1]).toEqual(marketEvolutionStepInput.period);
-          expect(getAllBySymbolParams[2]).toEqual(marketEvolutionStepInput.interval);
+          expect(getAllBySymbolParams.length).toEqual(4);
+          expect(getAllBySymbolParams[0]).toEqual(strategy.exchange);
+          expect(getAllBySymbolParams[1]).toEqual(strategy.symbol);
+          expect(getAllBySymbolParams[2]).toEqual(marketEvolutionStepInput.period);
+          expect(getAllBySymbolParams[3]).toEqual(marketEvolutionStepInput.interval);
 
           expect(marketEvolutionServiceMock.calculate).toHaveBeenCalledTimes(1);
           const calculateParams = marketEvolutionServiceMock.calculate.mock.calls[0];
@@ -181,12 +183,11 @@ describe('MarketEvolutionStepService', () => {
 
           expect(getCandlestickServiceMock.getAllBySymbol).toHaveBeenCalledTimes(1);
           const getAllBySymbolParams = getCandlestickServiceMock.getAllBySymbol.mock.calls[0];
-          expect(getAllBySymbolParams.length).toEqual(3);
-          expect(getAllBySymbolParams[0]).toEqual(strategy.symbol);
-          expect(getAllBySymbolParams[1]).toEqual(marketEvolutionStepInput.period);
-          expect(getAllBySymbolParams[2]).toEqual(marketEvolutionStepInput.interval);
-
-          expect(marketEvolutionServiceMock.calculate).toHaveBeenCalledTimes(1);
+          expect(getAllBySymbolParams.length).toEqual(4);
+          expect(getAllBySymbolParams[0]).toEqual(strategy.exchange);
+          expect(getAllBySymbolParams[1]).toEqual(strategy.symbol);
+          expect(getAllBySymbolParams[2]).toEqual(marketEvolutionStepInput.period);
+          expect(getAllBySymbolParams[3]);
           const calculateParams = marketEvolutionServiceMock.calculate.mock.calls[0];
           expect(calculateParams.length).toEqual(1);
           expect(calculateParams[0].period).toEqual(candlesticks.length);
@@ -228,10 +229,11 @@ describe('MarketEvolutionStepService', () => {
 
           expect(getCandlestickServiceMock.getAllBySymbol).toHaveBeenCalledTimes(1);
           const getAllBySymbolParams = getCandlestickServiceMock.getAllBySymbol.mock.calls[0];
-          expect(getAllBySymbolParams.length).toEqual(3);
-          expect(getAllBySymbolParams[0]).toEqual(strategy.symbol);
-          expect(getAllBySymbolParams[1]).toEqual(1);
-          expect(getAllBySymbolParams[2]).toEqual('1m');
+          expect(getAllBySymbolParams.length).toEqual(4);
+          expect(getAllBySymbolParams[0]).toEqual(strategy.exchange);
+          expect(getAllBySymbolParams[1]).toEqual(strategy.symbol);
+          expect(getAllBySymbolParams[2]).toEqual(1);
+          expect(getAllBySymbolParams[3]).toEqual('1m');
 
           expect(strategyStepRepositoryMock.getLastByStrategyIdAndType).toHaveBeenCalledTimes(1);
           const getLastByStrategyIdAndTypeParams = strategyStepRepositoryMock.getLastByStrategyIdAndType.mock.calls[0];
@@ -264,10 +266,11 @@ describe('MarketEvolutionStepService', () => {
 
             expect(getCandlestickServiceMock.getAllBySymbol).toHaveBeenCalledTimes(1);
             const getAllBySymbolParams = getCandlestickServiceMock.getAllBySymbol.mock.calls[0];
-            expect(getAllBySymbolParams.length).toEqual(3);
-            expect(getAllBySymbolParams[0]).toEqual(strategy.symbol);
-            expect(getAllBySymbolParams[1]).toEqual(1);
-            expect(getAllBySymbolParams[2]).toEqual('1m');
+            expect(getAllBySymbolParams.length).toEqual(4);
+            expect(getAllBySymbolParams[0]).toEqual(strategy.exchange);
+            expect(getAllBySymbolParams[1]).toEqual(strategy.symbol);
+            expect(getAllBySymbolParams[2]).toEqual(1);
+            expect(getAllBySymbolParams[3]).toEqual('1m');
 
             expect(strategyStepRepositoryMock.getLastByStrategyIdAndType).toHaveBeenCalledTimes(1);
             const getLastByStrategyIdAndTypeParams = strategyStepRepositoryMock.getLastByStrategyIdAndType.mock.calls[0];
@@ -309,10 +312,11 @@ describe('MarketEvolutionStepService', () => {
 
             expect(getCandlestickServiceMock.getAllBySymbol).toHaveBeenCalledTimes(1);
             const getAllBySymbolParams = getCandlestickServiceMock.getAllBySymbol.mock.calls[0];
-            expect(getAllBySymbolParams.length).toEqual(3);
-            expect(getAllBySymbolParams[0]).toEqual(strategy.symbol);
-            expect(getAllBySymbolParams[1]).toEqual(1);
-            expect(getAllBySymbolParams[2]).toEqual('1m');
+            expect(getAllBySymbolParams.length).toEqual(4);
+            expect(getAllBySymbolParams[0]).toEqual(strategy.exchange);
+            expect(getAllBySymbolParams[1]).toEqual(strategy.symbol);
+            expect(getAllBySymbolParams[2]).toEqual(1);
+            expect(getAllBySymbolParams[3]).toEqual('1m');
 
             expect(strategyStepRepositoryMock.getLastByStrategyIdAndType).toHaveBeenCalledTimes(1);
             const getLastByStrategyIdAndTypeParams = strategyStepRepositoryMock.getLastByStrategyIdAndType.mock.calls[0];
@@ -354,10 +358,11 @@ describe('MarketEvolutionStepService', () => {
 
             expect(getCandlestickServiceMock.getAllBySymbol).toHaveBeenCalledTimes(1);
             const getAllBySymbolParams = getCandlestickServiceMock.getAllBySymbol.mock.calls[0];
-            expect(getAllBySymbolParams.length).toEqual(3);
-            expect(getAllBySymbolParams[0]).toEqual(strategy.symbol);
-            expect(getAllBySymbolParams[1]).toEqual(1);
-            expect(getAllBySymbolParams[2]).toEqual('1m');
+            expect(getAllBySymbolParams.length).toEqual(4);
+            expect(getAllBySymbolParams[0]).toEqual(strategy.exchange);
+            expect(getAllBySymbolParams[1]).toEqual(strategy.symbol);
+            expect(getAllBySymbolParams[2]).toEqual(1);
+            expect(getAllBySymbolParams[3]).toEqual('1m');
 
             expect(strategyStepRepositoryMock.getLastByStrategyIdAndType).toHaveBeenCalledTimes(1);
             const getLastByStrategyIdAndTypeParams = strategyStepRepositoryMock.getLastByStrategyIdAndType.mock.calls[0];

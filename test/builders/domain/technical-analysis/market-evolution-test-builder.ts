@@ -1,6 +1,6 @@
+import { randomNumber, randomPercentage } from '@hastobegood/crypto-bot-artillery/test/builders';
 import { Point } from '../../../../src/code/domain/technical-analysis/model/point';
 import { CalculateMarketEvolution, MarketEvolution } from '../../../../src/code/domain/technical-analysis/model/market-evolution';
-import { randomNumber, randomPercentage } from '../../random-test-builder';
 import { buildDefaultPoints } from './point-test-builder';
 
 export const buildDefaultCalculateMarketEvolution = (): CalculateMarketEvolution => {
@@ -15,7 +15,7 @@ export const buildCalculateMarketEvolution = (period: number, points: Point[]): 
 };
 
 export const buildDefaultMarketEvolution = (): MarketEvolution => {
-  return buildMarketEvolution(randomNumber(100, 1_000), randomNumber(100, 1_000), randomPercentage());
+  return buildMarketEvolution(randomNumber(), randomNumber(), randomPercentage());
 };
 
 export const buildMarketEvolution = (lastValue: number, currentValue: number, percentage: number): MarketEvolution => {

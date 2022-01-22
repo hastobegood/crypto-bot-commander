@@ -1,8 +1,8 @@
+import { Candlestick } from '@hastobegood/crypto-bot-artillery/candlestick';
 import { MarketEvolutionService } from '../../technical-analysis/market-evolution-service';
 import { Point } from '../../technical-analysis/model/point';
 import { CheckOrderStepOutput, MarketEvolutionInterval, MarketEvolutionStepInput, MarketEvolutionStepOutput, StrategyStepType } from '../model/strategy-step';
 import { StrategyStepService } from './strategy-step-service';
-import { Candlestick } from '../../candlestick/model/candlestick';
 import { StrategyStepRepository } from './strategy-step-repository';
 import { Strategy } from '../model/strategy';
 import { GetCandlestickService } from '../../candlestick/get-candlestick-service';
@@ -50,7 +50,7 @@ export class MarketEvolutionStepService implements StrategyStepService {
       throw new Error(`Unable to calculate market evolution without interval`);
     }
 
-    return this.#buildPoints(await this.getCandlestickService.getAllBySymbol(strategy.symbol, period, interval));
+    return this.#buildPoints(await this.getCandlestickService.getAllBySymbol(strategy.exchange, strategy.symbol, period, interval));
   }
 
   async #getPointsSinceLastOrder(strategy: Strategy): Promise<Point[]> {

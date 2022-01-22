@@ -1,9 +1,9 @@
 import { DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb';
 import { mocked } from 'ts-jest/utils';
+import { Candlestick } from '@hastobegood/crypto-bot-artillery/candlestick';
+import { buildCandlesticksFromTo } from '@hastobegood/crypto-bot-artillery/test/builders';
 import { CandlestickRepository } from '../../../../src/code/domain/candlestick/candlestick-repository';
 import { CandlestickEntity, DdbCandlestickRepository } from '../../../../src/code/infrastructure/candlestick/ddb-candlestick-repository';
-import { Candlestick } from '../../../../src/code/domain/candlestick/model/candlestick';
-import { buildCandlesticksFromTo } from '../../../builders/domain/candlestick/candlestick-test-builder';
 import { buildDefaultCandlestickEntity } from '../../../builders/infrastructure/candlestick/candlestick-entity-builder';
 
 const ddbClientMock = mocked(jest.genMockFromModule<DynamoDBDocumentClient>('@aws-sdk/lib-dynamodb'), true);
@@ -25,7 +25,7 @@ describe('DdbCandlestickRepository', () => {
 
     describe('When candlesticks are saved', () => {
       it('Then candlesticks are saved by chunk of 25', async () => {
-        await candlestickRepository.saveAllBySymbol('ABC', candlesticks);
+        await candlestickRepository.saveAllBySymbol('Binance', 'ABC', candlesticks);
 
         expect(ddbClientMock.send).toHaveBeenCalledTimes(3);
       });
@@ -45,7 +45,7 @@ describe('DdbCandlestickRepository', () => {
       it('Then empty list is returned', async () => {
         const startDate = new Date('2021-09-11T12:30:00.000Z');
         const endDate = new Date('2021-09-13T12:30:00.000Z');
-        const result = await candlestickRepository.getAllBySymbol('ABC', startDate.valueOf(), endDate.valueOf());
+        const result = await candlestickRepository.getAllBySymbol('Binance', 'ABC', startDate.valueOf(), endDate.valueOf());
         expect(result.length).toEqual(0);
         expect(result).toEqual([]);
 
@@ -60,7 +60,7 @@ describe('DdbCandlestickRepository', () => {
             '#sk': 'sk',
           },
           ExpressionAttributeValues: {
-            ':pk': 'Candlestick::ABC::2021-09-11',
+            ':pk': 'Candlestick::Binance::ABC::2021-09-11',
             ':startDate': startDate.valueOf().toString(),
             ':endDate': endDate.valueOf().toString(),
           },
@@ -75,7 +75,7 @@ describe('DdbCandlestickRepository', () => {
             '#sk': 'sk',
           },
           ExpressionAttributeValues: {
-            ':pk': 'Candlestick::ABC::2021-09-12',
+            ':pk': 'Candlestick::Binance::ABC::2021-09-12',
             ':startDate': startDate.valueOf().toString(),
             ':endDate': endDate.valueOf().toString(),
           },
@@ -90,7 +90,7 @@ describe('DdbCandlestickRepository', () => {
             '#sk': 'sk',
           },
           ExpressionAttributeValues: {
-            ':pk': 'Candlestick::ABC::2021-09-13',
+            ':pk': 'Candlestick::Binance::ABC::2021-09-13',
             ':startDate': startDate.valueOf().toString(),
             ':endDate': endDate.valueOf().toString(),
           },
@@ -128,12 +128,33 @@ describe('DdbCandlestickRepository', () => {
       it('Then candlesticks are returned', async () => {
         const startDate = new Date('2021-09-11T12:30:00.000Z');
         const endDate = new Date('2021-09-13T12:30:00.000Z');
-        const result = await candlestickRepository.getAllBySymbol('ABC', startDate.valueOf(), endDate.valueOf());
+        const result = await candlestickRepository.getAllBySymbol('Binance', 'ABC', startDate.valueOf(), endDate.valueOf());
         expect(result.length).toEqual(3);
         expect(result).toEqual([
-          { openingDate: candlestick1.start, closingDate: candlestick1.end, openingPrice: candlestick1.ohlcv[0], closingPrice: candlestick1.ohlcv[3], lowestPrice: candlestick1.ohlcv[2], highestPrice: candlestick1.ohlcv[1] },
-          { openingDate: candlestick2.start, closingDate: candlestick2.end, openingPrice: candlestick2.ohlcv[0], closingPrice: candlestick2.ohlcv[3], lowestPrice: candlestick2.ohlcv[2], highestPrice: candlestick2.ohlcv[1] },
-          { openingDate: candlestick3.start, closingDate: candlestick3.end, openingPrice: candlestick3.ohlcv[0], closingPrice: candlestick3.ohlcv[3], lowestPrice: candlestick3.ohlcv[2], highestPrice: candlestick3.ohlcv[1] },
+          {
+            openingDate: candlestick1.start,
+            closingDate: candlestick1.end,
+            openingPrice: candlestick1.ohlcv[0],
+            closingPrice: candlestick1.ohlcv[3],
+            lowestPrice: candlestick1.ohlcv[2],
+            highestPrice: candlestick1.ohlcv[1],
+          },
+          {
+            openingDate: candlestick2.start,
+            closingDate: candlestick2.end,
+            openingPrice: candlestick2.ohlcv[0],
+            closingPrice: candlestick2.ohlcv[3],
+            lowestPrice: candlestick2.ohlcv[2],
+            highestPrice: candlestick2.ohlcv[1],
+          },
+          {
+            openingDate: candlestick3.start,
+            closingDate: candlestick3.end,
+            openingPrice: candlestick3.ohlcv[0],
+            closingPrice: candlestick3.ohlcv[3],
+            lowestPrice: candlestick3.ohlcv[2],
+            highestPrice: candlestick3.ohlcv[1],
+          },
         ]);
 
         expect(ddbClientMock.send).toHaveBeenCalledTimes(3);
@@ -147,7 +168,7 @@ describe('DdbCandlestickRepository', () => {
             '#sk': 'sk',
           },
           ExpressionAttributeValues: {
-            ':pk': 'Candlestick::ABC::2021-09-11',
+            ':pk': 'Candlestick::Binance::ABC::2021-09-11',
             ':startDate': startDate.valueOf().toString(),
             ':endDate': endDate.valueOf().toString(),
           },
@@ -162,7 +183,7 @@ describe('DdbCandlestickRepository', () => {
             '#sk': 'sk',
           },
           ExpressionAttributeValues: {
-            ':pk': 'Candlestick::ABC::2021-09-12',
+            ':pk': 'Candlestick::Binance::ABC::2021-09-12',
             ':startDate': startDate.valueOf().toString(),
             ':endDate': endDate.valueOf().toString(),
           },
@@ -177,7 +198,7 @@ describe('DdbCandlestickRepository', () => {
             '#sk': 'sk',
           },
           ExpressionAttributeValues: {
-            ':pk': 'Candlestick::ABC::2021-09-13',
+            ':pk': 'Candlestick::Binance::ABC::2021-09-13',
             ':startDate': startDate.valueOf().toString(),
             ':endDate': endDate.valueOf().toString(),
           },

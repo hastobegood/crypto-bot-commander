@@ -1,4 +1,4 @@
-import { Order, OrderStatus } from './model/order';
+import { Order, OrderStatus } from '@hastobegood/crypto-bot-artillery/order';
 
 export interface OrderRepository {
   save(order: Order): Promise<Order>;

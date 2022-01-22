@@ -335,6 +335,8 @@ describe('EvaluateStrategyService', () => {
           expect(checkOrderProcessParams[1]).toEqual({
             id: step2Output1.id,
             externalId: step2Output1.externalId,
+            side: step2Output1.side,
+            type: step2Output1.type,
           });
           checkOrderProcessParams = checkOrderStepServiceMock.process.mock.calls[1];
           expect(checkOrderProcessParams.length).toEqual(2);
@@ -342,6 +344,8 @@ describe('EvaluateStrategyService', () => {
           expect(checkOrderProcessParams[1]).toEqual({
             id: step4Output1.id,
             externalId: step4Output1.externalId,
+            side: step4Output1.side,
+            type: step4Output1.type,
           });
 
           expect(strategyStepRepositoryMock.save).toHaveBeenCalledTimes(7);
@@ -374,6 +378,8 @@ describe('EvaluateStrategyService', () => {
             input: {
               id: step2Output1.id,
               externalId: step2Output1.externalId,
+              side: step2Output1.side,
+              type: step2Output1.type,
             },
             nextId: strategy.template['2'].nextId,
             strategyId: strategy.id,
@@ -410,6 +416,8 @@ describe('EvaluateStrategyService', () => {
             input: {
               id: step4Output1.id,
               externalId: step4Output1.externalId,
+              side: step4Output1.side,
+              type: step4Output1.type,
             },
             nextId: strategy.template['4'].nextId,
             strategyId: strategy.id,
@@ -489,6 +497,8 @@ describe('EvaluateStrategyService', () => {
           expect(checkOrderProcessParams[1]).toEqual({
             id: step5Output1.id,
             externalId: step5Output1.externalId,
+            side: step5Output1.side,
+            type: step5Output1.type,
           });
 
           expect(strategyStepRepositoryMock.save).toHaveBeenCalledTimes(3);
@@ -521,6 +531,8 @@ describe('EvaluateStrategyService', () => {
             input: {
               id: step5Output1.id,
               externalId: step5Output1.externalId,
+              side: step5Output1.side,
+              type: step5Output1.type,
             },
             strategyId: strategy.id,
             output: step5Output2,

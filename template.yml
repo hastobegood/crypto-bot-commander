@@ -17,16 +17,11 @@ Parameters:
     Description: Boolean to enable or disable tracing
     Type: String
     Default: false
-  BinanceUrlParameter:
-    Description: URL of the Binance API
+  ExchangesSecretNameParameter:
+    Description: Name of the exchanges secret stored in Secrets Manager
     Type: String
-    Default: https://testnet.binance.vision/api
-  BinanceSecretNameParameter:
-    Description: Name of the Binance secret stored in Secrets Manager
-    Type: String
-    Default: test-BinanceTrading-Secret
-  BinanceSecretEncryptionKeyParameter:
-    Description: Encryption key used to encrypt the Binance secret in Secrets Manager (either a key id 'key/xxx' or an alias 'alias/xxx')
+  ExchangesSecretEncryptionKeyParameter:
+    Description: Encryption key used to encrypt the exchanges secret in Secrets Manager (either a key id 'key/xxx' or an alias 'alias/xxx')
     Type: String
     Default: alias/aws/secretsmanager
 
@@ -36,7 +31,7 @@ Conditions:
 Mappings:
   EnvironmentMap:
     test:
-      AvailableSymbols: BNB#BUSD,BNB#USDT,BTC#BUSD,BTC#USDT
+      AvailableSymbols: BNB#BUSD,BTC#BUSD
       UpdateAllCandlesticksSchedule: rate(1 minute)
     prod:
       AvailableSymbols: BNB#BUSD,BTC#BUSD,ETH#BUSD,XRP#BUSD
@@ -68,18 +63,17 @@ Resources:
         MaximumRetryAttempts: 0
       Environment:
         Variables:
-          BINANCE_URL: !Ref BinanceUrlParameter
-          BINANCE_SECRET_NAME: !Ref BinanceSecretNameParameter
+          EXCHANGES_SECRET_NAME: !Ref ExchangesSecretNameParameter
           CANDLESTICK_TABLE_NAME: !Ref CandlestickTable
       Policies:
         - AWSSecretsManagerGetSecretValuePolicy:
-            SecretArn: !Sub arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${BinanceSecretNameParameter}*
+            SecretArn: !Sub arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${ExchangesSecretNameParameter}*
         - Version: 2012-10-17
           Statement:
             - Effect: Allow
               Action:
                 - kms:Decrypt
-              Resource: !Sub arn:aws:kms:${AWS::Region}:${AWS::AccountId}:${BinanceSecretEncryptionKeyParameter}
+              Resource: !Sub arn:aws:kms:${AWS::Region}:${AWS::AccountId}:${ExchangesSecretEncryptionKeyParameter}
         - DynamoDBWritePolicy:
             TableName: !Ref CandlestickTable
 
@@ -93,8 +87,7 @@ Resources:
         MaximumRetryAttempts: 0
       Environment:
         Variables:
-          BINANCE_URL: !Ref BinanceUrlParameter
-          BINANCE_SECRET_NAME: !Ref BinanceSecretNameParameter
+          EXCHANGES_SECRET_NAME: !Ref ExchangesSecretNameParameter
           AVAILABLE_SYMBOLS: !FindInMap [ EnvironmentMap, !Ref EnvironmentParameter, AvailableSymbols ]
           CANDLESTICK_TABLE_NAME: !Ref CandlestickTable
           UPDATED_CANDLESTICKS_QUEUE_URL: !Ref UpdatedCandlesticksQueue
@@ -106,13 +99,13 @@ Resources:
             Schedule: !FindInMap [ EnvironmentMap, !Ref EnvironmentParameter, UpdateAllCandlesticksSchedule ]
       Policies:
         - AWSSecretsManagerGetSecretValuePolicy:
-            SecretArn: !Sub arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${BinanceSecretNameParameter}*
+            SecretArn: !Sub arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${ExchangesSecretNameParameter}*
         - Version: 2012-10-17
           Statement:
             - Effect: Allow
               Action:
                 - kms:Decrypt
-              Resource: !Sub arn:aws:kms:${AWS::Region}:${AWS::AccountId}:${BinanceSecretEncryptionKeyParameter}
+              Resource: !Sub arn:aws:kms:${AWS::Region}:${AWS::AccountId}:${ExchangesSecretEncryptionKeyParameter}
         - DynamoDBWritePolicy:
             TableName: !Ref CandlestickTable
         - SQSSendMessagePolicy:
@@ -156,8 +149,7 @@ Resources:
         MaximumRetryAttempts: 0
       Environment:
         Variables:
-          BINANCE_URL: !Ref BinanceUrlParameter
-          BINANCE_SECRET_NAME: !Ref BinanceSecretNameParameter
+          EXCHANGES_SECRET_NAME: !Ref ExchangesSecretNameParameter
           CANDLESTICK_TABLE_NAME: !Ref CandlestickTable
           STRATEGY_TABLE_NAME: !Ref StrategyTable
           ORDER_TABLE_NAME: !Ref OrderTable
@@ -171,13 +163,13 @@ Resources:
             BatchSize: 1
       Policies:
         - AWSSecretsManagerGetSecretValuePolicy:
-            SecretArn: !Sub arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${BinanceSecretNameParameter}*
+            SecretArn: !Sub arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${ExchangesSecretNameParameter}*
         - Version: 2012-10-17
           Statement:
             - Effect: Allow
               Action:
                 - kms:Decrypt
-              Resource: !Sub arn:aws:kms:${AWS::Region}:${AWS::AccountId}:${BinanceSecretEncryptionKeyParameter}
+              Resource: !Sub arn:aws:kms:${AWS::Region}:${AWS::AccountId}:${ExchangesSecretEncryptionKeyParameter}
         - DynamoDBReadPolicy:
             TableName: !Ref CandlestickTable
         - DynamoDBReadPolicy:
@@ -343,13 +335,6 @@ Outputs:
   OrderTableArn:
     Description: Order table ARN
     Value: !GetAtt OrderTable.Arn
-
-  StrategyTableName:
-    Description: Strategy table name
-    Value: !Ref StrategyTable
-  StrategyTableArn:
-    Description: Strategy table ARN
-    Value: !GetAtt StrategyTable.Arn
 
   UpdatedCandlesticksQueueName:
     Description: Updated candlesticks queue name

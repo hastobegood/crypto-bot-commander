@@ -14,12 +14,13 @@ beforeEach(() => {
 describe('PublishCandlestickService', () => {
   describe('Given updated candlesticks by symbol to publish', () => {
     it('Then updated candlesticks symbol is published', async () => {
-      await publishStrategyService.publishUpdatedBySymbol('ABC');
+      await publishStrategyService.publishUpdatedBySymbol('Binance', 'ABC');
 
       expect(candlestickPublisherMock.publishUpdatedBySymbol).toHaveBeenCalledTimes(1);
       const publishUpdatedBySymbolParams = candlestickPublisherMock.publishUpdatedBySymbol.mock.calls[0];
-      expect(publishUpdatedBySymbolParams.length).toEqual(1);
-      expect(publishUpdatedBySymbolParams[0]).toEqual('ABC');
+      expect(publishUpdatedBySymbolParams.length).toEqual(2);
+      expect(publishUpdatedBySymbolParams[0]).toEqual('Binance');
+      expect(publishUpdatedBySymbolParams[1]).toEqual('ABC');
     });
   });
 });

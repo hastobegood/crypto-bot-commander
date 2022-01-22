@@ -1,8 +1,8 @@
 import 'source-map-support/register';
 import { Context, SQSEvent } from 'aws-lambda';
-import { handleEvent } from './handler-utils';
 import { ddbClient } from '../code/configuration/aws/dynamodb';
 import { sqsClient } from '../code/configuration/aws/sqs';
+import { handleEvent } from '@hastobegood/crypto-bot-artillery/common';
 import { DdbStrategyRepository } from '../code/infrastructure/strategy/ddb-strategy-repository';
 import { SqsStrategyPublisher } from '../code/infrastructure/strategy/sqs-strategy-publisher';
 import { PublishStrategyService } from '../code/domain/strategy/publish-strategy-service';
