@@ -20,7 +20,7 @@
     "deploy:prod": "sam build && sam deploy --config-env prod"
   },
   "dependencies": {
-    "@aws-sdk/client-dynamodb": "^3.46.0",
+    "@aws-sdk/client-dynamodb": "^3.48.0",
     "@aws-sdk/client-secrets-manager": "^3.46.0",
     "@aws-sdk/client-sqs": "^3.46.0",
     "@aws-sdk/lib-dynamodb": "^3.46.0",
