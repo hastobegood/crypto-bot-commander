@@ -1,5 +1,5 @@
+import { Candlestick, CandlestickExchange, CandlestickInterval } from '@hastobegood/crypto-bot-artillery/candlestick';
 import { CandlestickRepository } from './candlestick-repository';
-import { Candlestick, CandlestickInterval } from './model/candlestick';
 
 const intervalDataMap = new Map<CandlestickInterval, IntervalData>();
 intervalDataMap.set('1m', { value: 1, seconds: 60, minutes: 1 });
@@ -14,18 +14,18 @@ intervalDataMap.set('1d', { value: 1, seconds: 86400, minutes: 1440 });
 export class GetCandlestickService {
   constructor(private candlestickRepository: CandlestickRepository) {}
 
-  async getLastBySymbol(symbol: string): Promise<Candlestick | null> {
-    const candlesticks = await this.getAllBySymbol(symbol, 1, '1m');
+  async getLastBySymbol(exchange: CandlestickExchange, symbol: string): Promise<Candlestick | null> {
+    const candlesticks = await this.getAllBySymbol(exchange, symbol, 1, '1m');
 
     return candlesticks.length === 0 ? null : candlesticks[0];
   }
 
-  async getAllBySymbol(symbol: string, period: number, interval: CandlestickInterval): Promise<Candlestick[]> {
+  async getAllBySymbol(exchange: CandlestickExchange, symbol: string, period: number, interval: CandlestickInterval): Promise<Candlestick[]> {
     const candlesticks: Candlestick[] = [];
     const intervalData = intervalDataMap.get(interval)!;
     const intervalDates = this.#getIntervalDates(period, intervalData);
 
-    const candlesticksByDates = await this.candlestickRepository.getAllBySymbol(symbol, intervalDates.startDate, intervalDates.endDate);
+    const candlesticksByDates = await this.candlestickRepository.getAllBySymbol(exchange, symbol, intervalDates.startDate, intervalDates.endDate);
     if (interval === '1m') {
       return candlesticksByDates;
     }

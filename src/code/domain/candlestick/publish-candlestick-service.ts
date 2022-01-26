@@ -1,9 +1,10 @@
+import { CandlestickExchange } from '@hastobegood/crypto-bot-artillery/candlestick';
 import { CandlestickPublisher } from './candlestick-publisher';
 
 export class PublishCandlestickService {
   constructor(private candlestickPublisher: CandlestickPublisher) {}
 
-  async publishUpdatedBySymbol(symbol: string): Promise<void> {
-    await this.candlestickPublisher.publishUpdatedBySymbol(symbol);
+  async publishUpdatedBySymbol(exchange: CandlestickExchange, symbol: string): Promise<void> {
+    await this.candlestickPublisher.publishUpdatedBySymbol(exchange, symbol);
   }
 }

@@ -1,4 +1,4 @@
-import { logger } from '../../configuration/log/logger';
+import { logger } from '@hastobegood/crypto-bot-artillery/common';
 import { Strategy, StrategyStatus } from '../../domain/strategy/model/strategy';
 import { ActiveStrategyMessage } from '../../infrastructure/strategy/sqs-strategy-publisher';
 import { GetStrategyService } from '../../domain/strategy/get-strategy-service';

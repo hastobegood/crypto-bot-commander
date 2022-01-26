@@ -1,4 +1,4 @@
-import { logger } from '../../configuration/log/logger';
+import { logger } from '@hastobegood/crypto-bot-artillery/common';
 import { StrategyRepository } from './strategy-repository';
 import { StrategyPublisher } from './strategy-publisher';
 

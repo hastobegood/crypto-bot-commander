@@ -1,5 +1,5 @@
+import { roundNumber } from '@hastobegood/crypto-bot-artillery/common';
 import { CalculateMarketEvolution, MarketEvolution } from './model/market-evolution';
-import { round } from '../../configuration/util/math';
 import { sortPoints, TechnicalAnalysisService, TechnicalAnalysisType } from './technical-analysis-service';
 
 export class MarketEvolutionService implements TechnicalAnalysisService<CalculateMarketEvolution, MarketEvolution> {
@@ -19,7 +19,7 @@ export class MarketEvolutionService implements TechnicalAnalysisService<Calculat
     return {
       lastValue: lastValue,
       currentValue: currentValue,
-      percentage: round(currentValue / lastValue - 1, 4),
+      percentage: roundNumber(currentValue / lastValue - 1, 4),
     };
   }
 }

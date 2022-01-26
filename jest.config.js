@@ -1,6 +1,4 @@
-import type { Config } from '@jest/types';
-
-const config: Config.InitialOptions = {
+const config = {
   // All imported modules in your tests should be mocked automatically
   // automock: false,
 
@@ -57,7 +55,11 @@ const config: Config.InitialOptions = {
   // globalTeardown: undefined,
 
   // A set of global variables that need to be available in all test environments
-  // globals: {},
+  globals: {
+    'ts-jest': {
+      useESM: true,
+    },
+  },
 
   // The maximum amount of workers used to run your tests. Can be specified as % or a number. E.g. maxWorkers: 10% will use 10% of your CPU amount + 1 as the maximum worker number. maxWorkers: 2 will use a maximum of 2 workers.
   // maxWorkers: "50%",
@@ -78,7 +80,11 @@ const config: Config.InitialOptions = {
   // ],
 
   // A map from regular expressions to module names or to arrays of module names that allow to stub out resources with a single module
-  // moduleNameMapper: {},
+  moduleNameMapper: {
+    '^(\\.{1,2}/.*)\\.js$': '$1',
+    '^@hastobegood\\/crypto-bot-artillery\\/(?!test)(.*)$': '<rootDir>/node_modules/@hastobegood/crypto-bot-artillery/lib/cjs/src/$1/index.js',
+    '^@hastobegood\\/crypto-bot-artillery\\/test\\/(.*)$': '<rootDir>/node_modules/@hastobegood/crypto-bot-artillery/lib/cjs/test/$1/index.js',
+  },
 
   // An array of regexp pattern strings, matched against all module paths before considered 'visible' to the module loader
   // modulePathIgnorePatterns: [],
@@ -90,7 +96,7 @@ const config: Config.InitialOptions = {
   // notifyMode: "failure-change",
 
   // A preset that is used as a base for Jest's configuration
-  preset: 'ts-jest',
+  preset: 'ts-jest/presets/js-with-ts-esm',
 
   // Run tests from one or more projects
   // projects: undefined,

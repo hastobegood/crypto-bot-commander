@@ -1,20 +1,19 @@
-import { mocked } from 'ts-jest/utils';
-import { CandlestickRepository } from '../../../../src/code/domain/candlestick/candlestick-repository';
-import { CandlestickClient } from '../../../../src/code/domain/candlestick/candlestick-client';
-import { Candlestick } from '../../../../src/code/domain/candlestick/model/candlestick';
-import { buildDefaultCandlesticks } from '../../../builders/domain/candlestick/candlestick-test-builder';
-import { UpdateCandlestickService } from '../../../../src/code/domain/candlestick/update-candlestick-service';
 import MockDate from 'mockdate';
+import { mocked } from 'ts-jest/utils';
+import { Candlesticks, FetchCandlestickClient } from '@hastobegood/crypto-bot-artillery/candlestick';
+import { buildDefaultCandlesticks } from '@hastobegood/crypto-bot-artillery/test/builders';
+import { CandlestickRepository } from '../../../../src/code/domain/candlestick/candlestick-repository';
+import { UpdateCandlestickService } from '../../../../src/code/domain/candlestick/update-candlestick-service';
 
-const candlestickClientMock = mocked(jest.genMockFromModule<CandlestickClient>('../../../../src/code/domain/candlestick/candlestick-client'), true);
+const fetchCandlestickClientMock = mocked(jest.genMockFromModule<FetchCandlestickClient>('@hastobegood/crypto-bot-artillery'), true);
 const candlestickRepositoryMock = mocked(jest.genMockFromModule<CandlestickRepository>('../../../../src/code/domain/candlestick/candlestick-repository'), true);
 
 let updateCandlestickService: UpdateCandlestickService;
 beforeEach(() => {
-  candlestickClientMock.getAllBySymbol = jest.fn();
+  fetchCandlestickClientMock.fetchAll = jest.fn();
   candlestickRepositoryMock.saveAllBySymbol = jest.fn();
 
-  updateCandlestickService = new UpdateCandlestickService(candlestickClientMock, candlestickRepositoryMock);
+  updateCandlestickService = new UpdateCandlestickService(fetchCandlestickClientMock, candlestickRepositoryMock);
 });
 
 describe('UpdateCandlestickService', () => {
@@ -26,52 +25,57 @@ describe('UpdateCandlestickService', () => {
   });
 
   describe('Given a symbol candlesticks to update', () => {
+    let candlesticks: Candlesticks;
+
     describe('When candlesticks are not found', () => {
       beforeEach(() => {
-        candlestickClientMock.getAllBySymbol.mockResolvedValue([]);
+        candlesticks = buildDefaultCandlesticks();
+        candlesticks.values = [];
+        fetchCandlestickClientMock.fetchAll.mockResolvedValue(candlesticks);
       });
 
       it('Then candlesticks are not saved', async () => {
-        await updateCandlestickService.updateAllBySymbol('ABC');
+        await updateCandlestickService.updateAllBySymbol('Binance', 'ABC');
 
-        expect(candlestickClientMock.getAllBySymbol).toHaveBeenCalledTimes(1);
-        const getAllBySymbolParams = candlestickClientMock.getAllBySymbol.mock.calls[0];
-        expect(getAllBySymbolParams.length).toEqual(5);
-        expect(getAllBySymbolParams[0]).toEqual('ABC');
-        expect(getAllBySymbolParams[1]).toEqual(new Date('2021-09-16T23:59:00.000Z').valueOf());
-        expect(getAllBySymbolParams[2]).toEqual(new Date('2021-09-17T00:00:00.000Z').valueOf());
-        expect(getAllBySymbolParams[3]).toEqual(2);
-        expect(getAllBySymbolParams[4]).toEqual('1m');
+        expect(fetchCandlestickClientMock.fetchAll).toHaveBeenCalledTimes(1);
+        const getAllBySymbolParams = fetchCandlestickClientMock.fetchAll.mock.calls[0];
+        expect(getAllBySymbolParams.length).toEqual(1);
+        expect(getAllBySymbolParams[0]).toEqual({
+          exchange: 'Binance',
+          symbol: 'ABC',
+          interval: '1m',
+          period: 2,
+        });
 
         expect(candlestickRepositoryMock.saveAllBySymbol).toHaveBeenCalledTimes(0);
       });
     });
 
     describe('When candlesticks are found', () => {
-      let candlesticks: Candlestick[];
-
       beforeEach(() => {
         candlesticks = buildDefaultCandlesticks();
-        candlestickClientMock.getAllBySymbol.mockResolvedValue(candlesticks);
+        fetchCandlestickClientMock.fetchAll.mockResolvedValue(candlesticks);
       });
 
       it('Then candlesticks are saved', async () => {
-        await updateCandlestickService.updateAllBySymbol('ABC');
+        await updateCandlestickService.updateAllBySymbol('Binance', 'ABC');
 
-        expect(candlestickClientMock.getAllBySymbol).toHaveBeenCalledTimes(1);
-        const getAllBySymbolParams = candlestickClientMock.getAllBySymbol.mock.calls[0];
-        expect(getAllBySymbolParams.length).toEqual(5);
-        expect(getAllBySymbolParams[0]).toEqual('ABC');
-        expect(getAllBySymbolParams[1]).toEqual(new Date('2021-09-16T23:59:00.000Z').valueOf());
-        expect(getAllBySymbolParams[2]).toEqual(new Date('2021-09-17T00:00:00.000Z').valueOf());
-        expect(getAllBySymbolParams[3]).toEqual(2);
-        expect(getAllBySymbolParams[4]).toEqual('1m');
+        expect(fetchCandlestickClientMock.fetchAll).toHaveBeenCalledTimes(1);
+        const getAllBySymbolParams = fetchCandlestickClientMock.fetchAll.mock.calls[0];
+        expect(getAllBySymbolParams.length).toEqual(1);
+        expect(getAllBySymbolParams[0]).toEqual({
+          exchange: 'Binance',
+          symbol: 'ABC',
+          interval: '1m',
+          period: 2,
+        });
 
         expect(candlestickRepositoryMock.saveAllBySymbol).toHaveBeenCalledTimes(1);
         const saveAllBySymbolParams = candlestickRepositoryMock.saveAllBySymbol.mock.calls[0];
-        expect(saveAllBySymbolParams.length).toEqual(2);
-        expect(saveAllBySymbolParams[0]).toEqual('ABC');
-        expect(saveAllBySymbolParams[1]).toEqual(candlesticks);
+        expect(saveAllBySymbolParams.length).toEqual(3);
+        expect(saveAllBySymbolParams[0]).toEqual('Binance');
+        expect(saveAllBySymbolParams[1]).toEqual('ABC');
+        expect(saveAllBySymbolParams[2]).toEqual(candlesticks.values);
       });
     });
   });

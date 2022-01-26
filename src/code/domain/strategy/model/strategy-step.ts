@@ -90,6 +90,8 @@ export interface SendOrderStepInput extends StrategyStepInput {
 export interface SendOrderStepOutput extends StrategyStepOutput {
   id: string;
   externalId: string;
+  side: SendOrderSide;
+  type: SendOrderType;
   status: string;
   externalStatus: string;
   baseAssetQuantity?: number;
@@ -100,6 +102,8 @@ export interface SendOrderStepOutput extends StrategyStepOutput {
 export interface CheckOrderStepInput extends StrategyStepInput {
   id: string;
   externalId: string;
+  side: SendOrderSide;
+  type: SendOrderType;
 }
 
 export interface CheckOrderStepOutput extends StrategyStepOutput {

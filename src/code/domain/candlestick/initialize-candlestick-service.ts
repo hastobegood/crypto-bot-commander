@@ -1,14 +1,14 @@
+import { logger } from '@hastobegood/crypto-bot-artillery/common';
+import { CandlestickExchange, FetchCandlestickClient } from '@hastobegood/crypto-bot-artillery/candlestick';
 import { CandlestickRepository } from './candlestick-repository';
-import { CandlestickClient } from './candlestick-client';
-import { logger } from '../../configuration/log/logger';
 
 const period = 1_000;
 const interval = 60 * 1_000;
 
 export class InitializeCandlestickService {
-  constructor(private candlestickClient: CandlestickClient, private candlestickRepository: CandlestickRepository) {}
+  constructor(private fetchCandlestickClient: FetchCandlestickClient, private candlestickRepository: CandlestickRepository) {}
 
-  async initializeAllBySymbol(symbol: string, year: number, month: number): Promise<void> {
+  async initializeAllBySymbol(exchange: CandlestickExchange, symbol: string, year: number, month: number): Promise<void> {
     const startDate = Date.UTC(year, month - 1, 1, 0, 0, 0, 0);
     const endDate = Date.UTC(year, month, 1, 0, 0, 0, 0) - 60 * 1_000;
 
@@ -21,10 +21,18 @@ export class InitializeCandlestickService {
     let from = startDate;
     while (from < endDate) {
       const to = Math.min(from + interval * (period - 1), endDate);
-      const candlesticks = await this.candlestickClient.getAllBySymbol(symbol, from, to, period, '1m');
-      logger.info(data, `Found ${candlesticks.length} candlesticks of 1 minute from ${new Date(from).toISOString()} to ${new Date(to).toISOString()}`);
-      if (candlesticks.length) {
-        await this.candlestickRepository.saveAllBySymbol(symbol, candlesticks);
+      const candlesticks = await this.fetchCandlestickClient.fetchAll({
+        exchange: exchange,
+        symbol: symbol,
+        interval: '1m',
+        period: period,
+        startDate: from,
+        endDate: to,
+      });
+
+      logger.info(data, `Found ${candlesticks.values.length} candlesticks of 1 minute from ${new Date(from).toISOString()} to ${new Date(to).toISOString()}`);
+      if (candlesticks.values.length) {
+        await this.candlestickRepository.saveAllBySymbol(exchange, symbol, candlesticks.values);
       }
       from = to + interval;
     }

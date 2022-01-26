@@ -12,7 +12,20 @@ beforeEach(() => {
 });
 
 describe('InitializeAllCandlesticksApiController', () => {
-  describe('Given candlesticks to initialize for a symbol, a year and a month', () => {
+  describe('Given candlesticks to initialize for an exchange, a symbol, a year and a month', () => {
+    describe('When exchange is unknown', () => {
+      it('Then error is thrown', async () => {
+        try {
+          await initializeAllCandlesticksController.process('Unknown', 'ABC', 2021, 8);
+          fail();
+        } catch (error) {
+          expect((error as Error).message).toEqual("Unsupported 'Unknown' exchange");
+        }
+
+        expect(initializeCandlestickServiceMock.initializeAllBySymbol).toHaveBeenCalledTimes(0);
+      });
+    });
+
     describe('When initialization has failed', () => {
       beforeEach(() => {
         initializeCandlestickServiceMock.initializeAllBySymbol.mockRejectedValue(new Error('Error occurred !'));
@@ -20,19 +33,19 @@ describe('InitializeAllCandlesticksApiController', () => {
 
       it('Then error is thrown', async () => {
         try {
-          await initializeAllCandlesticksController.process('ABC', 2021, 8);
+          await initializeAllCandlesticksController.process('Binance', 'ABC', 2021, 8);
           fail();
         } catch (error) {
-          expect(error).toBeDefined();
           expect((error as Error).message).toEqual('Error occurred !');
         }
 
         expect(initializeCandlestickServiceMock.initializeAllBySymbol).toHaveBeenCalledTimes(1);
         const initializeAllBySymbolParams = initializeCandlestickServiceMock.initializeAllBySymbol.mock.calls[0];
-        expect(initializeAllBySymbolParams.length).toEqual(3);
-        expect(initializeAllBySymbolParams[0]).toEqual('ABC');
-        expect(initializeAllBySymbolParams[1]).toEqual(2021);
-        expect(initializeAllBySymbolParams[2]).toEqual(8);
+        expect(initializeAllBySymbolParams.length).toEqual(4);
+        expect(initializeAllBySymbolParams[0]).toEqual('Binance');
+        expect(initializeAllBySymbolParams[1]).toEqual('ABC');
+        expect(initializeAllBySymbolParams[2]).toEqual(2021);
+        expect(initializeAllBySymbolParams[3]).toEqual(8);
       });
     });
 
@@ -42,14 +55,15 @@ describe('InitializeAllCandlesticksApiController', () => {
       });
 
       it('Then nothing is returned', async () => {
-        await initializeAllCandlesticksController.process('ABC', 2021, 8);
+        await initializeAllCandlesticksController.process('Binance', 'ABC', 2021, 8);
 
         expect(initializeCandlestickServiceMock.initializeAllBySymbol).toHaveBeenCalledTimes(1);
         const initializeAllBySymbolParams = initializeCandlestickServiceMock.initializeAllBySymbol.mock.calls[0];
-        expect(initializeAllBySymbolParams.length).toEqual(3);
-        expect(initializeAllBySymbolParams[0]).toEqual('ABC');
-        expect(initializeAllBySymbolParams[1]).toEqual(2021);
-        expect(initializeAllBySymbolParams[2]).toEqual(8);
+        expect(initializeAllBySymbolParams.length).toEqual(4);
+        expect(initializeAllBySymbolParams[0]).toEqual('Binance');
+        expect(initializeAllBySymbolParams[1]).toEqual('ABC');
+        expect(initializeAllBySymbolParams[2]).toEqual(2021);
+        expect(initializeAllBySymbolParams[3]).toEqual(8);
       });
     });
   });

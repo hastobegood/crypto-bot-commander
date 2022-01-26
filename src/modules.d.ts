@@ -3,8 +3,7 @@ declare namespace NodeJS {
     ENV: string;
     REGION: string;
     TRACING: boolean;
-    BINANCE_URL: string;
-    BINANCE_SECRET_NAME: string;
+    EXCHANGES_SECRET_NAME: string;
     AVAILABLE_SYMBOLS: string;
     CANDLESTICK_TABLE_NAME: string;
     STRATEGY_TABLE_NAME: string;

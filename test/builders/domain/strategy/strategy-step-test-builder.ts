@@ -1,3 +1,4 @@
+import { randomBoolean, randomFromList, randomNumber, randomPercentage, randomString } from '@hastobegood/crypto-bot-artillery/test/builders';
 import {
   CheckOrderStepInput,
   CheckOrderStepOutput,
@@ -24,7 +25,6 @@ import {
   StrategyStepTemplate,
   StrategyStepType,
 } from '../../../../src/code/domain/strategy/model/strategy-step';
-import { randomBoolean, randomFromList, randomNumber, randomPercentage, randomString } from '../../random-test-builder';
 
 export const buildDefaultStrategyStepTemplate = (): StrategyStepTemplate => {
   return buildStrategyStepTemplate(randomString(), 'SendOrder', buildDefaultSendOrderStepInput(), randomString());
@@ -56,11 +56,11 @@ export const buildDefaultStrategyStep = (): StrategyStep => {
 };
 
 export const buildDefaultMarketEvolutionStep = (): StrategyStep => {
-  return buildStrategyStep(buildDefaultMarketEvolutionStepTemplate(), randomString(10), buildDefaultMarketEvolutionStepOutput(true));
+  return buildStrategyStep(buildDefaultMarketEvolutionStepTemplate(), randomString(), buildDefaultMarketEvolutionStepOutput(true));
 };
 
 export const buildDefaultSendOrderStep = (): StrategyStep => {
-  return buildStrategyStep(buildDefaultSendOrderStepTemplate(), randomString(10), buildDefaultSendOrderStepOutput(true));
+  return buildStrategyStep(buildDefaultSendOrderStepTemplate(), randomString(), buildDefaultSendOrderStepOutput(true));
 };
 
 export const buildStrategyStep = (template: StrategyStepTemplate, strategyId: string, output: StrategyStepOutput): StrategyStep => {
@@ -88,7 +88,7 @@ export const buildMarketEvolutionStepInput = (source: MarketEvolutionSource, per
 };
 
 export const buildDefaultMarketEvolutionStepOutput = (success: boolean): MarketEvolutionStepOutput => {
-  return buildMarketEvolutionStepOutput(success, randomNumber(100, 1_000), randomNumber(100, 1_000), randomPercentage());
+  return buildMarketEvolutionStepOutput(success, randomNumber(), randomNumber(), randomPercentage());
 };
 
 export const buildMarketEvolutionStepOutput = (success: boolean, lastPrice: number, currentPrice: number, percentage: number): MarketEvolutionStepOutput => {
@@ -116,8 +116,8 @@ export const buildOrConditionStepInput = (steps: OrConditionStep[]): OrCondition
 export const buildDefaultOrConditionStepOutput = (success: boolean): OrConditionStepOutput => {
   return {
     success: success,
-    id: randomString(10),
-    nextId: randomString(10),
+    id: randomString(),
+    nextId: randomString(),
     steps: [
       { ...{ id: randomString(), priority: randomNumber() }, ...buildDefaultMarketEvolutionStepOutput(true) },
       { ...{ id: randomString(), priority: randomNumber() }, ...buildDefaultMarketEvolutionStepOutput(false) },
@@ -144,12 +144,14 @@ export const buildDefaultSendOrderStepOutput = (success: boolean): SendOrderStep
   return {
     success: success,
     id: randomString(),
+    side: randomFromList(['Buy', 'Sell']),
+    type: randomFromList(['Market', 'Limit']),
     status: randomString(),
     externalId: randomString(),
     externalStatus: randomString(),
-    baseAssetQuantity: baseAsset ? randomNumber(100, 500) : undefined,
-    quoteAssetQuantity: baseAsset ? undefined : randomNumber(100, 500),
-    priceLimit: randomNumber(1_000, 10_000),
+    baseAssetQuantity: baseAsset ? randomNumber() : undefined,
+    quoteAssetQuantity: baseAsset ? undefined : randomNumber(),
+    priceLimit: randomNumber(),
   };
 };
 
@@ -157,6 +159,8 @@ export const buildDefaultCheckOrderStepInput = (): CheckOrderStepInput => {
   return {
     id: randomString(),
     externalId: randomString(),
+    side: randomFromList(['Buy', 'Sell']),
+    type: randomFromList(['Market', 'Limit']),
   };
 };
 
@@ -167,8 +171,8 @@ export const buildDefaultCheckOrderStepOutput = (success: boolean): CheckOrderSt
     status: randomString(),
     externalId: randomString(),
     externalStatus: randomString(),
-    quantity: randomNumber(100, 500),
-    price: randomNumber(1_000, 10_000),
+    quantity: randomNumber(),
+    price: randomNumber(),
   };
 };
 
@@ -189,8 +193,8 @@ export const buildMovingAverageCrossoverStepInput = (type: MovingAverageType, cr
 export const buildDefaultMovingAverageCrossoverStepOutput = (success: boolean): MovingAverageCrossoverStepOutput => {
   return {
     success: success,
-    currentPrice: randomNumber(1_000, 10_000),
-    shortTermPrice: randomNumber(1_000, 10_000),
-    longTermPrice: randomNumber(1_000, 10_000),
+    currentPrice: randomNumber(),
+    shortTermPrice: randomNumber(),
+    longTermPrice: randomNumber(),
   };
 };
