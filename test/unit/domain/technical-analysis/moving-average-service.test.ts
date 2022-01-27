@@ -14,12 +14,24 @@ describe('MovingAverageService', () => {
 
   beforeEach(() => {
     points = [
-      { timestamp: 1, value: 20 },
-      { timestamp: 2, value: 30 },
-      { timestamp: 3, value: 40 },
-      { timestamp: 4, value: 50 },
-      { timestamp: 5, value: 60 },
-      { timestamp: 6, value: 70 },
+      { timestamp: 1, value: 15 },
+      { timestamp: 2, value: 10 },
+      { timestamp: 3, value: 20 },
+      { timestamp: 4, value: 30 },
+      { timestamp: 5, value: 25 },
+      { timestamp: 6, value: 20 },
+      { timestamp: 7, value: 15 },
+      { timestamp: 8, value: 5 },
+      { timestamp: 9, value: 10 },
+      { timestamp: 10, value: 5 },
+      { timestamp: 11, value: 10 },
+      { timestamp: 12, value: 15 },
+      { timestamp: 13, value: 20 },
+      { timestamp: 14, value: 30 },
+      { timestamp: 15, value: 40 },
+      { timestamp: 16, value: 50 },
+      { timestamp: 17, value: 60 },
+      { timestamp: 18, value: 70 },
     ];
   });
 
@@ -39,7 +51,6 @@ describe('MovingAverageService', () => {
         await movingAverageService.calculate(calculateMovingAverage);
         fail();
       } catch (error) {
-        expect(error).toBeDefined();
         expect((error as Error).message).toEqual("Unsupported 'XXX' moving average type");
       }
     });
@@ -48,20 +59,20 @@ describe('MovingAverageService', () => {
   describe('Given a simple moving average to calculate', () => {
     describe('When period is smaller than number of points', () => {
       beforeEach(() => {
-        calculateMovingAverage = buildCalculateMovingAverage('SMA', 5, points);
+        calculateMovingAverage = buildCalculateMovingAverage('SMA', 17, points);
       });
 
       it('Then simple moving average is calculated', async () => {
         const result = await movingAverageService.calculate(calculateMovingAverage);
         expect(result).toEqual({
-          value: 40,
+          value: 22.35294118,
         });
       });
     });
 
     describe('When period is equal to number of points', () => {
       beforeEach(() => {
-        calculateMovingAverage = buildCalculateMovingAverage('SMA', 6, points);
+        calculateMovingAverage = buildCalculateMovingAverage('SMA', 18, points);
       });
 
       it('Then error is thrown', async () => {
@@ -69,15 +80,14 @@ describe('MovingAverageService', () => {
           await movingAverageService.calculate(calculateMovingAverage);
           fail();
         } catch (error) {
-          expect(error).toBeDefined();
-          expect((error as Error).message).toEqual('Not enough point to calculate simple moving average');
+          expect((error as Error).message).toEqual('Not enough point to calculate simple moving average (19 expected but found 18)');
         }
       });
     });
 
     describe('When period is bigger than number of points', () => {
       beforeEach(() => {
-        calculateMovingAverage = buildCalculateMovingAverage('SMA', 7, points);
+        calculateMovingAverage = buildCalculateMovingAverage('SMA', 19, points);
       });
 
       it('Then error is thrown', async () => {
@@ -85,8 +95,7 @@ describe('MovingAverageService', () => {
           await movingAverageService.calculate(calculateMovingAverage);
           fail();
         } catch (error) {
-          expect(error).toBeDefined();
-          expect((error as Error).message).toEqual('Not enough point to calculate simple moving average');
+          expect((error as Error).message).toEqual('Not enough point to calculate simple moving average (20 expected but found 18)');
         }
       });
     });
@@ -95,33 +104,33 @@ describe('MovingAverageService', () => {
   describe('Given a cumulative moving average to calculate', () => {
     describe('When period is smaller than number of points', () => {
       beforeEach(() => {
-        calculateMovingAverage = buildCalculateMovingAverage('CMA', 5, points);
+        calculateMovingAverage = buildCalculateMovingAverage('CMA', 17, points);
       });
 
       it('Then cumulative moving average is calculated', async () => {
         const result = await movingAverageService.calculate(calculateMovingAverage);
         expect(result).toEqual({
-          value: 50,
+          value: 25.58823529,
         });
       });
     });
 
     describe('When period is equal to number of points', () => {
       beforeEach(() => {
-        calculateMovingAverage = buildCalculateMovingAverage('CMA', 6, points);
+        calculateMovingAverage = buildCalculateMovingAverage('CMA', 18, points);
       });
 
       it('Then cumulative moving average is calculated', async () => {
         const result = await movingAverageService.calculate(calculateMovingAverage);
         expect(result).toEqual({
-          value: 45,
+          value: 25,
         });
       });
     });
 
     describe('When period is bigger than number of points', () => {
       beforeEach(() => {
-        calculateMovingAverage = buildCalculateMovingAverage('CMA', 7, points);
+        calculateMovingAverage = buildCalculateMovingAverage('CMA', 19, points);
       });
 
       it('Then error is thrown', async () => {
@@ -129,8 +138,7 @@ describe('MovingAverageService', () => {
           await movingAverageService.calculate(calculateMovingAverage);
           fail();
         } catch (error) {
-          expect(error).toBeDefined();
-          expect((error as Error).message).toEqual('Not enough point to calculate cumulative moving average');
+          expect((error as Error).message).toEqual('Not enough point to calculate cumulative moving average (19 expected but found 18)');
         }
       });
     });
@@ -145,7 +153,7 @@ describe('MovingAverageService', () => {
       it('Then exponential moving average is calculated', async () => {
         const result = await movingAverageService.calculate(calculateMovingAverage);
         expect(result).toEqual({
-          value: 53.95061728,
+          value: 51.9473762,
         });
       });
     });
@@ -158,7 +166,7 @@ describe('MovingAverageService', () => {
       it('Then exponential moving average is calculated', async () => {
         const result = await movingAverageService.calculate(calculateMovingAverage);
         expect(result).toEqual({
-          value: 49.6483608,
+          value: 48.58965532,
         });
       });
     });
@@ -174,7 +182,7 @@ describe('MovingAverageService', () => {
           fail();
         } catch (error) {
           expect(error).toBeDefined();
-          expect((error as Error).message).toEqual('Not enough point to calculate exponential moving average');
+          expect((error as Error).message).toEqual('Not enough point to calculate exponential moving average (21 expected but found 18)');
         }
       });
     });

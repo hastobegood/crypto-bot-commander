@@ -34,7 +34,7 @@ Mappings:
       AvailableSymbols: BNB#BUSD,BTC#BUSD
       UpdateAllCandlesticksSchedule: rate(1 minute)
     prod:
-      AvailableSymbols: BNB#BUSD,BTC#BUSD,ETH#BUSD,XRP#BUSD
+      AvailableSymbols: BNB#BUSD,BNB#BTC,BTC#BUSD,XRP#BUSD,XRP#BNB,VET#ETH
       UpdateAllCandlesticksSchedule: rate(1 minute)
 
 Globals:

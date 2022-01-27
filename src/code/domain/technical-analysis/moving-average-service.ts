@@ -29,7 +29,7 @@ export class MovingAverageService implements TechnicalAnalysisService<CalculateM
 
   #calculateSimpleMovingAverage(period: number, points: Point[]): number {
     if (points.length < period + 1) {
-      throw new Error('Not enough point to calculate simple moving average');
+      throw new Error(`Not enough point to calculate simple moving average (${period + 1} expected but found ${points.length})`);
     }
 
     const total = points
@@ -42,7 +42,7 @@ export class MovingAverageService implements TechnicalAnalysisService<CalculateM
 
   #calculateCumulativeMovingAverage(period: number, points: Point[]): number {
     if (points.length < period) {
-      throw new Error('Not enough point to calculate cumulative moving average');
+      throw new Error(`Not enough point to calculate cumulative moving average (${period} expected but found ${points.length})`);
     }
 
     const total = points
@@ -54,15 +54,15 @@ export class MovingAverageService implements TechnicalAnalysisService<CalculateM
   }
 
   #calculateExponentialMovingAverage(period: number, points: Point[]): number {
-    if (points.length < period) {
-      throw new Error('Not enough point to calculate exponential moving average');
+    if (points.length < period * 3) {
+      throw new Error(`Not enough point to calculate exponential moving average (${period * 3} expected but found ${points.length})`);
     }
 
     const alpha = 2 / (period + 1);
 
     return points
-      .slice(0, period)
+      .slice(0, period * 3)
       .map((point) => point.value)
-      .reduceRight((previous, current) => (previous === 0 ? current : current * alpha + previous * (1 - alpha)));
+      .reduceRight((previous, current) => current * alpha + previous * (1 - alpha));
   }
 }
