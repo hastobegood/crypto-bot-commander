@@ -132,7 +132,7 @@ describe('MovingAverageCrossoverStepService', () => {
         expect(getAllBySymbolParams.length).toEqual(4);
         expect(getAllBySymbolParams[0]).toEqual(strategy.exchange);
         expect(getAllBySymbolParams[1]).toEqual(strategy.symbol);
-        expect(getAllBySymbolParams[2]).toEqual(movingAverageCrossoverStepInput.longTermPeriod);
+        expect(getAllBySymbolParams[2]).toEqual(movingAverageCrossoverStepInput.longTermPeriod * (movingAverageCrossoverStepInput.type === 'EMA' ? 3 : 1));
         expect(getAllBySymbolParams[3]).toEqual('1d');
 
         expect(movingAverageServiceMock.calculate).toHaveBeenCalledTimes(2);
@@ -293,7 +293,7 @@ describe('MovingAverageCrossoverStepService', () => {
         expect(getAllBySymbolParams.length).toEqual(4);
         expect(getAllBySymbolParams[0]).toEqual(strategy.exchange);
         expect(getAllBySymbolParams[1]).toEqual(strategy.symbol);
-        expect(getAllBySymbolParams[2]).toEqual(movingAverageCrossoverStepInput.longTermPeriod);
+        expect(getAllBySymbolParams[2]).toEqual(movingAverageCrossoverStepInput.longTermPeriod * (movingAverageCrossoverStepInput.type === 'EMA' ? 3 : 1));
         expect(getAllBySymbolParams[3]).toEqual('1d');
 
         expect(movingAverageServiceMock.calculate).toHaveBeenCalledTimes(2);

@@ -18,7 +18,8 @@ export class MovingAverageCrossoverStepService implements StrategyStepService {
       throw new Error('Unable to calculate moving average when short term period is greater than long term period');
     }
 
-    const points = await this.#getPoints(strategy, movingAverageCrossoverStepInput.longTermPeriod);
+    const period = movingAverageCrossoverStepInput.longTermPeriod * (movingAverageCrossoverStepInput.type === 'EMA' ? 3 : 1);
+    const points = await this.#getPoints(strategy, period);
     const calculateMovingAverage = {
       type: movingAverageCrossoverStepInput.type,
       points: points,
