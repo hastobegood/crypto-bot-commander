@@ -1,7 +1,7 @@
 import MockDate from 'mockdate';
 import { mocked } from 'ts-jest/utils';
 import { Candlestick } from '@hastobegood/crypto-bot-artillery/candlestick';
-import { buildCandlesticksFromTo } from '@hastobegood/crypto-bot-artillery/test/builders';
+import { buildCandlesticksFromTo, buildDefaultCandlestick } from '@hastobegood/crypto-bot-artillery/test/builders';
 import { GetCandlestickService } from '../../../../src/code/domain/candlestick/get-candlestick-service';
 import { CandlestickRepository } from '../../../../src/code/domain/candlestick/candlestick-repository';
 
@@ -9,6 +9,8 @@ const candlestickRepositoryMock = mocked(jest.genMockFromModule<CandlestickRepos
 
 let getCandlestickService: GetCandlestickService;
 beforeEach(() => {
+  candlestickRepositoryMock.save = jest.fn();
+  candlestickRepositoryMock.getLastBySymbol = jest.fn();
   candlestickRepositoryMock.getAllBySymbol = jest.fn();
 
   getCandlestickService = new GetCandlestickService(candlestickRepositoryMock);
@@ -16,6 +18,7 @@ beforeEach(() => {
 
 describe('GetCandlestickService', () => {
   let date: Date;
+  let candlestick: Candlestick;
   let candlesticks: Candlestick[];
 
   beforeEach(() => {
@@ -29,43 +32,98 @@ describe('GetCandlestickService', () => {
       MockDate.set(date);
     });
 
+    afterEach(() => {
+      expect(candlestickRepositoryMock.save).toHaveBeenCalledTimes(0);
+      expect(candlestickRepositoryMock.getAllBySymbol).toHaveBeenCalledTimes(0);
+    });
+
     describe('When last candlestick is not found', () => {
       beforeEach(() => {
-        candlesticks = [];
-        candlestickRepositoryMock.getAllBySymbol.mockResolvedValue(candlesticks);
+        candlestickRepositoryMock.getLastBySymbol.mockResolvedValue(null);
       });
 
       it('Then null is returned', async () => {
         const result = await getCandlestickService.getLastBySymbol('Binance', 'ABC');
         expect(result).toBeNull();
 
-        expect(candlestickRepositoryMock.getAllBySymbol).toHaveBeenCalledTimes(1);
-        const getAllBySymbolParams = candlestickRepositoryMock.getAllBySymbol.mock.calls[0];
-        expect(getAllBySymbolParams.length).toEqual(4);
+        expect(candlestickRepositoryMock.getLastBySymbol).toHaveBeenCalledTimes(1);
+        const getAllBySymbolParams = candlestickRepositoryMock.getLastBySymbol.mock.calls[0];
+        expect(getAllBySymbolParams.length).toEqual(3);
         expect(getAllBySymbolParams[0]).toEqual('Binance');
         expect(getAllBySymbolParams[1]).toEqual('ABC');
-        expect(getAllBySymbolParams[2]).toEqual(new Date('2021-09-13T16:38:00.000Z').valueOf());
-        expect(getAllBySymbolParams[3]).toEqual(new Date('2021-09-13T16:38:00.000Z').valueOf());
+        expect(getAllBySymbolParams[2]).toEqual('1m');
       });
     });
 
     describe('When last candlestick is found', () => {
       beforeEach(() => {
-        candlesticks = buildCandlesticksFromTo(new Date('2021-09-13T16:38:00.000Z'), new Date('2021-09-13T16:38:00.000Z'));
-        candlestickRepositoryMock.getAllBySymbol.mockResolvedValue(candlesticks);
+        candlestick = buildDefaultCandlestick();
+        candlestickRepositoryMock.getLastBySymbol.mockResolvedValue(candlestick);
       });
 
       it('Then last candlestick is returned', async () => {
         const result = await getCandlestickService.getLastBySymbol('Binance', 'ABC');
-        expect(result).toEqual(candlesticks[0]);
+        expect(result).toEqual(candlestick);
+
+        expect(candlestickRepositoryMock.getLastBySymbol).toHaveBeenCalledTimes(1);
+        const getAllBySymbolParams = candlestickRepositoryMock.getLastBySymbol.mock.calls[0];
+        expect(getAllBySymbolParams.length).toEqual(3);
+        expect(getAllBySymbolParams[0]).toEqual('Binance');
+        expect(getAllBySymbolParams[1]).toEqual('ABC');
+        expect(getAllBySymbolParams[2]).toEqual('1m');
+      });
+    });
+  });
+
+  describe('Given candlesticks to retrieve without starting date', () => {
+    describe('When last candlestick is not found', () => {
+      beforeEach(() => {
+        candlestickRepositoryMock.getLastBySymbol.mockResolvedValueOnce(null);
+      });
+
+      it('Then empty list is returned', async () => {
+        const results = await getCandlestickService.getAllLastBySymbol('Binance', 'ABC', '1m', 10);
+        expect(results.length).toEqual(0);
+        expect(results).toEqual([]);
+
+        expect(candlestickRepositoryMock.getLastBySymbol).toHaveBeenCalledTimes(1);
+        const getAllBySymbolParams = candlestickRepositoryMock.getLastBySymbol.mock.calls[0];
+        expect(getAllBySymbolParams.length).toEqual(3);
+        expect(getAllBySymbolParams[0]).toEqual('Binance');
+        expect(getAllBySymbolParams[1]).toEqual('ABC');
+        expect(getAllBySymbolParams[2]).toEqual('1m');
+      });
+    });
+
+    describe('When last candlestick is found', () => {
+      beforeEach(() => {
+        candlestick = buildDefaultCandlestick();
+        candlestickRepositoryMock.getLastBySymbol.mockResolvedValueOnce(candlestick);
+
+        candlesticks = [...buildCandlesticksFromTo(new Date(new Date(candlestick.openingDate - 60 * 9 * 1_000).setUTCSeconds(0, 0)), new Date(new Date(candlestick.openingDate).setUTCSeconds(0, 0)), 60)];
+        candlestickRepositoryMock.getAllBySymbol.mockResolvedValue(candlesticks);
+      });
+
+      it('Then last symbol opening date is used to retrieve candlesticks', async () => {
+        const results = await getCandlestickService.getAllLastBySymbol('Binance', 'ABC', '1m', 10);
+        expect(results.length).toEqual(10);
+        expect(results).toEqual(candlesticks);
+
+        expect(candlestickRepositoryMock.getLastBySymbol).toHaveBeenCalledTimes(1);
+        const getLastBySymbolParams = candlestickRepositoryMock.getLastBySymbol.mock.calls[0];
+        expect(getLastBySymbolParams.length).toEqual(3);
+        expect(getLastBySymbolParams[0]).toEqual('Binance');
+        expect(getLastBySymbolParams[1]).toEqual('ABC');
+        expect(getLastBySymbolParams[2]).toEqual('1m');
 
         expect(candlestickRepositoryMock.getAllBySymbol).toHaveBeenCalledTimes(1);
         const getAllBySymbolParams = candlestickRepositoryMock.getAllBySymbol.mock.calls[0];
-        expect(getAllBySymbolParams.length).toEqual(4);
+        expect(getAllBySymbolParams.length).toEqual(5);
         expect(getAllBySymbolParams[0]).toEqual('Binance');
         expect(getAllBySymbolParams[1]).toEqual('ABC');
-        expect(getAllBySymbolParams[2]).toEqual(new Date('2021-09-13T16:38:00.000Z').valueOf());
-        expect(getAllBySymbolParams[3]).toEqual(new Date('2021-09-13T16:38:00.000Z').valueOf());
+        expect(getAllBySymbolParams[2]).toEqual('1m');
+        expect(getAllBySymbolParams[3]).toEqual(new Date(candlestick.openingDate - 60 * 9 * 1_000).setUTCSeconds(0, 0));
+        expect(getAllBySymbolParams[4]).toEqual(new Date(candlestick.openingDate).setUTCSeconds(0, 0));
       });
     });
   });
@@ -79,46 +137,48 @@ describe('GetCandlestickService', () => {
     describe('When data is missing', () => {
       beforeEach(() => {
         candlesticks = [
-          ...buildCandlesticksFromTo(new Date('2021-09-13T15:40:00.000Z'), new Date('2021-09-13T16:00:00.000Z')),
-          ...buildCandlesticksFromTo(new Date('2021-09-13T16:02:00.000Z'), new Date('2021-09-13T16:10:00.000Z')),
-          ...buildCandlesticksFromTo(new Date('2021-09-13T16:12:00.000Z'), new Date('2021-09-13T16:38:00.000Z')),
+          ...buildCandlesticksFromTo(new Date('2021-09-13T15:40:00.000Z'), new Date('2021-09-13T16:00:00.000Z'), 60),
+          ...buildCandlesticksFromTo(new Date('2021-09-13T16:02:00.000Z'), new Date('2021-09-13T16:10:00.000Z'), 60),
+          ...buildCandlesticksFromTo(new Date('2021-09-13T16:12:00.000Z'), new Date('2021-09-13T16:38:00.000Z'), 60),
         ];
         candlestickRepositoryMock.getAllBySymbol.mockResolvedValue(candlesticks);
       });
 
       it('Then candlesticks are returned by 1 minute interval', async () => {
-        const results = await getCandlestickService.getAllBySymbol('Binance', 'ABC', 60, '1m');
+        const results = await getCandlestickService.getAllLastBySymbol('Binance', 'ABC', '1m', 60, date.valueOf());
         expect(results.length).toEqual(57);
         expect(results).toEqual(candlesticks);
 
         expect(candlestickRepositoryMock.getAllBySymbol).toHaveBeenCalledTimes(1);
         const getAllBySymbolParams = candlestickRepositoryMock.getAllBySymbol.mock.calls[0];
-        expect(getAllBySymbolParams.length).toEqual(4);
+        expect(getAllBySymbolParams.length).toEqual(5);
         expect(getAllBySymbolParams[0]).toEqual('Binance');
         expect(getAllBySymbolParams[1]).toEqual('ABC');
-        expect(getAllBySymbolParams[2]).toEqual(new Date('2021-09-13T15:39:00.000Z').valueOf());
-        expect(getAllBySymbolParams[3]).toEqual(new Date('2021-09-13T16:38:00.000Z').valueOf());
+        expect(getAllBySymbolParams[2]).toEqual('1m');
+        expect(getAllBySymbolParams[3]).toEqual(new Date('2021-09-13T15:39:00.000Z').valueOf());
+        expect(getAllBySymbolParams[4]).toEqual(new Date('2021-09-13T16:38:00.000Z').valueOf());
       });
     });
 
     describe('When data is not missing', () => {
       beforeEach(() => {
-        candlesticks = buildCandlesticksFromTo(new Date('2021-09-13T15:39:00.000Z'), new Date('2021-09-13T16:38:00.000Z'));
+        candlesticks = buildCandlesticksFromTo(new Date('2021-09-13T15:39:00.000Z'), new Date('2021-09-13T16:38:00.000Z'), 60);
         candlestickRepositoryMock.getAllBySymbol.mockResolvedValue(candlesticks);
       });
 
       it('Then candlesticks are returned by 1 minute interval', async () => {
-        const results = await getCandlestickService.getAllBySymbol('Binance', 'ABC', 60, '1m');
+        const results = await getCandlestickService.getAllLastBySymbol('Binance', 'ABC', '1m', 60, date.valueOf());
         expect(results.length).toEqual(60);
         expect(results).toEqual(candlesticks);
 
         expect(candlestickRepositoryMock.getAllBySymbol).toHaveBeenCalledTimes(1);
         const getAllBySymbolParams = candlestickRepositoryMock.getAllBySymbol.mock.calls[0];
-        expect(getAllBySymbolParams.length).toEqual(4);
+        expect(getAllBySymbolParams.length).toEqual(5);
         expect(getAllBySymbolParams[0]).toEqual('Binance');
         expect(getAllBySymbolParams[1]).toEqual('ABC');
-        expect(getAllBySymbolParams[2]).toEqual(new Date('2021-09-13T15:39:00.000Z').valueOf());
-        expect(getAllBySymbolParams[3]).toEqual(new Date('2021-09-13T16:38:00.000Z').valueOf());
+        expect(getAllBySymbolParams[2]).toEqual('1m');
+        expect(getAllBySymbolParams[3]).toEqual(new Date('2021-09-13T15:39:00.000Z').valueOf());
+        expect(getAllBySymbolParams[4]).toEqual(new Date('2021-09-13T16:38:00.000Z').valueOf());
       });
     });
   });
@@ -132,15 +192,15 @@ describe('GetCandlestickService', () => {
     describe('When data is missing', () => {
       beforeEach(() => {
         candlesticks = [
-          ...buildCandlesticksFromTo(new Date('2021-09-13T00:00:00.000Z'), new Date('2021-09-13T00:07:00.000Z')),
-          ...buildCandlesticksFromTo(new Date('2021-09-13T00:09:00.000Z'), new Date('2021-09-13T00:44:00.000Z')),
-          ...buildCandlesticksFromTo(new Date('2021-09-13T00:50:00.000Z'), new Date('2021-09-13T00:54:00.000Z')),
+          ...buildCandlesticksFromTo(new Date('2021-09-13T00:00:00.000Z'), new Date('2021-09-13T00:07:00.000Z'), 60),
+          ...buildCandlesticksFromTo(new Date('2021-09-13T00:09:00.000Z'), new Date('2021-09-13T00:44:00.000Z'), 60),
+          ...buildCandlesticksFromTo(new Date('2021-09-13T00:50:00.000Z'), new Date('2021-09-13T00:54:00.000Z'), 60),
         ];
         candlestickRepositoryMock.getAllBySymbol.mockResolvedValue(candlesticks);
       });
 
       it('Then candlesticks are returned by 5 minutes interval', async () => {
-        const results = await getCandlestickService.getAllBySymbol('Binance', 'ABC', 12, '5m');
+        const results = await getCandlestickService.getAllLastBySymbol('Binance', 'ABC', '5m', 12, date.valueOf());
         expect(results.length).toEqual(10);
         expect(results).toEqual([
           groupCandlesticksBy(candlesticks, '2021-09-13T00:00:00.000Z', '2021-09-13T00:05:00.000Z', 0, 4),
@@ -157,22 +217,23 @@ describe('GetCandlestickService', () => {
 
         expect(candlestickRepositoryMock.getAllBySymbol).toHaveBeenCalledTimes(1);
         const getAllBySymbolParams = candlestickRepositoryMock.getAllBySymbol.mock.calls[0];
-        expect(getAllBySymbolParams.length).toEqual(4);
+        expect(getAllBySymbolParams.length).toEqual(5);
         expect(getAllBySymbolParams[0]).toEqual('Binance');
         expect(getAllBySymbolParams[1]).toEqual('ABC');
-        expect(getAllBySymbolParams[2]).toEqual(new Date('2021-09-12T23:55:00.000Z').valueOf());
-        expect(getAllBySymbolParams[3]).toEqual(new Date('2021-09-13T00:54:00.000Z').valueOf());
+        expect(getAllBySymbolParams[2]).toEqual('5m');
+        expect(getAllBySymbolParams[3]).toEqual(new Date('2021-09-12T23:55:00.000Z').valueOf());
+        expect(getAllBySymbolParams[4]).toEqual(new Date('2021-09-13T00:54:00.000Z').valueOf());
       });
     });
 
     describe('When data is not missing', () => {
       beforeEach(() => {
-        candlesticks = buildCandlesticksFromTo(new Date('2021-09-12T23:55:00.000Z'), new Date('2021-09-13T00:54:00.000Z'));
+        candlesticks = buildCandlesticksFromTo(new Date('2021-09-12T23:55:00.000Z'), new Date('2021-09-13T00:54:00.000Z'), 60);
         candlestickRepositoryMock.getAllBySymbol.mockResolvedValue(candlesticks);
       });
 
       it('Then candlesticks are returned by 5 minutes interval', async () => {
-        const results = await getCandlestickService.getAllBySymbol('Binance', 'ABC', 12, '5m');
+        const results = await getCandlestickService.getAllLastBySymbol('Binance', 'ABC', '5m', 12, date.valueOf());
         expect(results.length).toEqual(12);
         expect(results).toEqual([
           groupCandlesticksBy(candlesticks, '2021-09-12T23:55:00.000Z', '2021-09-13T00:00:00.000Z', 0, 4),
@@ -191,11 +252,12 @@ describe('GetCandlestickService', () => {
 
         expect(candlestickRepositoryMock.getAllBySymbol).toHaveBeenCalledTimes(1);
         const getAllBySymbolParams = candlestickRepositoryMock.getAllBySymbol.mock.calls[0];
-        expect(getAllBySymbolParams.length).toEqual(4);
+        expect(getAllBySymbolParams.length).toEqual(5);
         expect(getAllBySymbolParams[0]).toEqual('Binance');
         expect(getAllBySymbolParams[1]).toEqual('ABC');
-        expect(getAllBySymbolParams[2]).toEqual(new Date('2021-09-12T23:55:00.000Z').valueOf());
-        expect(getAllBySymbolParams[3]).toEqual(new Date('2021-09-13T00:54:00.000Z').valueOf());
+        expect(getAllBySymbolParams[2]).toEqual('5m');
+        expect(getAllBySymbolParams[3]).toEqual(new Date('2021-09-12T23:55:00.000Z').valueOf());
+        expect(getAllBySymbolParams[4]).toEqual(new Date('2021-09-13T00:54:00.000Z').valueOf());
       });
     });
   });
@@ -209,15 +271,15 @@ describe('GetCandlestickService', () => {
     describe('When data is missing', () => {
       beforeEach(() => {
         candlesticks = [
-          ...buildCandlesticksFromTo(new Date('2021-09-13T11:30:00.000Z'), new Date('2021-09-13T11:35:00.000Z')),
-          ...buildCandlesticksFromTo(new Date('2021-09-13T11:37:00.000Z'), new Date('2021-09-13T11:38:00.000Z')),
-          ...buildCandlesticksFromTo(new Date('2021-09-13T11:40:00.000Z'), new Date('2021-09-13T12:01:00.000Z')),
+          ...buildCandlesticksFromTo(new Date('2021-09-13T11:30:00.000Z'), new Date('2021-09-13T11:35:00.000Z'), 60),
+          ...buildCandlesticksFromTo(new Date('2021-09-13T11:37:00.000Z'), new Date('2021-09-13T11:38:00.000Z'), 60),
+          ...buildCandlesticksFromTo(new Date('2021-09-13T11:40:00.000Z'), new Date('2021-09-13T12:01:00.000Z'), 60),
         ];
         candlestickRepositoryMock.getAllBySymbol.mockResolvedValue(candlesticks);
       });
 
       it('Then candlesticks are returned by 15 minutes interval', async () => {
-        const results = await getCandlestickService.getAllBySymbol('Binance', 'ABC', 3, '15m');
+        const results = await getCandlestickService.getAllLastBySymbol('Binance', 'ABC', '15m', 3, date.valueOf());
         expect(results.length).toEqual(3);
         expect(results).toEqual([
           groupCandlesticksBy(candlesticks, '2021-09-13T11:30:00.000Z', '2021-09-13T11:45:00.000Z', 0, 12),
@@ -227,22 +289,23 @@ describe('GetCandlestickService', () => {
 
         expect(candlestickRepositoryMock.getAllBySymbol).toHaveBeenCalledTimes(1);
         const getAllBySymbolParams = candlestickRepositoryMock.getAllBySymbol.mock.calls[0];
-        expect(getAllBySymbolParams.length).toEqual(4);
+        expect(getAllBySymbolParams.length).toEqual(5);
         expect(getAllBySymbolParams[0]).toEqual('Binance');
         expect(getAllBySymbolParams[1]).toEqual('ABC');
-        expect(getAllBySymbolParams[2]).toEqual(new Date('2021-09-13T11:30:00.000Z').valueOf());
-        expect(getAllBySymbolParams[3]).toEqual(new Date('2021-09-13T12:01:00.000Z').valueOf());
+        expect(getAllBySymbolParams[2]).toEqual('15m');
+        expect(getAllBySymbolParams[3]).toEqual(new Date('2021-09-13T11:30:00.000Z').valueOf());
+        expect(getAllBySymbolParams[4]).toEqual(new Date('2021-09-13T12:01:00.000Z').valueOf());
       });
     });
 
     describe('When data is not missing', () => {
       beforeEach(() => {
-        candlesticks = buildCandlesticksFromTo(new Date('2021-09-13T11:30:00.000Z'), new Date('2021-09-13T12:01:00.000Z'));
+        candlesticks = buildCandlesticksFromTo(new Date('2021-09-13T11:30:00.000Z'), new Date('2021-09-13T12:01:00.000Z'), 60);
         candlestickRepositoryMock.getAllBySymbol.mockResolvedValue(candlesticks);
       });
 
       it('Then candlesticks are returned by 15 minutes interval', async () => {
-        const results = await getCandlestickService.getAllBySymbol('Binance', 'ABC', 3, '15m');
+        const results = await getCandlestickService.getAllLastBySymbol('Binance', 'ABC', '15m', 3, date.valueOf());
         expect(results.length).toEqual(3);
         expect(results).toEqual([
           groupCandlesticksBy(candlesticks, '2021-09-13T11:30:00.000Z', '2021-09-13T11:45:00.000Z', 0, 14),
@@ -252,11 +315,12 @@ describe('GetCandlestickService', () => {
 
         expect(candlestickRepositoryMock.getAllBySymbol).toHaveBeenCalledTimes(1);
         const getAllBySymbolParams = candlestickRepositoryMock.getAllBySymbol.mock.calls[0];
-        expect(getAllBySymbolParams.length).toEqual(4);
+        expect(getAllBySymbolParams.length).toEqual(5);
         expect(getAllBySymbolParams[0]).toEqual('Binance');
         expect(getAllBySymbolParams[1]).toEqual('ABC');
-        expect(getAllBySymbolParams[2]).toEqual(new Date('2021-09-13T11:30:00.000Z').valueOf());
-        expect(getAllBySymbolParams[3]).toEqual(new Date('2021-09-13T12:01:00.000Z').valueOf());
+        expect(getAllBySymbolParams[2]).toEqual('15m');
+        expect(getAllBySymbolParams[3]).toEqual(new Date('2021-09-13T11:30:00.000Z').valueOf());
+        expect(getAllBySymbolParams[4]).toEqual(new Date('2021-09-13T12:01:00.000Z').valueOf());
       });
     });
   });
@@ -269,90 +333,45 @@ describe('GetCandlestickService', () => {
 
     describe('When data is missing', () => {
       beforeEach(() => {
-        candlesticks = buildCandlesticksFromTo(new Date('2021-09-12T13:00:00.000Z'), new Date('2021-09-13T09:59:00.000Z'));
+        candlesticks = buildCandlesticksFromTo(new Date('2021-09-12T13:00:00.000Z'), new Date('2021-09-13T09:00:00.000Z'), 60 * 60);
         candlestickRepositoryMock.getAllBySymbol.mockResolvedValue(candlesticks);
       });
 
       it('Then candlesticks are returned by 1 hour interval', async () => {
-        const results = await getCandlestickService.getAllBySymbol('Binance', 'ABC', 24, '1h');
+        const results = await getCandlestickService.getAllLastBySymbol('Binance', 'ABC', '1h', 24, date.valueOf());
         expect(results.length).toEqual(21);
-        expect(results).toEqual([
-          groupCandlesticksBy(candlesticks, '2021-09-12T13:00:00.000Z', '2021-09-12T14:00:00.000Z', 0, 59),
-          groupCandlesticksBy(candlesticks, '2021-09-12T14:00:00.000Z', '2021-09-12T15:00:00.000Z', 60, 119),
-          groupCandlesticksBy(candlesticks, '2021-09-12T15:00:00.000Z', '2021-09-12T16:00:00.000Z', 120, 179),
-          groupCandlesticksBy(candlesticks, '2021-09-12T16:00:00.000Z', '2021-09-12T17:00:00.000Z', 180, 239),
-          groupCandlesticksBy(candlesticks, '2021-09-12T17:00:00.000Z', '2021-09-12T18:00:00.000Z', 240, 299),
-          groupCandlesticksBy(candlesticks, '2021-09-12T18:00:00.000Z', '2021-09-12T19:00:00.000Z', 300, 359),
-          groupCandlesticksBy(candlesticks, '2021-09-12T19:00:00.000Z', '2021-09-12T20:00:00.000Z', 360, 419),
-          groupCandlesticksBy(candlesticks, '2021-09-12T20:00:00.000Z', '2021-09-12T21:00:00.000Z', 420, 479),
-          groupCandlesticksBy(candlesticks, '2021-09-12T21:00:00.000Z', '2021-09-12T22:00:00.000Z', 480, 539),
-          groupCandlesticksBy(candlesticks, '2021-09-12T22:00:00.000Z', '2021-09-12T23:00:00.000Z', 540, 599),
-          groupCandlesticksBy(candlesticks, '2021-09-12T23:00:00.000Z', '2021-09-13T00:00:00.000Z', 600, 659),
-          groupCandlesticksBy(candlesticks, '2021-09-13T00:00:00.000Z', '2021-09-13T01:00:00.000Z', 660, 719),
-          groupCandlesticksBy(candlesticks, '2021-09-13T01:00:00.000Z', '2021-09-13T02:00:00.000Z', 720, 779),
-          groupCandlesticksBy(candlesticks, '2021-09-13T02:00:00.000Z', '2021-09-13T03:00:00.000Z', 780, 839),
-          groupCandlesticksBy(candlesticks, '2021-09-13T03:00:00.000Z', '2021-09-13T04:00:00.000Z', 840, 899),
-          groupCandlesticksBy(candlesticks, '2021-09-13T04:00:00.000Z', '2021-09-13T05:00:00.000Z', 900, 959),
-          groupCandlesticksBy(candlesticks, '2021-09-13T05:00:00.000Z', '2021-09-13T06:00:00.000Z', 960, 1019),
-          groupCandlesticksBy(candlesticks, '2021-09-13T06:00:00.000Z', '2021-09-13T07:00:00.000Z', 1020, 1079),
-          groupCandlesticksBy(candlesticks, '2021-09-13T07:00:00.000Z', '2021-09-13T08:00:00.000Z', 1080, 1139),
-          groupCandlesticksBy(candlesticks, '2021-09-13T08:00:00.000Z', '2021-09-13T09:00:00.000Z', 1140, 1199),
-          groupCandlesticksBy(candlesticks, '2021-09-13T09:00:00.000Z', '2021-09-13T10:00:00.000Z', 1200, 1259),
-        ]);
+        expect(results).toEqual(candlesticks);
 
         expect(candlestickRepositoryMock.getAllBySymbol).toHaveBeenCalledTimes(1);
         const getAllBySymbolParams = candlestickRepositoryMock.getAllBySymbol.mock.calls[0];
-        expect(getAllBySymbolParams.length).toEqual(4);
+        expect(getAllBySymbolParams.length).toEqual(5);
         expect(getAllBySymbolParams[0]).toEqual('Binance');
         expect(getAllBySymbolParams[1]).toEqual('ABC');
-        expect(getAllBySymbolParams[2]).toEqual(new Date('2021-09-12T13:00:00.000Z').valueOf());
-        expect(getAllBySymbolParams[3]).toEqual(new Date('2021-09-13T12:00:00.000Z').valueOf());
+        expect(getAllBySymbolParams[2]).toEqual('1h');
+        expect(getAllBySymbolParams[3]).toEqual(new Date('2021-09-12T13:00:00.000Z').valueOf());
+        expect(getAllBySymbolParams[4]).toEqual(new Date('2021-09-13T12:00:00.000Z').valueOf());
       });
     });
 
     describe('When data is not missing', () => {
       beforeEach(() => {
-        candlesticks = buildCandlesticksFromTo(new Date('2021-09-12T13:00:00.000Z'), new Date('2021-09-13T12:00:00.000Z'));
+        candlesticks = buildCandlesticksFromTo(new Date('2021-09-12T13:00:00.000Z'), new Date('2021-09-13T12:00:00.000Z'), 60 * 60);
         candlestickRepositoryMock.getAllBySymbol.mockResolvedValue(candlesticks);
       });
 
       it('Then candlesticks are returned by 1 hour interval', async () => {
-        const results = await getCandlestickService.getAllBySymbol('Binance', 'ABC', 24, '1h');
+        const results = await getCandlestickService.getAllLastBySymbol('Binance', 'ABC', '1h', 24, date.valueOf());
         expect(results.length).toEqual(24);
-        expect(results).toEqual([
-          groupCandlesticksBy(candlesticks, '2021-09-12T13:00:00.000Z', '2021-09-12T14:00:00.000Z', 0, 59),
-          groupCandlesticksBy(candlesticks, '2021-09-12T14:00:00.000Z', '2021-09-12T15:00:00.000Z', 60, 119),
-          groupCandlesticksBy(candlesticks, '2021-09-12T15:00:00.000Z', '2021-09-12T16:00:00.000Z', 120, 179),
-          groupCandlesticksBy(candlesticks, '2021-09-12T16:00:00.000Z', '2021-09-12T17:00:00.000Z', 180, 239),
-          groupCandlesticksBy(candlesticks, '2021-09-12T17:00:00.000Z', '2021-09-12T18:00:00.000Z', 240, 299),
-          groupCandlesticksBy(candlesticks, '2021-09-12T18:00:00.000Z', '2021-09-12T19:00:00.000Z', 300, 359),
-          groupCandlesticksBy(candlesticks, '2021-09-12T19:00:00.000Z', '2021-09-12T20:00:00.000Z', 360, 419),
-          groupCandlesticksBy(candlesticks, '2021-09-12T20:00:00.000Z', '2021-09-12T21:00:00.000Z', 420, 479),
-          groupCandlesticksBy(candlesticks, '2021-09-12T21:00:00.000Z', '2021-09-12T22:00:00.000Z', 480, 539),
-          groupCandlesticksBy(candlesticks, '2021-09-12T22:00:00.000Z', '2021-09-12T23:00:00.000Z', 540, 599),
-          groupCandlesticksBy(candlesticks, '2021-09-12T23:00:00.000Z', '2021-09-13T00:00:00.000Z', 600, 659),
-          groupCandlesticksBy(candlesticks, '2021-09-13T00:00:00.000Z', '2021-09-13T01:00:00.000Z', 660, 719),
-          groupCandlesticksBy(candlesticks, '2021-09-13T01:00:00.000Z', '2021-09-13T02:00:00.000Z', 720, 779),
-          groupCandlesticksBy(candlesticks, '2021-09-13T02:00:00.000Z', '2021-09-13T03:00:00.000Z', 780, 839),
-          groupCandlesticksBy(candlesticks, '2021-09-13T03:00:00.000Z', '2021-09-13T04:00:00.000Z', 840, 899),
-          groupCandlesticksBy(candlesticks, '2021-09-13T04:00:00.000Z', '2021-09-13T05:00:00.000Z', 900, 959),
-          groupCandlesticksBy(candlesticks, '2021-09-13T05:00:00.000Z', '2021-09-13T06:00:00.000Z', 960, 1019),
-          groupCandlesticksBy(candlesticks, '2021-09-13T06:00:00.000Z', '2021-09-13T07:00:00.000Z', 1020, 1079),
-          groupCandlesticksBy(candlesticks, '2021-09-13T07:00:00.000Z', '2021-09-13T08:00:00.000Z', 1080, 1139),
-          groupCandlesticksBy(candlesticks, '2021-09-13T08:00:00.000Z', '2021-09-13T09:00:00.000Z', 1140, 1199),
-          groupCandlesticksBy(candlesticks, '2021-09-13T09:00:00.000Z', '2021-09-13T10:00:00.000Z', 1200, 1259),
-          groupCandlesticksBy(candlesticks, '2021-09-13T10:00:00.000Z', '2021-09-13T11:00:00.000Z', 1260, 1319),
-          groupCandlesticksBy(candlesticks, '2021-09-13T11:00:00.000Z', '2021-09-13T12:00:00.000Z', 1320, 1379),
-          groupCandlesticksBy(candlesticks, '2021-09-13T12:00:00.000Z', '2021-09-13T13:00:00.000Z', 1380, 1380),
-        ]);
+        expect(results).toEqual(candlesticks);
 
         expect(candlestickRepositoryMock.getAllBySymbol).toHaveBeenCalledTimes(1);
         const getAllBySymbolParams = candlestickRepositoryMock.getAllBySymbol.mock.calls[0];
-        expect(getAllBySymbolParams.length).toEqual(4);
+        expect(getAllBySymbolParams.length).toEqual(5);
         expect(getAllBySymbolParams[0]).toEqual('Binance');
         expect(getAllBySymbolParams[1]).toEqual('ABC');
-        expect(getAllBySymbolParams[2]).toEqual(new Date('2021-09-12T13:00:00.000Z').valueOf());
-        expect(getAllBySymbolParams[3]).toEqual(new Date('2021-09-13T12:00:00.000Z').valueOf());
+        expect(getAllBySymbolParams[2]).toEqual('1h');
+        expect(getAllBySymbolParams[3]).toEqual(new Date('2021-09-12T13:00:00.000Z').valueOf());
+        expect(getAllBySymbolParams[4]).toEqual(new Date('2021-09-13T12:00:00.000Z').valueOf());
       });
     });
   });
@@ -365,43 +384,45 @@ describe('GetCandlestickService', () => {
 
     describe('When data is missing', () => {
       beforeEach(() => {
-        candlesticks = buildCandlesticksFromTo(new Date('2021-09-13T00:01:00.000Z'), new Date('2021-09-13T05:01:00.000Z'));
+        candlesticks = [];
         candlestickRepositoryMock.getAllBySymbol.mockResolvedValue(candlesticks);
       });
 
       it('Then candlesticks are returned by 6 hours interval', async () => {
-        const results = await getCandlestickService.getAllBySymbol('Binance', 'ABC', 1, '6h');
-        expect(results.length).toEqual(1);
-        expect(results).toEqual([groupCandlesticksBy(candlesticks, '2021-09-13T00:00:00.000Z', '2021-09-13T06:00:00.000Z', 0, 300)]);
+        const results = await getCandlestickService.getAllLastBySymbol('Binance', 'ABC', '6h', 1, date.valueOf());
+        expect(results.length).toEqual(0);
+        expect(results).toEqual(candlesticks);
 
         expect(candlestickRepositoryMock.getAllBySymbol).toHaveBeenCalledTimes(1);
         const getAllBySymbolParams = candlestickRepositoryMock.getAllBySymbol.mock.calls[0];
-        expect(getAllBySymbolParams.length).toEqual(4);
+        expect(getAllBySymbolParams.length).toEqual(5);
         expect(getAllBySymbolParams[0]).toEqual('Binance');
         expect(getAllBySymbolParams[1]).toEqual('ABC');
-        expect(getAllBySymbolParams[2]).toEqual(new Date('2021-09-13T00:00:00.000Z').valueOf());
-        expect(getAllBySymbolParams[3]).toEqual(new Date('2021-09-13T05:01:00.000Z').valueOf());
+        expect(getAllBySymbolParams[2]).toEqual('6h');
+        expect(getAllBySymbolParams[3]).toEqual(new Date('2021-09-13T00:00:00.000Z').valueOf());
+        expect(getAllBySymbolParams[4]).toEqual(new Date('2021-09-13T05:01:00.000Z').valueOf());
       });
     });
 
     describe('When data is not missing', () => {
       beforeEach(() => {
-        candlesticks = buildCandlesticksFromTo(new Date('2021-09-13T00:00:00.000Z'), new Date('2021-09-13T05:01:00.000Z'));
+        candlesticks = buildCandlesticksFromTo(new Date('2021-09-13T00:00:00.000Z'), new Date('2021-09-13T06:00:00.000Z'), 60 * 60 * 6);
         candlestickRepositoryMock.getAllBySymbol.mockResolvedValue(candlesticks);
       });
 
       it('Then candlesticks are returned by 6 hours interval', async () => {
-        const results = await getCandlestickService.getAllBySymbol('Binance', 'ABC', 1, '6h');
+        const results = await getCandlestickService.getAllLastBySymbol('Binance', 'ABC', '6h', 1, date.valueOf());
         expect(results.length).toEqual(1);
-        expect(results).toEqual([groupCandlesticksBy(candlesticks, '2021-09-13T00:00:00.000Z', '2021-09-13T06:00:00.000Z', 0, 301)]);
+        expect(results).toEqual([groupCandlesticksBy(candlesticks, '2021-09-13T00:00:00.000Z', '2021-09-13T06:00:00.000Z', 0, 0)]);
 
         expect(candlestickRepositoryMock.getAllBySymbol).toHaveBeenCalledTimes(1);
         const getAllBySymbolParams = candlestickRepositoryMock.getAllBySymbol.mock.calls[0];
-        expect(getAllBySymbolParams.length).toEqual(4);
+        expect(getAllBySymbolParams.length).toEqual(5);
         expect(getAllBySymbolParams[0]).toEqual('Binance');
         expect(getAllBySymbolParams[1]).toEqual('ABC');
-        expect(getAllBySymbolParams[2]).toEqual(new Date('2021-09-13T00:00:00.000Z').valueOf());
-        expect(getAllBySymbolParams[3]).toEqual(new Date('2021-09-13T05:01:00.000Z').valueOf());
+        expect(getAllBySymbolParams[2]).toEqual('6h');
+        expect(getAllBySymbolParams[3]).toEqual(new Date('2021-09-13T00:00:00.000Z').valueOf());
+        expect(getAllBySymbolParams[4]).toEqual(new Date('2021-09-13T05:01:00.000Z').valueOf());
       });
     });
   });
@@ -414,43 +435,45 @@ describe('GetCandlestickService', () => {
 
     describe('When data is missing', () => {
       beforeEach(() => {
-        candlesticks = buildCandlesticksFromTo(new Date('2021-09-13T12:00:00.000Z'), new Date('2021-09-13T12:00:00.000Z'));
+        candlesticks = [];
         candlestickRepositoryMock.getAllBySymbol.mockResolvedValue(candlesticks);
       });
 
       it('Then candlesticks are returned by 12 hours interval', async () => {
-        const results = await getCandlestickService.getAllBySymbol('Binance', 'ABC', 1, '12h');
-        expect(results.length).toEqual(1);
-        expect(results).toEqual([groupCandlesticksBy(candlesticks, '2021-09-13T12:00:00.000Z', '2021-09-14T00:00:00.000Z', 0, 0)]);
+        const results = await getCandlestickService.getAllLastBySymbol('Binance', 'ABC', '12h', 1, date.valueOf());
+        expect(results.length).toEqual(0);
+        expect(results).toEqual(candlesticks);
 
         expect(candlestickRepositoryMock.getAllBySymbol).toHaveBeenCalledTimes(1);
         const getAllBySymbolParams = candlestickRepositoryMock.getAllBySymbol.mock.calls[0];
-        expect(getAllBySymbolParams.length).toEqual(4);
+        expect(getAllBySymbolParams.length).toEqual(5);
         expect(getAllBySymbolParams[0]).toEqual('Binance');
         expect(getAllBySymbolParams[1]).toEqual('ABC');
-        expect(getAllBySymbolParams[2]).toEqual(new Date('2021-09-13T12:00:00.000Z').valueOf());
+        expect(getAllBySymbolParams[2]).toEqual('12h');
         expect(getAllBySymbolParams[3]).toEqual(new Date('2021-09-13T12:00:00.000Z').valueOf());
+        expect(getAllBySymbolParams[4]).toEqual(new Date('2021-09-13T12:00:00.000Z').valueOf());
       });
     });
 
     describe('When data is not missing', () => {
       beforeEach(() => {
-        candlesticks = buildCandlesticksFromTo(new Date('2021-09-13T12:00:00.000Z'), new Date('2021-09-13T12:01:00.000Z'));
+        candlesticks = buildCandlesticksFromTo(new Date('2021-09-13T12:00:00.000Z'), new Date('2021-09-14T00:00:00.000Z'), 60 * 60 * 12);
         candlestickRepositoryMock.getAllBySymbol.mockResolvedValue(candlesticks);
       });
 
       it('Then candlesticks are returned by 12 hours interval', async () => {
-        const results = await getCandlestickService.getAllBySymbol('Binance', 'ABC', 1, '12h');
+        const results = await getCandlestickService.getAllLastBySymbol('Binance', 'ABC', '12h', 1, date.valueOf());
         expect(results.length).toEqual(1);
-        expect(results).toEqual([groupCandlesticksBy(candlesticks, '2021-09-13T12:00:00.000Z', '2021-09-14T00:00:00.000Z', 0, 1)]);
+        expect(results).toEqual([groupCandlesticksBy(candlesticks, '2021-09-13T12:00:00.000Z', '2021-09-14T00:00:00.000Z', 0, 0)]);
 
         expect(candlestickRepositoryMock.getAllBySymbol).toHaveBeenCalledTimes(1);
         const getAllBySymbolParams = candlestickRepositoryMock.getAllBySymbol.mock.calls[0];
-        expect(getAllBySymbolParams.length).toEqual(4);
+        expect(getAllBySymbolParams.length).toEqual(5);
         expect(getAllBySymbolParams[0]).toEqual('Binance');
         expect(getAllBySymbolParams[1]).toEqual('ABC');
-        expect(getAllBySymbolParams[2]).toEqual(new Date('2021-09-13T12:00:00.000Z').valueOf());
+        expect(getAllBySymbolParams[2]).toEqual('12h');
         expect(getAllBySymbolParams[3]).toEqual(new Date('2021-09-13T12:00:00.000Z').valueOf());
+        expect(getAllBySymbolParams[4]).toEqual(new Date('2021-09-13T12:00:00.000Z').valueOf());
       });
     });
   });
@@ -463,43 +486,45 @@ describe('GetCandlestickService', () => {
 
     describe('When data is missing', () => {
       beforeEach(() => {
-        candlesticks = buildCandlesticksFromTo(new Date('2021-09-13T00:00:00.000Z'), new Date('2021-09-13T00:00:00.000Z'));
+        candlesticks = [];
         candlestickRepositoryMock.getAllBySymbol.mockResolvedValue(candlesticks);
       });
 
       it('Then candlesticks are returned by 1 day interval', async () => {
-        const results = await getCandlestickService.getAllBySymbol('Binance', 'ABC', 1, '1d');
-        expect(results.length).toEqual(1);
-        expect(results).toEqual([groupCandlesticksBy(candlesticks, '2021-09-13T00:00:00.000Z', '2021-09-14T00:00:00.000Z', 0, 0)]);
+        const results = await getCandlestickService.getAllLastBySymbol('Binance', 'ABC', '1d', 1, date.valueOf());
+        expect(results.length).toEqual(0);
+        expect(results).toEqual(candlesticks);
 
         expect(candlestickRepositoryMock.getAllBySymbol).toHaveBeenCalledTimes(1);
         const getAllBySymbolParams = candlestickRepositoryMock.getAllBySymbol.mock.calls[0];
-        expect(getAllBySymbolParams.length).toEqual(4);
+        expect(getAllBySymbolParams.length).toEqual(5);
         expect(getAllBySymbolParams[0]).toEqual('Binance');
         expect(getAllBySymbolParams[1]).toEqual('ABC');
-        expect(getAllBySymbolParams[2]).toEqual(new Date('2021-09-13T00:00:00.000Z').valueOf());
+        expect(getAllBySymbolParams[2]).toEqual('1d');
         expect(getAllBySymbolParams[3]).toEqual(new Date('2021-09-13T00:00:00.000Z').valueOf());
+        expect(getAllBySymbolParams[4]).toEqual(new Date('2021-09-13T00:00:00.000Z').valueOf());
       });
     });
 
     describe('When data is not missing', () => {
       beforeEach(() => {
-        candlesticks = buildCandlesticksFromTo(new Date('2021-09-13T00:00:00.000Z'), new Date('2021-09-13T00:02:00.000Z'));
+        candlesticks = buildCandlesticksFromTo(new Date('2021-09-13T00:00:00.000Z'), new Date('2021-09-13T00:00:00.000Z'), 60 * 60 * 24);
         candlestickRepositoryMock.getAllBySymbol.mockResolvedValue(candlesticks);
       });
 
       it('Then candlesticks are returned by 1 day interval', async () => {
-        const results = await getCandlestickService.getAllBySymbol('Binance', 'ABC', 1, '1d');
+        const results = await getCandlestickService.getAllLastBySymbol('Binance', 'ABC', '1d', 1, date.valueOf());
         expect(results.length).toEqual(1);
-        expect(results).toEqual([groupCandlesticksBy(candlesticks, '2021-09-13T00:00:00.000Z', '2021-09-14T00:00:00.000Z', 0, 2)]);
+        expect(results).toEqual([groupCandlesticksBy(candlesticks, '2021-09-13T00:00:00.000Z', '2021-09-14T00:00:00.000Z', 0, 0)]);
 
         expect(candlestickRepositoryMock.getAllBySymbol).toHaveBeenCalledTimes(1);
         const getAllBySymbolParams = candlestickRepositoryMock.getAllBySymbol.mock.calls[0];
-        expect(getAllBySymbolParams.length).toEqual(4);
+        expect(getAllBySymbolParams.length).toEqual(5);
         expect(getAllBySymbolParams[0]).toEqual('Binance');
         expect(getAllBySymbolParams[1]).toEqual('ABC');
-        expect(getAllBySymbolParams[2]).toEqual(new Date('2021-09-13T00:00:00.000Z').valueOf());
+        expect(getAllBySymbolParams[2]).toEqual('1d');
         expect(getAllBySymbolParams[3]).toEqual(new Date('2021-09-13T00:00:00.000Z').valueOf());
+        expect(getAllBySymbolParams[4]).toEqual(new Date('2021-09-13T00:00:00.000Z').valueOf());
       });
     });
   });
@@ -512,43 +537,45 @@ describe('GetCandlestickService', () => {
 
     describe('When data is missing', () => {
       beforeEach(() => {
-        candlesticks = buildCandlesticksFromTo(new Date('2021-09-12T00:01:00.000Z'), new Date('2021-09-13T00:00:00.000Z'));
+        candlesticks = buildCandlesticksFromTo(new Date('2021-09-12T00:00:00.000Z'), new Date('2021-09-12T00:00:00.000Z'), 60 * 60 * 24);
         candlestickRepositoryMock.getAllBySymbol.mockResolvedValue(candlesticks);
       });
 
       it('Then candlesticks are returned by 1 day interval', async () => {
-        const results = await getCandlestickService.getAllBySymbol('Binance', 'ABC', 2, '1d');
-        expect(results.length).toEqual(2);
-        expect(results).toEqual([groupCandlesticksBy(candlesticks, '2021-09-12T00:00:00.000Z', '2021-09-13T00:00:00.000Z', 0, 1438), groupCandlesticksBy(candlesticks, '2021-09-13T00:00:00.000Z', '2021-09-14T00:00:00.000Z', 1439, 1439)]);
+        const results = await getCandlestickService.getAllLastBySymbol('Binance', 'ABC', '1d', 2, date.valueOf());
+        expect(results.length).toEqual(1);
+        expect(results).toEqual([groupCandlesticksBy(candlesticks, '2021-09-12T00:00:00.000Z', '2021-09-13T00:00:00.000Z', 0, 0)]);
 
         expect(candlestickRepositoryMock.getAllBySymbol).toHaveBeenCalledTimes(1);
         const getAllBySymbolParams = candlestickRepositoryMock.getAllBySymbol.mock.calls[0];
-        expect(getAllBySymbolParams.length).toEqual(4);
+        expect(getAllBySymbolParams.length).toEqual(5);
         expect(getAllBySymbolParams[0]).toEqual('Binance');
         expect(getAllBySymbolParams[1]).toEqual('ABC');
-        expect(getAllBySymbolParams[2]).toEqual(new Date('2021-09-12T00:00:00.000Z').valueOf());
-        expect(getAllBySymbolParams[3]).toEqual(new Date('2021-09-13T00:00:00.000Z').valueOf());
+        expect(getAllBySymbolParams[2]).toEqual('1d');
+        expect(getAllBySymbolParams[3]).toEqual(new Date('2021-09-12T00:00:00.000Z').valueOf());
+        expect(getAllBySymbolParams[4]).toEqual(new Date('2021-09-13T00:00:00.000Z').valueOf());
       });
     });
 
     describe('When data is not missing', () => {
       beforeEach(() => {
-        candlesticks = buildCandlesticksFromTo(new Date('2021-09-12T00:00:00.000Z'), new Date('2021-09-13T00:00:00.000Z'));
+        candlesticks = buildCandlesticksFromTo(new Date('2021-09-12T00:00:00.000Z'), new Date('2021-09-13T00:00:00.000Z'), 60 * 60 * 24);
         candlestickRepositoryMock.getAllBySymbol.mockResolvedValue(candlesticks);
       });
 
       it('Then candlesticks are returned by 1 day interval', async () => {
-        const results = await getCandlestickService.getAllBySymbol('Binance', 'ABC', 2, '1d');
+        const results = await getCandlestickService.getAllLastBySymbol('Binance', 'ABC', '1d', 2, date.valueOf());
         expect(results.length).toEqual(2);
-        expect(results).toEqual([groupCandlesticksBy(candlesticks, '2021-09-12T00:00:00.000Z', '2021-09-13T00:00:00.000Z', 0, 1439), groupCandlesticksBy(candlesticks, '2021-09-13T00:00:00.000Z', '2021-09-14T00:00:00.000Z', 1440, 1440)]);
+        expect(results).toEqual([groupCandlesticksBy(candlesticks, '2021-09-12T00:00:00.000Z', '2021-09-13T00:00:00.000Z', 0, 0), groupCandlesticksBy(candlesticks, '2021-09-13T00:00:00.000Z', '2021-09-14T00:00:00.000Z', 1, 1)]);
 
         expect(candlestickRepositoryMock.getAllBySymbol).toHaveBeenCalledTimes(1);
         const getAllBySymbolParams = candlestickRepositoryMock.getAllBySymbol.mock.calls[0];
-        expect(getAllBySymbolParams.length).toEqual(4);
+        expect(getAllBySymbolParams.length).toEqual(5);
         expect(getAllBySymbolParams[0]).toEqual('Binance');
         expect(getAllBySymbolParams[1]).toEqual('ABC');
-        expect(getAllBySymbolParams[2]).toEqual(new Date('2021-09-12T00:00:00.000Z').valueOf());
-        expect(getAllBySymbolParams[3]).toEqual(new Date('2021-09-13T00:00:00.000Z').valueOf());
+        expect(getAllBySymbolParams[2]).toEqual('1d');
+        expect(getAllBySymbolParams[3]).toEqual(new Date('2021-09-12T00:00:00.000Z').valueOf());
+        expect(getAllBySymbolParams[4]).toEqual(new Date('2021-09-13T00:00:00.000Z').valueOf());
       });
     });
   });
@@ -557,7 +584,7 @@ describe('GetCandlestickService', () => {
 const groupCandlesticksBy = (candlesticks: Candlestick[], startDate: string, endDate: string, startIndex: number, endIndex: number): Candlestick => {
   return {
     openingDate: new Date(startDate).valueOf(),
-    closingDate: new Date(endDate).valueOf(),
+    closingDate: new Date(endDate).valueOf() - 1,
     openingPrice: candlesticks[startIndex].openingPrice,
     closingPrice: candlesticks[endIndex].closingPrice,
     lowestPrice: candlesticks.slice(startIndex, endIndex + 1).reduce((previous, current) => (current.lowestPrice < previous.lowestPrice ? current : previous)).lowestPrice,

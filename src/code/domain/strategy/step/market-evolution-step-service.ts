@@ -50,7 +50,7 @@ export class MarketEvolutionStepService implements StrategyStepService {
       throw new Error(`Unable to calculate market evolution without interval`);
     }
 
-    return this.#buildPoints(await this.getCandlestickService.getAllBySymbol(strategy.exchange, strategy.symbol, period, interval));
+    return this.#buildPoints(await this.getCandlestickService.getAllLastBySymbol(strategy.exchange, strategy.symbol, interval, period));
   }
 
   async #getPointsSinceLastOrder(strategy: Strategy): Promise<Point[]> {
@@ -73,7 +73,7 @@ export class MarketEvolutionStepService implements StrategyStepService {
 
   #buildPoints(candlesticks: Candlestick[]): Point[] {
     return candlesticks.map((candlestick) => ({
-      timestamp: candlestick.closingDate,
+      timestamp: candlestick.openingDate,
       value: candlestick.closingPrice,
     }));
   }

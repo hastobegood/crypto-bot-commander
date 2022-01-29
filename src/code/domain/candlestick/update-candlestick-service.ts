@@ -1,25 +1,31 @@
 import { logger } from '@hastobegood/crypto-bot-artillery/common';
-import { CandlestickExchange, FetchCandlestickClient } from '@hastobegood/crypto-bot-artillery/candlestick';
+import { CandlestickExchange, CandlestickInterval, FetchCandlestickClient } from '@hastobegood/crypto-bot-artillery/candlestick';
 import { CandlestickRepository } from './candlestick-repository';
 
 export class UpdateCandlestickService {
   constructor(private fetchCandlestickClient: FetchCandlestickClient, private candlestickRepository: CandlestickRepository) {}
 
   async updateAllBySymbol(exchange: CandlestickExchange, symbol: string): Promise<void> {
-    const data = {
-      symbol: symbol,
-    };
+    await Promise.all([this.#saveAll(exchange, symbol, '1m'), this.#saveAll(exchange, symbol, '1h'), this.#saveAll(exchange, symbol, '1d')]);
+  }
 
+  async #saveAll(exchange: CandlestickExchange, symbol: string, interval: CandlestickInterval): Promise<void> {
     const candlesticks = await this.fetchCandlestickClient.fetchAll({
       exchange: exchange,
       symbol: symbol,
-      interval: '1m',
+      interval: interval,
       period: 2,
     });
 
-    logger.info(data, `Found ${candlesticks.values.length} candlesticks of 1 minute`);
+    const data = {
+      exchange: exchange,
+      symbol: symbol,
+      interval: interval,
+    };
+
+    logger.info(data, `Found ${candlesticks.values.length} ${interval} candlesticks`);
     if (candlesticks.values.length) {
-      await this.candlestickRepository.saveAllBySymbol(exchange, symbol, candlesticks.values);
+      await this.candlestickRepository.save(candlesticks);
     }
   }
 }

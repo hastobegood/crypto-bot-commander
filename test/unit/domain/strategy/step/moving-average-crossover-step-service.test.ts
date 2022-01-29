@@ -1,6 +1,6 @@
 import { mocked } from 'ts-jest/utils';
 import { Candlestick } from '@hastobegood/crypto-bot-artillery/candlestick';
-import { buildCandlestick } from '@hastobegood/crypto-bot-artillery/test/builders';
+import { buildDefaultCandlestick } from '@hastobegood/crypto-bot-artillery/test/builders';
 import { Strategy } from '../../../../../src/code/domain/strategy/model/strategy';
 import { MovingAverageCrossover, MovingAverageCrossoverStepInput, MovingAverageSignal } from '../../../../../src/code/domain/strategy/model/strategy-step';
 import { buildDefaultStrategy } from '../../../../builders/domain/strategy/strategy-test-builder';
@@ -16,7 +16,8 @@ const movingAverageServiceMock = mocked(jest.genMockFromModule<MovingAverageServ
 
 let movingAverageCrossoverStepService: MovingAverageCrossoverStepService;
 beforeEach(() => {
-  getCandlestickServiceMock.getAllBySymbol = jest.fn();
+  getCandlestickServiceMock.getLastBySymbol = jest.fn();
+  getCandlestickServiceMock.getAllLastBySymbol = jest.fn();
   movingAverageServiceMock.calculate = jest.fn();
 
   movingAverageCrossoverStepService = new MovingAverageCrossoverStepService(getCandlestickServiceMock, movingAverageServiceMock);
@@ -32,8 +33,15 @@ describe('MovingAverageCrossoverStepService', () => {
   beforeEach(() => {
     strategy = buildDefaultStrategy();
 
-    candlesticks = [buildCandlestick(new Date(new Date().getDate() - 1), 90), buildCandlestick(new Date(), 100)];
-    getCandlestickServiceMock.getAllBySymbol.mockResolvedValue(candlesticks);
+    candlesticks = [
+      { ...buildDefaultCandlestick(), openingDate: new Date(new Date().getDate() - 1).valueOf(), closingPrice: 90 },
+      { ...buildDefaultCandlestick(), openingDate: new Date().valueOf(), closingPrice: 100 },
+    ];
+    getCandlestickServiceMock.getAllLastBySymbol.mockResolvedValue(candlesticks);
+  });
+
+  afterEach(() => {
+    expect(getCandlestickServiceMock.getLastBySymbol).toHaveBeenCalledTimes(0);
   });
 
   describe('Given the strategy step type to retrieve', () => {
@@ -61,7 +69,7 @@ describe('MovingAverageCrossoverStepService', () => {
           expect((error as Error).message).toEqual('Unable to calculate moving average when short term period is greater than long term period');
         }
 
-        expect(getCandlestickServiceMock.getAllBySymbol).toHaveBeenCalledTimes(0);
+        expect(getCandlestickServiceMock.getAllLastBySymbol).toHaveBeenCalledTimes(0);
         expect(movingAverageServiceMock.calculate).toHaveBeenCalledTimes(0);
       });
     });
@@ -87,7 +95,7 @@ describe('MovingAverageCrossoverStepService', () => {
           expect((error as Error).message).toEqual("Unsupported 'Unknown' moving average crossover");
         }
 
-        expect(getCandlestickServiceMock.getAllBySymbol).toHaveBeenCalledTimes(1);
+        expect(getCandlestickServiceMock.getAllLastBySymbol).toHaveBeenCalledTimes(1);
         expect(movingAverageServiceMock.calculate).toHaveBeenCalledTimes(2);
       });
     });
@@ -113,7 +121,7 @@ describe('MovingAverageCrossoverStepService', () => {
           expect((error as Error).message).toEqual("Unsupported 'Hodl' moving average signal");
         }
 
-        expect(getCandlestickServiceMock.getAllBySymbol).toHaveBeenCalledTimes(1);
+        expect(getCandlestickServiceMock.getAllLastBySymbol).toHaveBeenCalledTimes(1);
         expect(movingAverageServiceMock.calculate).toHaveBeenCalledTimes(2);
       });
     });
@@ -127,13 +135,13 @@ describe('MovingAverageCrossoverStepService', () => {
       });
 
       afterEach(() => {
-        expect(getCandlestickServiceMock.getAllBySymbol).toHaveBeenCalledTimes(1);
-        const getAllBySymbolParams = getCandlestickServiceMock.getAllBySymbol.mock.calls[0];
-        expect(getAllBySymbolParams.length).toEqual(4);
-        expect(getAllBySymbolParams[0]).toEqual(strategy.exchange);
-        expect(getAllBySymbolParams[1]).toEqual(strategy.symbol);
-        expect(getAllBySymbolParams[2]).toEqual(movingAverageCrossoverStepInput.longTermPeriod * (movingAverageCrossoverStepInput.type === 'EMA' ? 3 : 1));
-        expect(getAllBySymbolParams[3]).toEqual('1d');
+        expect(getCandlestickServiceMock.getAllLastBySymbol).toHaveBeenCalledTimes(1);
+        const getAllLastBySymbolParams = getCandlestickServiceMock.getAllLastBySymbol.mock.calls[0];
+        expect(getAllLastBySymbolParams.length).toEqual(4);
+        expect(getAllLastBySymbolParams[0]).toEqual(strategy.exchange);
+        expect(getAllLastBySymbolParams[1]).toEqual(strategy.symbol);
+        expect(getAllLastBySymbolParams[2]).toEqual('1d');
+        expect(getAllLastBySymbolParams[3]).toEqual(movingAverageCrossoverStepInput.longTermPeriod * (movingAverageCrossoverStepInput.type === 'EMA' ? 3 : 1));
 
         expect(movingAverageServiceMock.calculate).toHaveBeenCalledTimes(2);
         let calculateParams = movingAverageServiceMock.calculate.mock.calls[0];
@@ -142,8 +150,8 @@ describe('MovingAverageCrossoverStepService', () => {
           type: movingAverageCrossoverStepInput.type,
           period: movingAverageCrossoverStepInput.shortTermPeriod,
           points: [
-            { timestamp: candlesticks[0].closingDate.valueOf(), value: 90 },
-            { timestamp: candlesticks[1].closingDate.valueOf(), value: 100 },
+            { timestamp: candlesticks[0].openingDate.valueOf(), value: 90 },
+            { timestamp: candlesticks[1].openingDate.valueOf(), value: 100 },
           ],
         });
         calculateParams = movingAverageServiceMock.calculate.mock.calls[1];
@@ -152,8 +160,8 @@ describe('MovingAverageCrossoverStepService', () => {
           type: movingAverageCrossoverStepInput.type,
           period: movingAverageCrossoverStepInput.longTermPeriod,
           points: [
-            { timestamp: candlesticks[0].closingDate.valueOf(), value: 90 },
-            { timestamp: candlesticks[1].closingDate.valueOf(), value: 100 },
+            { timestamp: candlesticks[0].openingDate.valueOf(), value: 90 },
+            { timestamp: candlesticks[1].openingDate.valueOf(), value: 100 },
           ],
         });
       });
@@ -288,13 +296,13 @@ describe('MovingAverageCrossoverStepService', () => {
       });
 
       afterEach(() => {
-        expect(getCandlestickServiceMock.getAllBySymbol).toHaveBeenCalledTimes(1);
-        const getAllBySymbolParams = getCandlestickServiceMock.getAllBySymbol.mock.calls[0];
-        expect(getAllBySymbolParams.length).toEqual(4);
-        expect(getAllBySymbolParams[0]).toEqual(strategy.exchange);
-        expect(getAllBySymbolParams[1]).toEqual(strategy.symbol);
-        expect(getAllBySymbolParams[2]).toEqual(movingAverageCrossoverStepInput.longTermPeriod * (movingAverageCrossoverStepInput.type === 'EMA' ? 3 : 1));
-        expect(getAllBySymbolParams[3]).toEqual('1d');
+        expect(getCandlestickServiceMock.getAllLastBySymbol).toHaveBeenCalledTimes(1);
+        const getAllLastBySymbolParams = getCandlestickServiceMock.getAllLastBySymbol.mock.calls[0];
+        expect(getAllLastBySymbolParams.length).toEqual(4);
+        expect(getAllLastBySymbolParams[0]).toEqual(strategy.exchange);
+        expect(getAllLastBySymbolParams[1]).toEqual(strategy.symbol);
+        expect(getAllLastBySymbolParams[2]).toEqual('1d');
+        expect(getAllLastBySymbolParams[3]).toEqual(movingAverageCrossoverStepInput.longTermPeriod * (movingAverageCrossoverStepInput.type === 'EMA' ? 3 : 1));
 
         expect(movingAverageServiceMock.calculate).toHaveBeenCalledTimes(2);
         let calculateParams = movingAverageServiceMock.calculate.mock.calls[0];
@@ -303,8 +311,8 @@ describe('MovingAverageCrossoverStepService', () => {
           type: movingAverageCrossoverStepInput.type,
           period: movingAverageCrossoverStepInput.shortTermPeriod,
           points: [
-            { timestamp: candlesticks[0].closingDate.valueOf(), value: 90 },
-            { timestamp: candlesticks[1].closingDate.valueOf(), value: 100 },
+            { timestamp: candlesticks[0].openingDate.valueOf(), value: 90 },
+            { timestamp: candlesticks[1].openingDate.valueOf(), value: 100 },
           ],
         });
         calculateParams = movingAverageServiceMock.calculate.mock.calls[1];
@@ -313,8 +321,8 @@ describe('MovingAverageCrossoverStepService', () => {
           type: movingAverageCrossoverStepInput.type,
           period: movingAverageCrossoverStepInput.longTermPeriod,
           points: [
-            { timestamp: candlesticks[0].closingDate.valueOf(), value: 90 },
-            { timestamp: candlesticks[1].closingDate.valueOf(), value: 100 },
+            { timestamp: candlesticks[0].openingDate.valueOf(), value: 90 },
+            { timestamp: candlesticks[1].openingDate.valueOf(), value: 100 },
           ],
         });
       });

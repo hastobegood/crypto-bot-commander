@@ -10,12 +10,19 @@ const candlestickRepositoryMock = mocked(jest.genMockFromModule<CandlestickRepos
 let initializeCandlestickService: InitializeCandlestickService;
 beforeEach(() => {
   fetchCandlestickClientMock.fetchAll = jest.fn();
-  candlestickRepositoryMock.saveAllBySymbol = jest.fn();
+  candlestickRepositoryMock.save = jest.fn();
+  candlestickRepositoryMock.getLastBySymbol = jest.fn();
+  candlestickRepositoryMock.getAllBySymbol = jest.fn();
 
   initializeCandlestickService = new InitializeCandlestickService(fetchCandlestickClientMock, candlestickRepositoryMock);
 });
 
 describe('InitCandlestickService', () => {
+  afterEach(() => {
+    expect(candlestickRepositoryMock.getLastBySymbol).toHaveBeenCalledTimes(0);
+    expect(candlestickRepositoryMock.getAllBySymbol).toHaveBeenCalledTimes(0);
+  });
+
   describe('Given a symbol candlesticks to initialize for a specific year and month', () => {
     describe('When symbol candlesticks are retrieved', () => {
       let candlesticks1: Candlesticks;
@@ -32,10 +39,10 @@ describe('InitCandlestickService', () => {
         fetchCandlestickClientMock.fetchAll.mockResolvedValueOnce(candlesticks1).mockResolvedValueOnce(candlesticks2).mockResolvedValueOnce(candlesticks3).mockResolvedValue(candlesticks4);
       });
 
-      it('Then symbol candlesticks are saved', async () => {
+      it('Then symbol candlesticks are saved with intervals 1m, 1h and 1d', async () => {
         await initializeCandlestickService.initializeAllBySymbol('Binance', 'ABC', 2021, 9);
 
-        expect(fetchCandlestickClientMock.fetchAll).toHaveBeenCalledTimes(44);
+        expect(fetchCandlestickClientMock.fetchAll).toHaveBeenCalledTimes(46);
         const fetchAllParams = fetchCandlestickClientMock.fetchAll.mock.calls;
         expect(fetchAllParams[0]).toEqual([
           {
@@ -477,12 +484,32 @@ describe('InitCandlestickService', () => {
             endDate: new Date('2021-09-30T23:59:00.000Z').valueOf(),
           },
         ]);
+        expect(fetchAllParams[44]).toEqual([
+          {
+            exchange: 'Binance',
+            symbol: 'ABC',
+            interval: '1h',
+            period: 1_000,
+            startDate: new Date('2021-09-01T00:00:00.000Z').valueOf(),
+            endDate: new Date('2021-09-30T23:00:00.000Z').valueOf(),
+          },
+        ]);
+        expect(fetchAllParams[45]).toEqual([
+          {
+            exchange: 'Binance',
+            symbol: 'ABC',
+            interval: '1d',
+            period: 1_000,
+            startDate: new Date('2021-09-01T00:00:00.000Z').valueOf(),
+            endDate: new Date('2021-09-30T00:00:00.000Z').valueOf(),
+          },
+        ]);
 
-        expect(candlestickRepositoryMock.saveAllBySymbol).toHaveBeenCalledTimes(3);
-        const saveAllBySymbolParams = candlestickRepositoryMock.saveAllBySymbol.mock.calls;
-        expect(saveAllBySymbolParams[0]).toEqual(['Binance', 'ABC', candlesticks1.values]);
-        expect(saveAllBySymbolParams[1]).toEqual(['Binance', 'ABC', candlesticks2.values]);
-        expect(saveAllBySymbolParams[2]).toEqual(['Binance', 'ABC', candlesticks3.values]);
+        expect(candlestickRepositoryMock.save).toHaveBeenCalledTimes(3);
+        const saveParams = candlestickRepositoryMock.save.mock.calls;
+        expect(saveParams[0]).toEqual([candlesticks1]);
+        expect(saveParams[1]).toEqual([candlesticks2]);
+        expect(saveParams[2]).toEqual([candlesticks3]);
       });
     });
   });

@@ -1285,10 +1285,10 @@
     minimatch "^3.0.4"
     strip-json-comments "^3.1.1"
 
-"@hastobegood/crypto-bot-artillery@^0.2.0":
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/@hastobegood/crypto-bot-artillery/-/crypto-bot-artillery-0.2.0.tgz#b99919978a443c0ba0978767ef714e86bf037290"
-  integrity sha512-5gAM/BbDMOy4/jN7RSUz7ZU6F/BCNUXSpy+nWHo0zdAiW1nQNlrgMAC4ppu6vwJ1pOdwxTvC9vWGK4G3vNSYWQ==
+"@hastobegood/crypto-bot-artillery@^0.2.3":
+  version "0.2.3"
+  resolved "https://registry.yarnpkg.com/@hastobegood/crypto-bot-artillery/-/crypto-bot-artillery-0.2.3.tgz#2129ffdaccc49a0bc359936429dd570291c7a356"
+  integrity sha512-m0XQj4tJk1mrnHq3Rb2bXGZScQvHStoDdAW5y0+4f4V+G6Oq2GtlfZgCiXoG/g+Mv+i0sL4fO5rk6Ffr2lPxkg==
   dependencies:
     "@hastobegood/crypto-clients-binance" "^0.2.3"
     pino "^7.6.4"
