@@ -2,39 +2,43 @@ import { Candlestick, CandlestickExchange, CandlestickInterval } from '@hastobeg
 import { CandlestickRepository } from './candlestick-repository';
 
 const intervalDataMap = new Map<CandlestickInterval, IntervalData>();
-intervalDataMap.set('1m', { value: 1, seconds: 60, minutes: 1 });
-intervalDataMap.set('5m', { value: 5, seconds: 300, minutes: 5 });
-intervalDataMap.set('15m', { value: 15, seconds: 900, minutes: 15 });
-intervalDataMap.set('30m', { value: 30, seconds: 1800, minutes: 30 });
-intervalDataMap.set('1h', { value: 1, seconds: 3600, minutes: 60 });
-intervalDataMap.set('6h', { value: 6, seconds: 21600, minutes: 360 });
-intervalDataMap.set('12h', { value: 12, seconds: 43200, minutes: 720 });
-intervalDataMap.set('1d', { value: 1, seconds: 86400, minutes: 1440 });
+intervalDataMap.set('1m', { value: 1, seconds: 60 });
+intervalDataMap.set('5m', { value: 5, seconds: 300 });
+intervalDataMap.set('15m', { value: 15, seconds: 900 });
+intervalDataMap.set('30m', { value: 30, seconds: 1800 });
+intervalDataMap.set('1h', { value: 1, seconds: 3600 });
+intervalDataMap.set('6h', { value: 6, seconds: 21600 });
+intervalDataMap.set('12h', { value: 12, seconds: 43200 });
+intervalDataMap.set('1d', { value: 1, seconds: 86400 });
 
 export class GetCandlestickService {
   constructor(private candlestickRepository: CandlestickRepository) {}
 
   async getLastBySymbol(exchange: CandlestickExchange, symbol: string): Promise<Candlestick | null> {
-    const candlesticks = await this.getAllBySymbol(exchange, symbol, 1, '1m');
-
-    return candlesticks.length === 0 ? null : candlesticks[0];
+    return this.candlestickRepository.getLastBySymbol(exchange, symbol, '1m');
   }
 
-  async getAllBySymbol(exchange: CandlestickExchange, symbol: string, period: number, interval: CandlestickInterval): Promise<Candlestick[]> {
-    const candlesticks: Candlestick[] = [];
-    const intervalData = intervalDataMap.get(interval)!;
-    const intervalDates = this.#getIntervalDates(period, intervalData);
-
-    const candlesticksByDates = await this.candlestickRepository.getAllBySymbol(exchange, symbol, intervalDates.startDate, intervalDates.endDate);
-    if (interval === '1m') {
-      return candlesticksByDates;
+  async getAllLastBySymbol(exchange: CandlestickExchange, symbol: string, interval: CandlestickInterval, period: number, startingDate?: number): Promise<Candlestick[]> {
+    const effectiveStartingDate = startingDate || (await this.candlestickRepository.getLastBySymbol(exchange, symbol, '1m'))?.openingDate;
+    if (!effectiveStartingDate) {
+      return [];
     }
-    const candlesticksByOpeningDate = new Map<number, Candlestick>(candlesticksByDates.map((candlestick) => [candlestick.openingDate, candlestick]));
+
+    return this.#getAllLastBySymbolAndStartingDate(exchange, symbol, interval, period, effectiveStartingDate);
+  }
+
+  async #getAllLastBySymbolAndStartingDate(exchange: CandlestickExchange, symbol: string, interval: CandlestickInterval, period: number, startingDate: number): Promise<Candlestick[]> {
+    const candlesticks: Candlestick[] = [];
+    const intervalDates = this.#getIntervalDates(interval, period, startingDate);
+
+    const candlesticksByOpeningDate = new Map<number, Candlestick>(
+      (await this.candlestickRepository.getAllBySymbol(exchange, symbol, interval, intervalDates.startDate, intervalDates.endDate)).map((candlestick) => [candlestick.openingDate, candlestick]),
+    );
 
     let currentInterval = intervalDates.startDate;
     while (currentInterval <= intervalDates.endDate) {
       const openingDate = currentInterval;
-      const closingDate = currentInterval + intervalData.seconds * 1000;
+      const closingDate = currentInterval + intervalDates.data.seconds * 1_000 - 1;
       let openingPrice;
       let closingPrice;
       let lowestPrice;
@@ -54,7 +58,7 @@ export class GetCandlestickService {
             highestPrice = candlestick.highestPrice;
           }
         }
-        currentInterval += 60 * 1000;
+        currentInterval += (intervalDates.data.seconds / intervalDates.data.value) * 1_000;
       }
 
       if (openingPrice && closingPrice && lowestPrice && highestPrice) {
@@ -69,23 +73,31 @@ export class GetCandlestickService {
       }
     }
 
+    if (candlesticks.length > period) {
+      throw new Error(`More candlesticks than requested periods (${period} requested but found ${candlesticks.length})`);
+    }
+
     return candlesticks;
   }
 
-  #getIntervalDates(period: number, intervalData: IntervalData): IntervalDates {
-    const currentDate = new Date();
-    const endDate = currentDate.setUTCSeconds(0, 0);
-
-    let startDate = currentDate.setUTCHours(0, 0, 0, 0);
-    while (startDate <= endDate) {
-      startDate += intervalData.seconds * 1000;
+  #getIntervalDates(interval: CandlestickInterval, period: number, startingDate: number): IntervalDates {
+    const intervalData = intervalDataMap.get(interval);
+    if (!intervalData) {
+      throw new Error(`Unsupported '${interval}' candlestick interval`);
     }
-    startDate -= intervalData.seconds * 1000 * period;
+
+    const endDate = new Date(startingDate).setUTCSeconds(0, 0);
+
+    let startDate = new Date(startingDate).setUTCHours(0, 0, 0, 0);
+    while (startDate <= endDate) {
+      startDate += intervalData.seconds * 1_000;
+    }
+    startDate -= intervalData.seconds * 1_000 * period;
 
     return {
+      data: intervalData,
       startDate: startDate,
       endDate: endDate,
-      lengthInMinutes: (endDate - startDate) / 1000 / 60 + 1,
     };
   }
 }
@@ -93,11 +105,10 @@ export class GetCandlestickService {
 interface IntervalData {
   value: number;
   seconds: number;
-  minutes: number;
 }
 
 interface IntervalDates {
+  data: IntervalData;
   startDate: number;
   endDate: number;
-  lengthInMinutes: number;
 }

@@ -49,12 +49,12 @@ export class MovingAverageCrossoverStepService implements StrategyStepService {
   }
 
   async #getPoints(strategy: Strategy, period: number): Promise<Point[]> {
-    return this.#buildPoints(await this.getCandlestickService.getAllBySymbol(strategy.exchange, strategy.symbol, period, '1d'));
+    return this.#buildPoints(await this.getCandlestickService.getAllLastBySymbol(strategy.exchange, strategy.symbol, '1d', period));
   }
 
   #buildPoints(candlesticks: Candlestick[]): Point[] {
     return candlesticks.map((candlestick) => ({
-      timestamp: candlestick.closingDate,
+      timestamp: candlestick.openingDate,
       value: candlestick.closingPrice,
     }));
   }
