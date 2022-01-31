@@ -38,6 +38,11 @@ Mappings:
       UpdateAllCandlesticksSchedule: rate(1 minute)
 
 Globals:
+  Api:
+    EndpointConfiguration:
+      Type: EDGE
+    OpenApiVersion: 3.0.3
+    TracingEnabled: !Ref TracingParameter
   Function:
     Runtime: nodejs14.x
     MemorySize: 128
@@ -183,6 +188,47 @@ Resources:
         - SQSSendMessagePolicy:
             QueueName: !GetAtt ProcessedStrategyStepQueue.QueueName
 
+  ApiV1:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: !Ref EnvironmentParameter
+      Auth:
+        UsagePlan:
+          CreateUsagePlan: PER_API
+          Quota:
+            Period: DAY
+            Limit: 500
+          Throttle:
+            RateLimit: 5
+            BurstLimit: 5
+      DefinitionBody:
+        Fn::Transform:
+          Name: AWS::Include
+          Parameters:
+            Location: ./api/openapi.yml
+
+  GetAllCandlesticksFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Description: Get all candlesticks function
+      CodeUri: dist/webpack/get-all-candlesticks-handler
+      Handler: app.handler
+      MemorySize: 1024
+      Environment:
+        Variables:
+          CANDLESTICK_TABLE_NAME: !Ref CandlestickTable
+          AVAILABLE_SYMBOLS: !FindInMap [ EnvironmentMap, !Ref EnvironmentParameter, AvailableSymbols ]
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ApiV1
+            Path: /candlesticks
+            Method: GET
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref CandlestickTable
+
   CandlestickTable:
     Type: AWS::DynamoDB::Table
     Properties:
@@ -314,6 +360,23 @@ Outputs:
   EvaluateStrategyFunctionArn:
     Description: Evaluate strategy function ARN
     Value: !GetAtt EvaluateStrategyFunction.Arn
+
+  ApiV1Id:
+    Description: API v1 ID
+    Value: !Ref ApiV1
+  ApiV1Url:
+    Description: API v1 URL
+    Value: !Sub https://${ApiV1}.execute-api.${AWS::Region}.amazonaws.com/${EnvironmentParameter}/
+  ApiV1RootResourceId:
+    Description: API v1 root resource ID
+    Value: !GetAtt ApiV1.RootResourceId
+
+  GetAllCandlesticksFunctionName:
+    Description: Get all candlesticks function name
+    Value: !Ref GetAllCandlesticksFunction
+  GetAllCandlesticksFunctionArn:
+    Description: Get all candlesticks function ARN
+    Value: !GetAtt GetAllCandlesticksFunction.Arn
 
   CandlestickTableName:
     Description: Candlestick table name

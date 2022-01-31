@@ -1,0 +1,149 @@
+openapi: 3.0.3
+
+info:
+  title: crypto-bot-commander-api
+  version: 1.0.0
+
+x-amazon-apigateway-api-key-source: HEADER
+
+paths:
+  /candlesticks:
+    get:
+      summary: Get all candlesticks from an exchange for a specific symbol
+      operationId: getAllCandlesticks
+      tags:
+        - Candlesticks
+      security:
+        - DefaultApiKey: [ ]
+      parameters:
+        - name: exchange
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/Exchange'
+        - name: symbol
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/Symbol'
+        - name: interval
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/Interval'
+        - name: limit
+          in: query
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 1000
+        - name: until
+          in: query
+          schema:
+            $ref: '#/components/schemas/Timestamp'
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Candlesticks'
+        400:
+          description: Bad request
+        500:
+          description: Internal server error
+      x-amazon-apigateway-integration:
+        type: aws_proxy
+        passthroughBehavior: when_no_match
+        httpMethod: POST
+        timeoutInMillis: 3000
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetAllCandlesticksFunction.Arn}:Live/invocations
+
+components:
+  securitySchemes:
+    DefaultApiKey:
+      type: apiKey
+      name: x-api-key
+      in: header
+      x-amazon-apigateway-api-key-source: HEADER
+  schemas:
+    Timestamp:
+      type: integer
+      minimum: 0
+    Exchange:
+      type: string
+      enum:
+        - Binance
+    Symbol:
+      type: string
+      pattern: ^[A-Z0-9]+#[A-Z0-9]+$
+    Interval:
+      type: string
+      enum:
+        - 1m
+        - 5m
+        - 15m
+        - 30m
+        - 1h
+        - 6h
+        - 12h
+        - 1d
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+        details:
+          type: array
+          minItems: 1
+          items:
+            type: object
+            properties:
+              message:
+                type: string
+              path:
+                type: string
+            required:
+              - message
+      required:
+        - message
+        - details
+    Candlesticks:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            exchange:
+              $ref: '#/components/schemas/Exchange'
+            symbol:
+              $ref: '#/components/schemas/Symbol'
+            interval:
+              $ref: '#/components/schemas/Interval'
+            values:
+              type: array
+              items:
+                type: object
+                properties:
+                  time:
+                    $ref: '#/components/schemas/Timestamp'
+                  ohlc:
+                    type: array
+                    items:
+                      type: array
+                      minItems: 4
+                      maxItems: 4
+                      items:
+                        type: number
+                required:
+                  - time
+                  - ohlc
+          required:
+            - exchange
+            - symbol
+            - interval
+            - values
+      required:
+        - data
