@@ -1297,10 +1297,10 @@
   dependencies:
     "@hapi/hoek" "^9.0.0"
 
-"@hastobegood/crypto-bot-artillery@^0.3.0":
-  version "0.3.0"
-  resolved "https://registry.yarnpkg.com/@hastobegood/crypto-bot-artillery/-/crypto-bot-artillery-0.3.0.tgz#eb99dca3369862f764f005410edb8f0cb92e60b6"
-  integrity sha512-8soHoXZ3X0yuPyYLoWhCokKkgpmAwy15h2LYjslhIZL5wvSfOUwzZJmx/1q87S0+IWc6iWxVqXkZUJf1pUHMKQ==
+"@hastobegood/crypto-bot-artillery@^0.4.0":
+  version "0.4.0"
+  resolved "https://registry.yarnpkg.com/@hastobegood/crypto-bot-artillery/-/crypto-bot-artillery-0.4.0.tgz#45e2536f59cb3f32fbe14f7d23094a520e446261"
+  integrity sha512-5KJJfXMTKdiYKqsDUkirP5arbettRv99suxUsh8SL6ZwVqagCENX8Cw+tIVgCJ8UJj2u85bP1+NYfY/ULEJBJA==
   dependencies:
     "@hastobegood/crypto-clients-binance" "^0.2.3"
     joi "^17.6.0"
