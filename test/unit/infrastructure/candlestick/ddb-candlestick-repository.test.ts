@@ -242,7 +242,7 @@ describe('DdbCandlestickRepository', () => {
       });
 
       it('Then empty list is returned', async () => {
-        const startDate = new Date('2021-09-11T12:30:00.000Z');
+        const startDate = new Date('2021-07-11T12:30:00.000Z');
         const endDate = new Date('2021-09-13T12:30:00.000Z');
         const result = await candlestickRepository.getAllBySymbol('Binance', 'ABC', '1m', startDate.valueOf(), endDate.valueOf());
         expect(result.length).toEqual(0);
@@ -259,7 +259,7 @@ describe('DdbCandlestickRepository', () => {
             '#sk': 'sk',
           },
           ExpressionAttributeValues: {
-            ':pk': 'Candlestick::Binance::ABC::1m::2021-09-13',
+            ':pk': 'Candlestick::Binance::ABC::1m::2021-09',
             ':startDate': startDate.valueOf().toString(),
             ':endDate': endDate.valueOf().toString(),
           },
@@ -274,7 +274,7 @@ describe('DdbCandlestickRepository', () => {
             '#sk': 'sk',
           },
           ExpressionAttributeValues: {
-            ':pk': 'Candlestick::Binance::ABC::1m::2021-09-12',
+            ':pk': 'Candlestick::Binance::ABC::1m::2021-08',
             ':startDate': startDate.valueOf().toString(),
             ':endDate': endDate.valueOf().toString(),
           },
@@ -289,7 +289,7 @@ describe('DdbCandlestickRepository', () => {
             '#sk': 'sk',
           },
           ExpressionAttributeValues: {
-            ':pk': 'Candlestick::Binance::ABC::1m::2021-09-11',
+            ':pk': 'Candlestick::Binance::ABC::1m::2021-07',
             ':startDate': startDate.valueOf().toString(),
             ':endDate': endDate.valueOf().toString(),
           },
@@ -325,7 +325,7 @@ describe('DdbCandlestickRepository', () => {
       });
 
       it('Then candlesticks are returned', async () => {
-        const startDate = new Date('2021-09-11T12:30:00.000Z');
+        const startDate = new Date('2021-07-11T12:30:00.000Z');
         const endDate = new Date('2021-09-13T12:30:00.000Z');
         const result = await candlestickRepository.getAllBySymbol('Binance', 'ABC', '1m', startDate.valueOf(), endDate.valueOf());
         expect(result.length).toEqual(3);
@@ -367,7 +367,7 @@ describe('DdbCandlestickRepository', () => {
             '#sk': 'sk',
           },
           ExpressionAttributeValues: {
-            ':pk': 'Candlestick::Binance::ABC::1m::2021-09-13',
+            ':pk': 'Candlestick::Binance::ABC::1m::2021-09',
             ':startDate': startDate.valueOf().toString(),
             ':endDate': endDate.valueOf().toString(),
           },
@@ -382,7 +382,7 @@ describe('DdbCandlestickRepository', () => {
             '#sk': 'sk',
           },
           ExpressionAttributeValues: {
-            ':pk': 'Candlestick::Binance::ABC::1m::2021-09-12',
+            ':pk': 'Candlestick::Binance::ABC::1m::2021-08',
             ':startDate': startDate.valueOf().toString(),
             ':endDate': endDate.valueOf().toString(),
           },
@@ -397,7 +397,7 @@ describe('DdbCandlestickRepository', () => {
             '#sk': 'sk',
           },
           ExpressionAttributeValues: {
-            ':pk': 'Candlestick::Binance::ABC::1m::2021-09-11',
+            ':pk': 'Candlestick::Binance::ABC::1m::2021-07',
             ':startDate': startDate.valueOf().toString(),
             ':endDate': endDate.valueOf().toString(),
           },
@@ -417,8 +417,8 @@ describe('DdbCandlestickRepository', () => {
       });
 
       it('Then empty list is returned', async () => {
-        const startDate = new Date('2021-08-31T12:00:00.000Z');
-        const endDate = new Date('2021-09-01T11:00:00.000Z');
+        const startDate = new Date('2020-12-31T12:00:00.000Z');
+        const endDate = new Date('2021-01-01T11:00:00.000Z');
         const result = await candlestickRepository.getAllBySymbol('Binance', 'ABC', '1h', startDate.valueOf(), endDate.valueOf());
         expect(result.length).toEqual(0);
         expect(result).toEqual([]);
@@ -434,7 +434,7 @@ describe('DdbCandlestickRepository', () => {
             '#sk': 'sk',
           },
           ExpressionAttributeValues: {
-            ':pk': 'Candlestick::Binance::ABC::1h::2021-09',
+            ':pk': 'Candlestick::Binance::ABC::1h::2021',
             ':startDate': startDate.valueOf().toString(),
             ':endDate': endDate.valueOf().toString(),
           },
@@ -449,7 +449,7 @@ describe('DdbCandlestickRepository', () => {
             '#sk': 'sk',
           },
           ExpressionAttributeValues: {
-            ':pk': 'Candlestick::Binance::ABC::1h::2021-08',
+            ':pk': 'Candlestick::Binance::ABC::1h::2020',
             ':startDate': startDate.valueOf().toString(),
             ':endDate': endDate.valueOf().toString(),
           },
@@ -485,8 +485,8 @@ describe('DdbCandlestickRepository', () => {
       });
 
       it('Then candlesticks are returned', async () => {
-        const startDate = new Date('2021-08-31T12:00:00.000Z');
-        const endDate = new Date('2021-09-01T11:00:00.000Z');
+        const startDate = new Date('2020-12-31T12:00:00.000Z');
+        const endDate = new Date('2021-01-01T11:00:00.000Z');
         const result = await candlestickRepository.getAllBySymbol('Binance', 'ABC', '1h', startDate.valueOf(), endDate.valueOf());
         expect(result.length).toEqual(3);
         expect(result).toEqual([
@@ -527,7 +527,7 @@ describe('DdbCandlestickRepository', () => {
             '#sk': 'sk',
           },
           ExpressionAttributeValues: {
-            ':pk': 'Candlestick::Binance::ABC::1h::2021-09',
+            ':pk': 'Candlestick::Binance::ABC::1h::2021',
             ':startDate': startDate.valueOf().toString(),
             ':endDate': endDate.valueOf().toString(),
           },
@@ -542,7 +542,7 @@ describe('DdbCandlestickRepository', () => {
             '#sk': 'sk',
           },
           ExpressionAttributeValues: {
-            ':pk': 'Candlestick::Binance::ABC::1h::2021-08',
+            ':pk': 'Candlestick::Binance::ABC::1h::2020',
             ':startDate': startDate.valueOf().toString(),
             ':endDate': endDate.valueOf().toString(),
           },
@@ -562,7 +562,7 @@ describe('DdbCandlestickRepository', () => {
       });
 
       it('Then empty list is returned', async () => {
-        const startDate = new Date('2021-08-31T12:30:00.000Z');
+        const startDate = new Date('2020-08-31T12:30:00.000Z');
         const endDate = new Date('2021-09-13T12:30:00.000Z');
         const result = await candlestickRepository.getAllBySymbol('Binance', 'ABC', '1d', startDate.valueOf(), endDate.valueOf());
         expect(result.length).toEqual(0);
@@ -579,7 +579,7 @@ describe('DdbCandlestickRepository', () => {
             '#sk': 'sk',
           },
           ExpressionAttributeValues: {
-            ':pk': 'Candlestick::Binance::ABC::1d::2021-09',
+            ':pk': 'Candlestick::Binance::ABC::1d::2021',
             ':startDate': startDate.valueOf().toString(),
             ':endDate': endDate.valueOf().toString(),
           },
@@ -594,7 +594,7 @@ describe('DdbCandlestickRepository', () => {
             '#sk': 'sk',
           },
           ExpressionAttributeValues: {
-            ':pk': 'Candlestick::Binance::ABC::1d::2021-08',
+            ':pk': 'Candlestick::Binance::ABC::1d::2020',
             ':startDate': startDate.valueOf().toString(),
             ':endDate': endDate.valueOf().toString(),
           },
@@ -630,7 +630,7 @@ describe('DdbCandlestickRepository', () => {
       });
 
       it('Then candlesticks are returned', async () => {
-        const startDate = new Date('2021-08-31T12:30:00.000Z');
+        const startDate = new Date('2020-08-31T12:30:00.000Z');
         const endDate = new Date('2021-09-13T12:30:00.000Z');
         const result = await candlestickRepository.getAllBySymbol('Binance', 'ABC', '1d', startDate.valueOf(), endDate.valueOf());
         expect(result.length).toEqual(3);
@@ -672,7 +672,7 @@ describe('DdbCandlestickRepository', () => {
             '#sk': 'sk',
           },
           ExpressionAttributeValues: {
-            ':pk': 'Candlestick::Binance::ABC::1d::2021-09',
+            ':pk': 'Candlestick::Binance::ABC::1d::2021',
             ':startDate': startDate.valueOf().toString(),
             ':endDate': endDate.valueOf().toString(),
           },
@@ -687,7 +687,7 @@ describe('DdbCandlestickRepository', () => {
             '#sk': 'sk',
           },
           ExpressionAttributeValues: {
-            ':pk': 'Candlestick::Binance::ABC::1d::2021-08',
+            ':pk': 'Candlestick::Binance::ABC::1d::2020',
             ':startDate': startDate.valueOf().toString(),
             ':endDate': endDate.valueOf().toString(),
           },

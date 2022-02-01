@@ -1,5 +1,5 @@
 import { chunk } from 'lodash';
-import { BatchWriteCommand, BatchWriteCommandInput, BatchWriteCommandOutput, DynamoDBDocumentClient, GetCommand, GetCommandInput, PutCommand, PutCommandInput, PutCommandOutput, QueryCommand, QueryCommandInput } from '@aws-sdk/lib-dynamodb';
+import { BatchWriteCommand, BatchWriteCommandInput, DynamoDBDocumentClient, GetCommand, GetCommandInput, PutCommand, PutCommandInput, QueryCommand, QueryCommandInput } from '@aws-sdk/lib-dynamodb';
 import { Candlestick, CandlestickExchange, CandlestickInterval, Candlesticks } from '@hastobegood/crypto-bot-artillery/candlestick';
 import { CandlestickRepository } from '../../domain/candlestick/candlestick-repository';
 
@@ -12,11 +12,11 @@ export class DdbCandlestickRepository implements CandlestickRepository {
     await Promise.all([this.#saveAll(candlesticks), this.#saveLast(candlesticks)]);
   }
 
-  async #saveAll(candlesticks: Candlesticks): Promise<BatchWriteCommandOutput[]> {
+  async #saveAll(candlesticks: Candlesticks): Promise<void> {
     const effectiveInterval = this.#extractEffectiveInterval(candlesticks.interval);
 
-    return Promise.all(
-      chunk(candlesticks.values, 25).map((chunk) => {
+    await Promise.all(
+      chunk(candlesticks.values, 25).map(async (chunk) => {
         const batchWriteInput: BatchWriteCommandInput = {
           RequestItems: {
             [this.tableName]: chunk.map((candlestick) => ({
@@ -32,12 +32,19 @@ export class DdbCandlestickRepository implements CandlestickRepository {
           },
         };
 
-        return this.ddbClient.send(new BatchWriteCommand(batchWriteInput));
+        while (batchWriteInput.RequestItems && batchWriteInput.RequestItems[this.tableName].length) {
+          const batchWriteOutput = await this.ddbClient.send(new BatchWriteCommand(batchWriteInput));
+          if (batchWriteOutput.UnprocessedItems && Object.keys(batchWriteOutput.UnprocessedItems).length) {
+            batchWriteInput.RequestItems = batchWriteOutput.UnprocessedItems;
+          } else {
+            batchWriteInput.RequestItems[this.tableName].length = 0;
+          }
+        }
       }),
     );
   }
 
-  async #saveLast(candlesticks: Candlesticks): Promise<PutCommandOutput | void> {
+  async #saveLast(candlesticks: Candlesticks): Promise<void> {
     const effectiveInterval = this.#extractEffectiveInterval(candlesticks.interval);
     const lastCandlestick = candlesticks.values.reduce((previous, current) => (current.openingDate > previous.openingDate ? current : previous));
 
@@ -59,7 +66,7 @@ export class DdbCandlestickRepository implements CandlestickRepository {
       },
     };
 
-    return this.ddbClient.send(new PutCommand(putInput)).catch((error) => {
+    await this.ddbClient.send(new PutCommand(putInput)).catch((error) => {
       if (error.name !== 'ConditionalCheckFailedException') {
         throw error;
       }
@@ -110,7 +117,7 @@ export class DdbCandlestickRepository implements CandlestickRepository {
       intervalDates.decrement();
     }
 
-    return (await Promise.all(candlesticks)).reduce((accumulator, value) => accumulator.concat(value));
+    return (await Promise.all(candlesticks)).reduce((accumulator, value) => accumulator.concat(value), []);
   }
 
   #extractEffectiveInterval(interval: CandlestickInterval): EffectiveCandlestickInterval {
@@ -132,10 +139,10 @@ export class DdbCandlestickRepository implements CandlestickRepository {
   #formatPkDate(interval: EffectiveCandlestickInterval, date: Date): string {
     switch (interval) {
       case '1m':
-        return date.toISOString().substr(0, 10);
+        return date.toISOString().substr(0, 7);
       case '1h':
       case '1d':
-        return date.toISOString().substr(0, 7);
+        return date.toISOString().substr(0, 4);
     }
   }
 
@@ -150,24 +157,26 @@ export class DdbCandlestickRepository implements CandlestickRepository {
 
     switch (interval) {
       case '1m':
+        intervalDates.limitDate.setUTCDate(1);
+        intervalDates.currentDate.setUTCDate(1);
         return { ...intervalDates, decrement: this.#decrementMinuteInterval(intervalDates.currentDate) };
       case '1h':
       case '1d':
-        intervalDates.limitDate.setUTCDate(1);
-        intervalDates.currentDate.setUTCDate(1);
+        intervalDates.limitDate.setUTCFullYear(intervalDates.limitDate.getUTCFullYear(), 0, 1);
+        intervalDates.currentDate.setUTCFullYear(intervalDates.currentDate.getUTCFullYear(), 0, 1);
         return { ...intervalDates, decrement: this.#decrementDayInterval(intervalDates.currentDate) };
     }
   }
 
   #decrementMinuteInterval(currentDate: Date): () => void {
     return (): void => {
-      currentDate.setUTCDate(currentDate.getUTCDate() - 1);
+      currentDate.setUTCMonth(currentDate.getUTCMonth() - 1);
     };
   }
 
   #decrementDayInterval(currentDate: Date): () => void {
     return (): void => {
-      currentDate.setUTCMonth(currentDate.getUTCMonth() - 1);
+      currentDate.setUTCFullYear(currentDate.getUTCFullYear() - 1, 0, 1);
     };
   }
 
