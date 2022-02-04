@@ -6,6 +6,13 @@ Transform:
   - AWS::Serverless-2016-10-31
 
 Parameters:
+  LogLevelParameter:
+    Type: String
+    Description: Functions log level
+    Default: info
+    AllowedValues:
+      - debug
+      - info
   EnvironmentParameter:
     Type: String
     Description: Environment where the stack is deployed
@@ -51,6 +58,7 @@ Globals:
     Tracing: !If [ TracingCondition, Active, PassThrough ]
     Environment:
       Variables:
+        LOG_LEVEL: !Ref LogLevelParameter
         ENV: !Ref EnvironmentParameter
         REGION: !Ref AWS::Region
         TRACING: !Ref TracingParameter

@@ -16,6 +16,11 @@ paths:
       security:
         - DefaultApiKey: [ ]
       parameters:
+        - name: x-api-key
+          in: header
+          required: true
+          schema:
+            $ref: '#/components/schemas/ApiKey'
         - name: exchange
           in: query
           required: true
@@ -69,6 +74,8 @@ components:
       in: header
       x-amazon-apigateway-api-key-source: HEADER
   schemas:
+    ApiKey:
+      type: string
     Timestamp:
       type: integer
       minimum: 0
