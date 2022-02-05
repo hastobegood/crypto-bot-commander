@@ -207,7 +207,7 @@ describe('DdbCandlestickRepository', () => {
             data: {
               start: candlestick.openingDate.valueOf(),
               end: candlestick.closingDate.valueOf(),
-              ohlcv: [candlestick.openingPrice, candlestick.highestPrice, candlestick.lowestPrice, candlestick.closingPrice, 0],
+              ohlcv: [candlestick.openingPrice, candlestick.highestPrice, candlestick.lowestPrice, candlestick.closingPrice, candlestick.volume],
             },
           },
         }));
@@ -337,6 +337,7 @@ describe('DdbCandlestickRepository', () => {
             closingPrice: candlestick1.ohlcv[3],
             lowestPrice: candlestick1.ohlcv[2],
             highestPrice: candlestick1.ohlcv[1],
+            volume: candlestick1.ohlcv[4],
           },
           {
             openingDate: candlestick2.start,
@@ -345,6 +346,7 @@ describe('DdbCandlestickRepository', () => {
             closingPrice: candlestick2.ohlcv[3],
             lowestPrice: candlestick2.ohlcv[2],
             highestPrice: candlestick2.ohlcv[1],
+            volume: candlestick2.ohlcv[4],
           },
           {
             openingDate: candlestick3.start,
@@ -353,6 +355,7 @@ describe('DdbCandlestickRepository', () => {
             closingPrice: candlestick3.ohlcv[3],
             lowestPrice: candlestick3.ohlcv[2],
             highestPrice: candlestick3.ohlcv[1],
+            volume: candlestick3.ohlcv[4],
           },
         ]);
 
@@ -497,6 +500,7 @@ describe('DdbCandlestickRepository', () => {
             closingPrice: candlestick1.ohlcv[3],
             lowestPrice: candlestick1.ohlcv[2],
             highestPrice: candlestick1.ohlcv[1],
+            volume: candlestick1.ohlcv[4],
           },
           {
             openingDate: candlestick2.start,
@@ -505,6 +509,7 @@ describe('DdbCandlestickRepository', () => {
             closingPrice: candlestick2.ohlcv[3],
             lowestPrice: candlestick2.ohlcv[2],
             highestPrice: candlestick2.ohlcv[1],
+            volume: candlestick2.ohlcv[4],
           },
           {
             openingDate: candlestick3.start,
@@ -513,6 +518,7 @@ describe('DdbCandlestickRepository', () => {
             closingPrice: candlestick3.ohlcv[3],
             lowestPrice: candlestick3.ohlcv[2],
             highestPrice: candlestick3.ohlcv[1],
+            volume: candlestick3.ohlcv[4],
           },
         ]);
 
@@ -642,6 +648,7 @@ describe('DdbCandlestickRepository', () => {
             closingPrice: candlestick1.ohlcv[3],
             lowestPrice: candlestick1.ohlcv[2],
             highestPrice: candlestick1.ohlcv[1],
+            volume: candlestick1.ohlcv[4],
           },
           {
             openingDate: candlestick2.start,
@@ -650,6 +657,7 @@ describe('DdbCandlestickRepository', () => {
             closingPrice: candlestick2.ohlcv[3],
             lowestPrice: candlestick2.ohlcv[2],
             highestPrice: candlestick2.ohlcv[1],
+            volume: candlestick2.ohlcv[4],
           },
           {
             openingDate: candlestick3.start,
@@ -658,6 +666,7 @@ describe('DdbCandlestickRepository', () => {
             closingPrice: candlestick3.ohlcv[3],
             lowestPrice: candlestick3.ohlcv[2],
             highestPrice: candlestick3.ohlcv[1],
+            volume: candlestick3.ohlcv[4],
           },
         ]);
 

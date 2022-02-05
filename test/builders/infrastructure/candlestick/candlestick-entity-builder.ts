@@ -5,6 +5,6 @@ export const buildDefaultCandlestickEntity = (): CandlestickEntity => {
   return {
     start: new Date().valueOf(),
     end: new Date().valueOf(),
-    ohlcv: [randomNumber(), randomNumber(), randomNumber(), randomNumber(), 0],
+    ohlcv: [randomNumber(), randomNumber(), randomNumber(), randomNumber(), randomNumber()],
   };
 };

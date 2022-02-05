@@ -63,7 +63,7 @@ export class GetAllCandlesticksApiController {
         interval: queryParameters.interval,
         values: candlesticks.map((candlestick) => ({
           time: candlestick.openingDate,
-          ohlc: [candlestick.openingPrice, candlestick.highestPrice, candlestick.lowestPrice, candlestick.closingPrice],
+          ohlcv: [candlestick.openingPrice, candlestick.highestPrice, candlestick.lowestPrice, candlestick.closingPrice, candlestick.volume],
         })),
       });
     } catch (error) {
