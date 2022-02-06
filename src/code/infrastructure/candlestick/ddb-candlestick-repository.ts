@@ -1,9 +1,7 @@
-import { chunk } from 'lodash';
+import { chunk } from 'lodash-es';
 import { BatchWriteCommand, BatchWriteCommandInput, DynamoDBDocumentClient, GetCommand, GetCommandInput, PutCommand, PutCommandInput, QueryCommand, QueryCommandInput } from '@aws-sdk/lib-dynamodb';
 import { Candlestick, CandlestickExchange, CandlestickInterval, Candlesticks } from '@hastobegood/crypto-bot-artillery/candlestick';
 import { CandlestickRepository } from '../../domain/candlestick/candlestick-repository';
-
-type EffectiveCandlestickInterval = '1m' | '1h' | '1d';
 
 export class DdbCandlestickRepository implements CandlestickRepository {
   constructor(private tableName: string, private ddbClient: DynamoDBDocumentClient) {}
@@ -13,8 +11,6 @@ export class DdbCandlestickRepository implements CandlestickRepository {
   }
 
   async #saveAll(candlesticks: Candlesticks): Promise<void> {
-    const effectiveInterval = this.#extractEffectiveInterval(candlesticks.interval);
-
     await Promise.all(
       chunk(candlesticks.values, 25).map(async (chunk) => {
         const batchWriteInput: BatchWriteCommandInput = {
@@ -22,7 +18,7 @@ export class DdbCandlestickRepository implements CandlestickRepository {
             [this.tableName]: chunk.map((candlestick) => ({
               PutRequest: {
                 Item: {
-                  pk: `Candlestick::${candlesticks.exchange}::${candlesticks.symbol}::${effectiveInterval}::${this.#formatPkDate(effectiveInterval, new Date(candlestick.openingDate))}`,
+                  pk: `Candlestick::${candlesticks.exchange}::${candlesticks.symbol}::${candlesticks.interval}::${this.#formatPkDate(candlesticks.interval, new Date(candlestick.openingDate))}`,
                   sk: candlestick.openingDate.valueOf().toString(),
                   type: 'Candlestick',
                   data: this.#convertToItemFormat(candlestick),
@@ -45,13 +41,12 @@ export class DdbCandlestickRepository implements CandlestickRepository {
   }
 
   async #saveLast(candlesticks: Candlesticks): Promise<void> {
-    const effectiveInterval = this.#extractEffectiveInterval(candlesticks.interval);
     const lastCandlestick = candlesticks.values.reduce((previous, current) => (current.openingDate > previous.openingDate ? current : previous));
 
     const putInput: PutCommandInput = {
       TableName: this.tableName,
       Item: {
-        pk: `Candlestick::${candlesticks.exchange}::${candlesticks.symbol}::${effectiveInterval}::Last`,
+        pk: `Candlestick::${candlesticks.exchange}::${candlesticks.symbol}::${candlesticks.interval}::Last`,
         sk: 'Details',
         type: 'Candlestick',
         data: this.#convertToItemFormat(lastCandlestick),
@@ -74,11 +69,10 @@ export class DdbCandlestickRepository implements CandlestickRepository {
   }
 
   async getLastBySymbol(exchange: CandlestickExchange, symbol: string, interval: CandlestickInterval): Promise<Candlestick | null> {
-    const effectiveInterval = this.#extractEffectiveInterval(interval);
     const getInput: GetCommandInput = {
       TableName: this.tableName,
       Key: {
-        pk: `Candlestick::${exchange}::${symbol}::${effectiveInterval}::Last`,
+        pk: `Candlestick::${exchange}::${symbol}::${interval}::Last`,
         sk: 'Details',
       },
     };
@@ -90,8 +84,7 @@ export class DdbCandlestickRepository implements CandlestickRepository {
 
   async getAllBySymbol(exchange: CandlestickExchange, symbol: string, interval: CandlestickInterval, startDate: number, endDate: number): Promise<Candlestick[]> {
     const candlesticks: Promise<Candlestick[]>[] = [];
-    const effectiveInterval = this.#extractEffectiveInterval(interval);
-    const intervalDates = this.#extractIntervalDates(effectiveInterval, startDate, endDate);
+    const intervalDates = this.#extractIntervalDates(interval, startDate, endDate);
 
     while (intervalDates.currentDate >= intervalDates.limitDate) {
       const queryInput: QueryCommandInput = {
@@ -102,7 +95,7 @@ export class DdbCandlestickRepository implements CandlestickRepository {
           '#sk': 'sk',
         },
         ExpressionAttributeValues: {
-          ':pk': `Candlestick::${exchange}::${symbol}::${effectiveInterval}::${this.#formatPkDate(effectiveInterval, intervalDates.currentDate)}`,
+          ':pk': `Candlestick::${exchange}::${symbol}::${interval}::${this.#formatPkDate(interval, intervalDates.currentDate)}`,
           ':startDate': startDate.toString(),
           ':endDate': endDate.toString(),
         },
@@ -120,33 +113,22 @@ export class DdbCandlestickRepository implements CandlestickRepository {
     return (await Promise.all(candlesticks)).reduce((accumulator, value) => accumulator.concat(value), []);
   }
 
-  #extractEffectiveInterval(interval: CandlestickInterval): EffectiveCandlestickInterval {
+  #formatPkDate(interval: CandlestickInterval, date: Date): string {
     switch (interval) {
       case '1m':
       case '5m':
       case '15m':
       case '30m':
-        return '1m';
+        return date.toISOString().substr(0, 7);
       case '1h':
       case '6h':
       case '12h':
-        return '1h';
-      case '1d':
-        return '1d';
-    }
-  }
-
-  #formatPkDate(interval: EffectiveCandlestickInterval, date: Date): string {
-    switch (interval) {
-      case '1m':
-        return date.toISOString().substr(0, 7);
-      case '1h':
       case '1d':
         return date.toISOString().substr(0, 4);
     }
   }
 
-  #extractIntervalDates(interval: EffectiveCandlestickInterval, startDate: number, endDate: number): IntervalDates {
+  #extractIntervalDates(interval: CandlestickInterval, startDate: number, endDate: number): IntervalDates {
     const intervalDates = {
       limitDate: new Date(startDate),
       currentDate: new Date(endDate),
@@ -157,10 +139,15 @@ export class DdbCandlestickRepository implements CandlestickRepository {
 
     switch (interval) {
       case '1m':
+      case '5m':
+      case '15m':
+      case '30m':
         intervalDates.limitDate.setUTCDate(1);
         intervalDates.currentDate.setUTCDate(1);
         return { ...intervalDates, decrement: this.#decrementMinuteInterval(intervalDates.currentDate) };
       case '1h':
+      case '6h':
+      case '12h':
       case '1d':
         intervalDates.limitDate.setUTCFullYear(intervalDates.limitDate.getUTCFullYear(), 0, 1);
         intervalDates.currentDate.setUTCFullYear(intervalDates.currentDate.getUTCFullYear(), 0, 1);
@@ -184,7 +171,7 @@ export class DdbCandlestickRepository implements CandlestickRepository {
     return {
       start: candlestick.openingDate.valueOf(),
       end: candlestick.closingDate.valueOf(),
-      ohlcv: [candlestick.openingPrice, candlestick.highestPrice, candlestick.lowestPrice, candlestick.closingPrice, 0],
+      ohlcv: [candlestick.openingPrice, candlestick.highestPrice, candlestick.lowestPrice, candlestick.closingPrice, candlestick.volume],
     };
   }
 
@@ -196,6 +183,7 @@ export class DdbCandlestickRepository implements CandlestickRepository {
       closingPrice: candlestick.ohlcv[3],
       lowestPrice: candlestick.ohlcv[2],
       highestPrice: candlestick.ohlcv[1],
+      volume: candlestick.ohlcv[4],
     };
   }
 }
