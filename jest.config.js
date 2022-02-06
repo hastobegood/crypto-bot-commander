@@ -82,6 +82,7 @@ const config = {
   // A map from regular expressions to module names or to arrays of module names that allow to stub out resources with a single module
   moduleNameMapper: {
     '^(\\.{1,2}/.*)\\.js$': '$1',
+    '^lodash-es$': 'lodash',
     '^@hastobegood\\/crypto-bot-artillery\\/(?!test)(.*)$': '<rootDir>/node_modules/@hastobegood/crypto-bot-artillery/lib/cjs/src/$1/index.js',
     '^@hastobegood\\/crypto-bot-artillery\\/test\\/(.*)$': '<rootDir>/node_modules/@hastobegood/crypto-bot-artillery/lib/cjs/test/$1/index.js',
   },
