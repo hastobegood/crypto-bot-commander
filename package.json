@@ -22,7 +22,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "~3.49.0",
-    "@aws-sdk/client-secrets-manager": "~3.49.0",
+    "@aws-sdk/client-secrets-manager": "~3.51.0",
     "@aws-sdk/client-sqs": "~3.49.0",
     "@aws-sdk/lib-dynamodb": "~3.49.0",
     "@hastobegood/crypto-bot-artillery": "^0.7.0",
