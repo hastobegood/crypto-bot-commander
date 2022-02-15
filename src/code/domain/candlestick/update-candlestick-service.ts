@@ -1,5 +1,5 @@
 import { logger } from '@hastobegood/crypto-bot-artillery/common';
-import { CandlestickExchange, CandlestickInterval, FetchCandlestickClient } from '@hastobegood/crypto-bot-artillery/candlestick';
+import { CandlestickExchange, CandlestickInterval, Candlesticks, FetchCandlestickClient } from '@hastobegood/crypto-bot-artillery/candlestick';
 import { CandlestickRepository } from './candlestick-repository';
 
 export class UpdateCandlestickService {
@@ -10,12 +10,7 @@ export class UpdateCandlestickService {
   }
 
   async #saveAll(exchange: CandlestickExchange, symbol: string, interval: CandlestickInterval): Promise<void> {
-    const candlesticks = await this.fetchCandlestickClient.fetchAll({
-      exchange: exchange,
-      symbol: symbol,
-      interval: interval,
-      period: 2,
-    });
+    const candlesticks = await this.#getLastCandlesticks(exchange, symbol, interval);
 
     const data = {
       exchange: exchange,
@@ -27,5 +22,22 @@ export class UpdateCandlestickService {
     if (candlesticks.values.length) {
       await this.candlestickRepository.save(candlesticks);
     }
+  }
+
+  async #getLastCandlesticks(exchange: CandlestickExchange, symbol: string, interval: CandlestickInterval): Promise<Candlesticks> {
+    const candlesticks = await this.fetchCandlestickClient.fetchAll({
+      exchange: exchange,
+      symbol: symbol,
+      interval: interval,
+      period: 2,
+    });
+
+    // ignore candlesticks older than 2 minutes
+    const limitDate = new Date().valueOf() - 120_000;
+
+    return {
+      ...candlesticks,
+      values: candlesticks.values.filter((value) => value.closingDate >= limitDate),
+    };
   }
 }

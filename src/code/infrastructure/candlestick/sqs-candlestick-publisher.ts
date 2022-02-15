@@ -5,6 +5,19 @@ import { CandlestickPublisher } from '../../domain/candlestick/candlestick-publi
 export class SqsCandlestickPublisher implements CandlestickPublisher {
   constructor(private queueUrl: string, private sqsClient: SQSClient) {}
 
+  async publishTriggeredBySymbol(exchange: CandlestickExchange, symbol: string): Promise<void> {
+    const currentSeconds = (new Date().setUTCMilliseconds(0) / 1_000) % 60;
+    const delaySeconds = (currentSeconds <= 10 ? 10 : 70) - currentSeconds;
+
+    const sendMessageInput: SendMessageCommandInput = {
+      QueueUrl: this.queueUrl,
+      MessageBody: JSON.stringify(this.#buildMessage(exchange, symbol)),
+      DelaySeconds: delaySeconds,
+    };
+
+    await this.sqsClient.send(new SendMessageCommand(sendMessageInput));
+  }
+
   async publishUpdatedBySymbol(exchange: CandlestickExchange, symbol: string): Promise<void> {
     const sendMessageInput: SendMessageCommandInput = {
       QueueUrl: this.queueUrl,
@@ -16,7 +29,7 @@ export class SqsCandlestickPublisher implements CandlestickPublisher {
     await this.sqsClient.send(new SendMessageCommand(sendMessageInput));
   }
 
-  #buildMessage(exchange: CandlestickExchange, symbol: string): UpdatedCandlesticksMessage {
+  #buildMessage(exchange: CandlestickExchange, symbol: string): TriggeredCandlesticksMessage | UpdatedCandlesticksMessage {
     return {
       content: {
         exchange: exchange,
@@ -24,6 +37,13 @@ export class SqsCandlestickPublisher implements CandlestickPublisher {
       },
     };
   }
+}
+
+export interface TriggeredCandlesticksMessage {
+  content: {
+    exchange: CandlestickExchange;
+    symbol: string;
+  };
 }
 
 export interface UpdatedCandlesticksMessage {

@@ -1,34 +1,29 @@
 import { mocked } from 'ts-jest/utils';
-import { UpdateAllCandlesticksEventScheduler } from '../../../../src/code/application/candlestick/update-all-candlesticks-event-scheduler';
+import { UpdateAllCandlesticksMessageConsumer } from '../../../../src/code/application/candlestick/update-all-candlesticks-message-consumer';
 import { UpdateCandlestickService } from '../../../../src/code/domain/candlestick/update-candlestick-service';
 import { PublishCandlestickService } from '../../../../src/code/domain/candlestick/publish-candlestick-service';
+import { TriggeredCandlesticksMessage } from '../../../../src/code/infrastructure/candlestick/sqs-candlestick-publisher';
+import { buildDefaultTriggeredCandlesticksMessage } from '../../../builders/infrastructure/candlestick/candlestick-message-builder';
 
 const updateCandlestickServiceMock = mocked(jest.genMockFromModule<UpdateCandlestickService>('../../../../src/code/domain/candlestick/update-candlestick-service'), true);
 const publishCandlestickServiceMock = mocked(jest.genMockFromModule<PublishCandlestickService>('../../../../src/code/domain/candlestick/publish-candlestick-service'), true);
 
-let updateAllCandlesticksEventScheduler: UpdateAllCandlesticksEventScheduler;
+let updateAllCandlesticksMessageConsumer: UpdateAllCandlesticksMessageConsumer;
 beforeEach(() => {
   updateCandlestickServiceMock.updateAllBySymbol = jest.fn();
   publishCandlestickServiceMock.publishUpdatedBySymbol = jest.fn();
 
-  updateAllCandlesticksEventScheduler = new UpdateAllCandlesticksEventScheduler(updateCandlestickServiceMock, publishCandlestickServiceMock);
+  updateAllCandlesticksMessageConsumer = new UpdateAllCandlesticksMessageConsumer(updateCandlestickServiceMock, publishCandlestickServiceMock);
 });
 
-describe('UpdateAllCandlesticksEventScheduler', () => {
+describe('UpdateAllCandlesticksMessageConsumer', () => {
+  let triggeredCandlesticksMessage: TriggeredCandlesticksMessage;
+
+  beforeEach(() => {
+    triggeredCandlesticksMessage = buildDefaultTriggeredCandlesticksMessage();
+  });
+
   describe('Given candlesticks to update for a symbol', () => {
-    describe('When exchange is unknown', () => {
-      it('Then error is thrown', async () => {
-        try {
-          await updateAllCandlesticksEventScheduler.process('Unknown', 'ABC');
-          fail();
-        } catch (error) {
-          expect((error as Error).message).toEqual("Unsupported 'Unknown' exchange");
-        }
-
-        expect(updateCandlestickServiceMock.updateAllBySymbol).toHaveBeenCalledTimes(0);
-      });
-    });
-
     describe('When update has failed', () => {
       beforeEach(() => {
         updateCandlestickServiceMock.updateAllBySymbol.mockRejectedValue(new Error('Error occurred !'));
@@ -36,7 +31,7 @@ describe('UpdateAllCandlesticksEventScheduler', () => {
 
       it('Then error is thrown', async () => {
         try {
-          await updateAllCandlesticksEventScheduler.process('Binance', 'ABC');
+          await updateAllCandlesticksMessageConsumer.process(triggeredCandlesticksMessage);
           fail();
         } catch (error) {
           expect((error as Error).message).toEqual('Error occurred !');
@@ -45,8 +40,8 @@ describe('UpdateAllCandlesticksEventScheduler', () => {
         expect(updateCandlestickServiceMock.updateAllBySymbol).toHaveBeenCalledTimes(1);
         const updateAllBySymbolParams = updateCandlestickServiceMock.updateAllBySymbol.mock.calls[0];
         expect(updateAllBySymbolParams.length).toEqual(2);
-        expect(updateAllBySymbolParams[0]).toEqual('Binance');
-        expect(updateAllBySymbolParams[1]).toEqual('ABC');
+        expect(updateAllBySymbolParams[0]).toEqual(triggeredCandlesticksMessage.content.exchange);
+        expect(updateAllBySymbolParams[1]).toEqual(triggeredCandlesticksMessage.content.symbol);
 
         expect(publishCandlestickServiceMock.publishUpdatedBySymbol).toHaveBeenCalledTimes(0);
       });
@@ -58,19 +53,19 @@ describe('UpdateAllCandlesticksEventScheduler', () => {
       });
 
       it('Then nothing is returned', async () => {
-        await updateAllCandlesticksEventScheduler.process('Binance', 'ABC');
+        await updateAllCandlesticksMessageConsumer.process(triggeredCandlesticksMessage);
 
         expect(updateCandlestickServiceMock.updateAllBySymbol).toHaveBeenCalledTimes(1);
         const updateAllBySymbolParams = updateCandlestickServiceMock.updateAllBySymbol.mock.calls[0];
         expect(updateAllBySymbolParams.length).toEqual(2);
-        expect(updateAllBySymbolParams[0]).toEqual('Binance');
-        expect(updateAllBySymbolParams[1]).toEqual('ABC');
+        expect(updateAllBySymbolParams[0]).toEqual(triggeredCandlesticksMessage.content.exchange);
+        expect(updateAllBySymbolParams[1]).toEqual(triggeredCandlesticksMessage.content.symbol);
 
         expect(publishCandlestickServiceMock.publishUpdatedBySymbol).toHaveBeenCalledTimes(1);
         const publishUpdatedBySymbolParams = publishCandlestickServiceMock.publishUpdatedBySymbol.mock.calls[0];
         expect(publishUpdatedBySymbolParams.length).toEqual(2);
-        expect(publishUpdatedBySymbolParams[0]).toEqual('Binance');
-        expect(publishUpdatedBySymbolParams[1]).toEqual('ABC');
+        expect(publishUpdatedBySymbolParams[0]).toEqual(triggeredCandlesticksMessage.content.exchange);
+        expect(publishUpdatedBySymbolParams[1]).toEqual(triggeredCandlesticksMessage.content.symbol);
       });
     });
   });

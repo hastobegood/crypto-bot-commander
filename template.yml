@@ -39,10 +39,10 @@ Mappings:
   EnvironmentMap:
     test:
       AvailableSymbols: BNB#BUSD,BTC#BUSD
-      UpdateAllCandlesticksSchedule: rate(1 minute)
+      TriggerAllCandlesticksSchedule: rate(1 minute)
     prod:
-      AvailableSymbols: BNB#BUSD,BNB#BTC,BTC#BUSD,XRP#BUSD,XRP#BNB,VET#ETH
-      UpdateAllCandlesticksSchedule: rate(1 minute)
+      AvailableSymbols: BNB#BUSD,BTC#BUSD,XRP#BUSD
+      TriggerAllCandlesticksSchedule: rate(1 minute)
 
 Globals:
   Api:
@@ -53,7 +53,7 @@ Globals:
   Function:
     Runtime: nodejs14.x
     MemorySize: 128
-    Timeout: 30
+    Timeout: 10
     AutoPublishAlias: Live
     Tracing: !If [ TracingCondition, Active, PassThrough ]
     Environment:
@@ -90,6 +90,28 @@ Resources:
         - DynamoDBWritePolicy:
             TableName: !Ref CandlestickTable
 
+  TriggerAllCandlesticksFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Description: Trigger all candlesticks function
+      CodeUri: dist/webpack/trigger-all-candlesticks-handler
+      Handler: app.handler
+      EventInvokeConfig:
+        MaximumRetryAttempts: 0
+      Environment:
+        Variables:
+          AVAILABLE_SYMBOLS: !FindInMap [ EnvironmentMap, !Ref EnvironmentParameter, AvailableSymbols ]
+          TRIGGERED_CANDLESTICKS_QUEUE_URL: !Ref TriggeredCandlesticksQueue
+      Events:
+        ScheduleEvent:
+          Type: Schedule
+          Properties:
+            Enabled: true
+            Schedule: !FindInMap [ EnvironmentMap, !Ref EnvironmentParameter, TriggerAllCandlesticksSchedule ]
+      Policies:
+        - SQSSendMessagePolicy:
+            QueueName: !GetAtt TriggeredCandlesticksQueue.QueueName
+
   UpdateAllCandlesticksFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -101,15 +123,15 @@ Resources:
       Environment:
         Variables:
           EXCHANGES_SECRET_NAME: !Ref ExchangesSecretNameParameter
-          AVAILABLE_SYMBOLS: !FindInMap [ EnvironmentMap, !Ref EnvironmentParameter, AvailableSymbols ]
           CANDLESTICK_TABLE_NAME: !Ref CandlestickTable
           UPDATED_CANDLESTICKS_QUEUE_URL: !Ref UpdatedCandlesticksQueue
       Events:
-        ScheduleEvent:
-          Type: Schedule
+        SqsEvent:
+          Type: SQS
           Properties:
             Enabled: true
-            Schedule: !FindInMap [ EnvironmentMap, !Ref EnvironmentParameter, UpdateAllCandlesticksSchedule ]
+            Queue: !GetAtt TriggeredCandlesticksQueue.Arn
+            BatchSize: 5
       Policies:
         - AWSSecretsManagerGetSecretValuePolicy:
             SecretArn: !Sub arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${ExchangesSecretNameParameter}*
@@ -142,7 +164,7 @@ Resources:
           Properties:
             Enabled: true
             Queue: !GetAtt UpdatedCandlesticksQueue.Arn
-            BatchSize: 10
+            BatchSize: 5
       Policies:
         - DynamoDBReadPolicy:
             TableName: !Ref StrategyTable
@@ -240,7 +262,10 @@ Resources:
   CandlestickTable:
     Type: AWS::DynamoDB::Table
     Properties:
-      BillingMode: PAY_PER_REQUEST
+      BillingMode: PROVISIONED
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 2
       SSESpecification:
         SSEEnabled: true
       KeySchema:
@@ -313,30 +338,36 @@ Resources:
         - AttributeName: sk
           AttributeType: S
 
+  TriggeredCandlesticksQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      VisibilityTimeout: 60
+      MessageRetentionPeriod: 60
+
   UpdatedCandlesticksQueue:
     Type: AWS::SQS::Queue
     Properties:
-      FifoQueue: true
-      VisibilityTimeout: 90
+      VisibilityTimeout: 60
       MessageRetentionPeriod: 60
+      FifoQueue: true
       DeduplicationScope: messageGroup
       FifoThroughputLimit: perMessageGroupId
 
   ActiveStrategiesQueue:
     Type: AWS::SQS::Queue
     Properties:
-      FifoQueue: true
-      VisibilityTimeout: 90
+      VisibilityTimeout: 60
       MessageRetentionPeriod: 60
+      FifoQueue: true
       DeduplicationScope: messageGroup
       FifoThroughputLimit: perMessageGroupId
 
   ProcessedStrategyStepQueue:
     Type: AWS::SQS::Queue
     Properties:
-      FifoQueue: true
-      VisibilityTimeout: 90
+      VisibilityTimeout: 60
       MessageRetentionPeriod: 60
+      FifoQueue: true
       DeduplicationScope: messageGroup
       FifoThroughputLimit: perMessageGroupId
 
@@ -406,6 +437,16 @@ Outputs:
   OrderTableArn:
     Description: Order table ARN
     Value: !GetAtt OrderTable.Arn
+
+  TriggeredCandlesticksQueueName:
+    Description: Triggered candlesticks queue name
+    Value: !GetAtt TriggeredCandlesticksQueue.QueueName
+  TriggeredCandlesticksQueueArn:
+    Description: Triggered candlesticks queue ARN
+    Value: !GetAtt TriggeredCandlesticksQueue.Arn
+  TriggeredCandlesticksQueueUrl:
+    Description: Triggered candlesticks queue URL
+    Value: !Ref TriggeredCandlesticksQueue
 
   UpdatedCandlesticksQueueName:
     Description: Updated candlesticks queue name
