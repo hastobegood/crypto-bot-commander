@@ -1,8 +1,8 @@
 import { SQSClient } from '@aws-sdk/client-sqs';
 import { mocked } from 'ts-jest/utils';
 import MockDate from 'mockdate';
-import { SqsCandlestickPublisher, UpdatedCandlesticksMessage } from '../../../../src/code/infrastructure/candlestick/sqs-candlestick-publisher';
-import { buildDefaultUpdatedCandlesticksMessage } from '../../../builders/infrastructure/candlestick/candlestick-message-builder';
+import { SqsCandlestickPublisher, TriggeredCandlesticksMessage, UpdatedCandlesticksMessage } from '../../../../src/code/infrastructure/candlestick/sqs-candlestick-publisher';
+import { buildDefaultTriggeredCandlesticksMessage, buildDefaultUpdatedCandlesticksMessage } from '../../../builders/infrastructure/candlestick/candlestick-message-builder';
 import { CandlestickPublisher } from '../../../../src/code/domain/candlestick/candlestick-publisher';
 
 const sqsClientMock = mocked(jest.genMockFromModule<SQSClient>('@aws-sdk/client-sqs'), true);
@@ -16,16 +16,85 @@ beforeEach(() => {
 
 describe('SqsCandlestickPublisher', () => {
   let date: Date;
-  let updatedCandlesticksMessage: UpdatedCandlesticksMessage;
 
-  beforeEach(() => {
-    date = new Date();
-    MockDate.set(date);
+  describe('Given triggered candlesticks by symbol to publish', () => {
+    let triggeredCandlesticksMessage: TriggeredCandlesticksMessage;
 
-    updatedCandlesticksMessage = buildDefaultUpdatedCandlesticksMessage();
+    beforeEach(() => {
+      triggeredCandlesticksMessage = buildDefaultTriggeredCandlesticksMessage();
+    });
+
+    describe('Where current seconds is lower than 10', () => {
+      beforeEach(() => {
+        date = new Date('2022-02-26T16:17:07.153Z');
+        MockDate.set(date);
+      });
+
+      it('Then triggered candlesticks symbol is published with less than 10 seconds delay ', async () => {
+        await candlestickPublisher.publishTriggeredBySymbol(triggeredCandlesticksMessage.content.exchange, triggeredCandlesticksMessage.content.symbol);
+
+        expect(sqsClientMock.send).toHaveBeenCalledTimes(1);
+        const sendParams = sqsClientMock.send.mock.calls[0];
+        expect(sendParams.length).toEqual(1);
+        expect(sendParams[0].input).toEqual({
+          QueueUrl: 'my-queue-url',
+          MessageBody: JSON.stringify(triggeredCandlesticksMessage),
+          DelaySeconds: 3,
+        });
+      });
+    });
+
+    describe('Where current seconds is equal to 10', () => {
+      beforeEach(() => {
+        date = new Date('2022-02-26T16:17:10.153Z');
+        MockDate.set(date);
+      });
+
+      it('Then triggered candlesticks symbol is published with 0 seconds delay ', async () => {
+        await candlestickPublisher.publishTriggeredBySymbol(triggeredCandlesticksMessage.content.exchange, triggeredCandlesticksMessage.content.symbol);
+
+        expect(sqsClientMock.send).toHaveBeenCalledTimes(1);
+        const sendParams = sqsClientMock.send.mock.calls[0];
+        expect(sendParams.length).toEqual(1);
+        expect(sendParams[0].input).toEqual({
+          QueueUrl: 'my-queue-url',
+          MessageBody: JSON.stringify(triggeredCandlesticksMessage),
+          DelaySeconds: 0,
+        });
+      });
+    });
+
+    describe('Where current seconds is greater than 10', () => {
+      beforeEach(() => {
+        date = new Date('2022-02-26T16:17:45.153Z');
+        MockDate.set(date);
+      });
+
+      it('Then triggered candlesticks symbol is published with more than 10 seconds delay ', async () => {
+        await candlestickPublisher.publishTriggeredBySymbol(triggeredCandlesticksMessage.content.exchange, triggeredCandlesticksMessage.content.symbol);
+
+        expect(sqsClientMock.send).toHaveBeenCalledTimes(1);
+        const sendParams = sqsClientMock.send.mock.calls[0];
+        expect(sendParams.length).toEqual(1);
+        expect(sendParams[0].input).toEqual({
+          QueueUrl: 'my-queue-url',
+          MessageBody: JSON.stringify(triggeredCandlesticksMessage),
+          DelaySeconds: 25,
+        });
+      });
+    });
   });
 
   describe('Given updated candlesticks by symbol to publish', () => {
+    let updatedCandlesticksMessage: UpdatedCandlesticksMessage;
+
+    beforeEach(() => {
+      updatedCandlesticksMessage = buildDefaultUpdatedCandlesticksMessage();
+
+      date = new Date();
+      MockDate.set(date);
+    });
+
     it('Then updated candlesticks symbol is published', async () => {
       await candlestickPublisher.publishUpdatedBySymbol(updatedCandlesticksMessage.content.exchange, updatedCandlesticksMessage.content.symbol);
 

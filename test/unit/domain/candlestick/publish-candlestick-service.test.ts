@@ -6,13 +6,34 @@ const candlestickPublisherMock = mocked(jest.genMockFromModule<CandlestickPublis
 
 let publishStrategyService: PublishCandlestickService;
 beforeEach(() => {
+  candlestickPublisherMock.publishTriggeredBySymbol = jest.fn();
   candlestickPublisherMock.publishUpdatedBySymbol = jest.fn();
 
   publishStrategyService = new PublishCandlestickService(candlestickPublisherMock);
 });
 
 describe('PublishCandlestickService', () => {
+  describe('Given triggered candlesticks by symbol to publish', () => {
+    afterEach(() => {
+      expect(candlestickPublisherMock.publishUpdatedBySymbol).toHaveBeenCalledTimes(0);
+    });
+
+    it('Then triggered candlesticks symbol is published', async () => {
+      await publishStrategyService.publishTriggeredBySymbol('Binance', 'ABC');
+
+      expect(candlestickPublisherMock.publishTriggeredBySymbol).toHaveBeenCalledTimes(1);
+      const publishTriggeredBySymbolParams = candlestickPublisherMock.publishTriggeredBySymbol.mock.calls[0];
+      expect(publishTriggeredBySymbolParams.length).toEqual(2);
+      expect(publishTriggeredBySymbolParams[0]).toEqual('Binance');
+      expect(publishTriggeredBySymbolParams[1]).toEqual('ABC');
+    });
+  });
+
   describe('Given updated candlesticks by symbol to publish', () => {
+    afterEach(() => {
+      expect(candlestickPublisherMock.publishTriggeredBySymbol).toHaveBeenCalledTimes(0);
+    });
+
     it('Then updated candlesticks symbol is published', async () => {
       await publishStrategyService.publishUpdatedBySymbol('Binance', 'ABC');
 
