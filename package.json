@@ -17,8 +17,8 @@
     "lint": "yarn eslint . --ext .ts",
     "lint:fix": "yarn eslint . --ext .ts --fix",
     "lint:report": "yarn eslint . --ext .ts --format json -o reports/eslint-report.json ",
-    "deploy:test": "sam build && sam deploy --config-env test",
-    "deploy:prod": "sam build && sam deploy --config-env prod"
+    "deploy:test": "sam build && sam deploy --config-env test --tags Environment=test Application=CryptoBotCommander",
+    "deploy:prod": "sam build && sam deploy --config-env prod --tags Environment=prod Application=CryptoBotCommander"
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.53.0",
