@@ -1309,21 +1309,21 @@
   dependencies:
     "@hapi/hoek" "^9.0.0"
 
-"@hastobegood/crypto-bot-artillery@^0.7.0":
-  version "0.7.0"
-  resolved "https://registry.yarnpkg.com/@hastobegood/crypto-bot-artillery/-/crypto-bot-artillery-0.7.0.tgz#bf7cb6019fe14938b16551b72dd6a7da22ecd8ea"
-  integrity sha512-ACPSID+Lxgc5Xj5xB9ayZCakIr1E1xPXltqLv3SxQA0tiRQ8w1+//y0ezDfMijcOp/jhyelhXfs04NwAW61bAQ==
+"@hastobegood/crypto-bot-artillery@^0.8.0":
+  version "0.8.0"
+  resolved "https://registry.yarnpkg.com/@hastobegood/crypto-bot-artillery/-/crypto-bot-artillery-0.8.0.tgz#140579fe5e29ea3225d177a3aea04cb3d03d81cd"
+  integrity sha512-fsiLAxiHe6IK7AYxGZRKAaOBeZ4C25Wf3EISgF/5lVIYlblNXKR0XbyNbhVpROvPOom+eOaGBaOU6Iib9F1t/g==
   dependencies:
-    "@hastobegood/crypto-clients-binance" "^0.3.0"
+    "@hastobegood/crypto-clients-binance" "^0.5.0"
     joi "^17.6.0"
-    pino "^7.6.4"
+    pino "^7.8.0"
 
-"@hastobegood/crypto-clients-binance@^0.3.0":
-  version "0.3.0"
-  resolved "https://registry.yarnpkg.com/@hastobegood/crypto-clients-binance/-/crypto-clients-binance-0.3.0.tgz#191046cc6479dcdebf9ea3eb74191a7f31af5e01"
-  integrity sha512-kLnnjDnSpuDfL5aXISdJMdrsrUS9/Sn+j1c2GVuQH3nd/fqe6NP15fcHz/KZXEe1FF8QkniawOriQ6J4BOeYbA==
+"@hastobegood/crypto-clients-binance@^0.5.0":
+  version "0.5.0"
+  resolved "https://registry.yarnpkg.com/@hastobegood/crypto-clients-binance/-/crypto-clients-binance-0.5.0.tgz#57aadd42c23371bac650aa98381f26f1b341dd06"
+  integrity sha512-SXCghYeQi7N/eFRBjT5sNQPv0EvKXrk30GE+IVM9Rp6HxzjN2m9rIN20xYf1a2dNpchA8l2ccrUsnMVrRFODvA==
   dependencies:
-    axios "^0.25.0"
+    axios "^0.26.0"
 
 "@humanwhocodes/config-array@^0.9.2":
   version "0.9.2"
@@ -2237,12 +2237,12 @@ aws-xray-sdk-core@^3.3.4:
     cls-hooked "^4.2.2"
     semver "^5.3.0"
 
-axios@^0.25.0:
-  version "0.25.0"
-  resolved "https://registry.yarnpkg.com/axios/-/axios-0.25.0.tgz#349cfbb31331a9b4453190791760a8d35b093e0a"
-  integrity sha512-cD8FOb0tRH3uuEe6+evtAbgJtfxr7ly3fQjYcMcuPlgkwVS9xboaVIpcDV+cYQe+yGykgwZCs1pzjntcGa6l5g==
+axios@^0.26.0:
+  version "0.26.0"
+  resolved "https://registry.yarnpkg.com/axios/-/axios-0.26.0.tgz#9a318f1c69ec108f8cd5f3c3d390366635e13928"
+  integrity sha512-lKoGLMYtHvFrPVt3r+RBMp9nh34N0M8zEfCWqdWZx6phynIEhQqAdydpyBAAG211zlhX9Rgu08cOamy6XjE5Og==
   dependencies:
-    follow-redirects "^1.14.7"
+    follow-redirects "^1.14.8"
 
 babel-jest@^27.5.1:
   version "27.5.1"
@@ -3002,7 +3002,7 @@ flatted@^3.1.0:
   resolved "https://registry.yarnpkg.com/flatted/-/flatted-3.2.4.tgz#28d9969ea90661b5134259f312ab6aa7929ac5e2"
   integrity sha512-8/sOawo8tJ4QOBX8YlQBMxL8+RLZfxMQOif9o0KUKTNTjMYElWPE0r/m5VNFxTRd0NSw8qSy8dajrwX4RYI1Hw==
 
-follow-redirects@^1.14.7:
+follow-redirects@^1.14.8:
   version "1.14.9"
   resolved "https://registry.yarnpkg.com/follow-redirects/-/follow-redirects-1.14.9.tgz#dd4ea157de7bfaf9ea9b3fbd85aa16951f78d8d7"
   integrity sha512-MQDfihBQYMcyy5dhRDJUHcw7lb2Pv/TuE6xP1vyraLukNDHKbDxDNaOE3NbCAdKQApno+GPRyo1YAp89yCjK4w==
@@ -4231,10 +4231,10 @@ pino-std-serializers@^4.0.0:
   resolved "https://registry.yarnpkg.com/pino-std-serializers/-/pino-std-serializers-4.0.0.tgz#1791ccd2539c091ae49ce9993205e2cd5dbba1e2"
   integrity sha512-cK0pekc1Kjy5w9V2/n+8MkZwusa6EyyxfeQCB799CQRhRt/CqYKiWs5adeu8Shve2ZNffvfC/7J64A2PJo1W/Q==
 
-pino@^7.6.4:
-  version "7.6.4"
-  resolved "https://registry.yarnpkg.com/pino/-/pino-7.6.4.tgz#f82421fd7a16d82a70b398e1687c4bd86ae48db2"
-  integrity sha512-ktibPg3ttWONxYQ2Efk1zYbIvofD5zdd/ReoujK84ggEp0REflb9TsXavSjt8u1CdT2mMJe9QQ3ZpyOQxUKipA==
+pino@^7.8.0:
+  version "7.8.0"
+  resolved "https://registry.yarnpkg.com/pino/-/pino-7.8.0.tgz#cbd48121fba0e9e08acea440d27aa7baa91fd73c"
+  integrity sha512-Ynw2HRVapiyj+ZGfUcpms+SRgDKFIy0ztaFUf3X6IHh+vsysMvn+tpV/Ej3gyutPp4n9tgH6ZkkCAelSvP5zmQ==
   dependencies:
     fast-redact "^3.0.0"
     on-exit-leak-free "^0.2.0"
