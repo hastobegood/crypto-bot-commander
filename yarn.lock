@@ -1309,14 +1309,14 @@
   dependencies:
     "@hapi/hoek" "^9.0.0"
 
-"@hastobegood/crypto-bot-artillery@^0.8.0":
-  version "0.8.0"
-  resolved "https://registry.yarnpkg.com/@hastobegood/crypto-bot-artillery/-/crypto-bot-artillery-0.8.0.tgz#140579fe5e29ea3225d177a3aea04cb3d03d81cd"
-  integrity sha512-fsiLAxiHe6IK7AYxGZRKAaOBeZ4C25Wf3EISgF/5lVIYlblNXKR0XbyNbhVpROvPOom+eOaGBaOU6Iib9F1t/g==
+"@hastobegood/crypto-bot-artillery@^0.9.0":
+  version "0.9.0"
+  resolved "https://registry.yarnpkg.com/@hastobegood/crypto-bot-artillery/-/crypto-bot-artillery-0.9.0.tgz#906ea331628b7ec2a5cc498b9adc49555294f8e3"
+  integrity sha512-voNc32gjNM5C0UuXUwJ5jni5KBYMKc+ejWIrmfMBtOGIxOLGiUXI18cOsTToWtSVyZ78YJ6mG5FvoL7OMNcnNg==
   dependencies:
     "@hastobegood/crypto-clients-binance" "^0.5.0"
     joi "^17.6.0"
-    pino "^7.8.0"
+    pino "^7.8.1"
 
 "@hastobegood/crypto-clients-binance@^0.5.0":
   version "0.5.0"
@@ -4239,10 +4239,10 @@ pino-std-serializers@^4.0.0:
   resolved "https://registry.yarnpkg.com/pino-std-serializers/-/pino-std-serializers-4.0.0.tgz#1791ccd2539c091ae49ce9993205e2cd5dbba1e2"
   integrity sha512-cK0pekc1Kjy5w9V2/n+8MkZwusa6EyyxfeQCB799CQRhRt/CqYKiWs5adeu8Shve2ZNffvfC/7J64A2PJo1W/Q==
 
-pino@^7.8.0:
-  version "7.8.0"
-  resolved "https://registry.yarnpkg.com/pino/-/pino-7.8.0.tgz#cbd48121fba0e9e08acea440d27aa7baa91fd73c"
-  integrity sha512-Ynw2HRVapiyj+ZGfUcpms+SRgDKFIy0ztaFUf3X6IHh+vsysMvn+tpV/Ej3gyutPp4n9tgH6ZkkCAelSvP5zmQ==
+pino@^7.8.1:
+  version "7.8.1"
+  resolved "https://registry.yarnpkg.com/pino/-/pino-7.8.1.tgz#f8a7b590a6f2321e2f23b91515763530efbd61bb"
+  integrity sha512-G0AVnaJBBtbdOpZ3z0/QD3R57BWwjVo4K7e+c5mHKjNCYIY1FIKuNlWjVJfCVQ4Bq6iN/yAAh5OCeeTI7OXosA==
   dependencies:
     fast-redact "^3.0.0"
     on-exit-leak-free "^0.2.0"
