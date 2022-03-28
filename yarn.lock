@@ -1309,21 +1309,21 @@
   dependencies:
     "@hapi/hoek" "^9.0.0"
 
-"@hastobegood/crypto-bot-artillery@^0.8.0":
-  version "0.8.0"
-  resolved "https://registry.yarnpkg.com/@hastobegood/crypto-bot-artillery/-/crypto-bot-artillery-0.8.0.tgz#140579fe5e29ea3225d177a3aea04cb3d03d81cd"
-  integrity sha512-fsiLAxiHe6IK7AYxGZRKAaOBeZ4C25Wf3EISgF/5lVIYlblNXKR0XbyNbhVpROvPOom+eOaGBaOU6Iib9F1t/g==
+"@hastobegood/crypto-bot-artillery@^0.10.0":
+  version "0.10.0"
+  resolved "https://registry.yarnpkg.com/@hastobegood/crypto-bot-artillery/-/crypto-bot-artillery-0.10.0.tgz#89acdb9acad634e47d3d6a6404370848d4da0dec"
+  integrity sha512-wGMDHOok4eyzR3K3AyiqVyR9FgqgQulUghCqq2dYBuhJVkVYoRPoPZoMHP9CmTnZis7U0KTwisjst2dL9rD9Xw==
   dependencies:
-    "@hastobegood/crypto-clients-binance" "^0.5.0"
+    "@hastobegood/crypto-clients-binance" "^0.6.0"
     joi "^17.6.0"
-    pino "^7.8.0"
+    pino "^7.9.2"
 
-"@hastobegood/crypto-clients-binance@^0.5.0":
-  version "0.5.0"
-  resolved "https://registry.yarnpkg.com/@hastobegood/crypto-clients-binance/-/crypto-clients-binance-0.5.0.tgz#57aadd42c23371bac650aa98381f26f1b341dd06"
-  integrity sha512-SXCghYeQi7N/eFRBjT5sNQPv0EvKXrk30GE+IVM9Rp6HxzjN2m9rIN20xYf1a2dNpchA8l2ccrUsnMVrRFODvA==
+"@hastobegood/crypto-clients-binance@^0.6.0":
+  version "0.6.0"
+  resolved "https://registry.yarnpkg.com/@hastobegood/crypto-clients-binance/-/crypto-clients-binance-0.6.0.tgz#48fc003d37f7c0c465a3691d760759f6dbd02f3a"
+  integrity sha512-mYVsKpni6Tn4ijK04Vn6kNDT9O7Qg6rNjfSs28J7A+vLntaGQRlD+tqcEkq1cZ/oB4Z9DQgBQCbKHiYJPU+0AQ==
   dependencies:
-    axios "^0.26.0"
+    axios "^0.26.1"
 
 "@humanwhocodes/config-array@^0.9.2":
   version "0.9.2"
@@ -2237,10 +2237,10 @@ aws-xray-sdk-core@^3.3.4:
     cls-hooked "^4.2.2"
     semver "^5.3.0"
 
-axios@^0.26.0:
-  version "0.26.0"
-  resolved "https://registry.yarnpkg.com/axios/-/axios-0.26.0.tgz#9a318f1c69ec108f8cd5f3c3d390366635e13928"
-  integrity sha512-lKoGLMYtHvFrPVt3r+RBMp9nh34N0M8zEfCWqdWZx6phynIEhQqAdydpyBAAG211zlhX9Rgu08cOamy6XjE5Og==
+axios@^0.26.1:
+  version "0.26.1"
+  resolved "https://registry.yarnpkg.com/axios/-/axios-0.26.1.tgz#1ede41c51fcf51bbbd6fd43669caaa4f0495aaa9"
+  integrity sha512-fPwcX4EvnSHuInCMItEhAGnaSEXRBjtzh9fOtsE6E1G6p7vl7edEeZe11QHf18+6+9gR5PbKV/sGKNaD8YaMeA==
   dependencies:
     follow-redirects "^1.14.8"
 
@@ -4239,10 +4239,10 @@ pino-std-serializers@^4.0.0:
   resolved "https://registry.yarnpkg.com/pino-std-serializers/-/pino-std-serializers-4.0.0.tgz#1791ccd2539c091ae49ce9993205e2cd5dbba1e2"
   integrity sha512-cK0pekc1Kjy5w9V2/n+8MkZwusa6EyyxfeQCB799CQRhRt/CqYKiWs5adeu8Shve2ZNffvfC/7J64A2PJo1W/Q==
 
-pino@^7.8.0:
-  version "7.8.0"
-  resolved "https://registry.yarnpkg.com/pino/-/pino-7.8.0.tgz#cbd48121fba0e9e08acea440d27aa7baa91fd73c"
-  integrity sha512-Ynw2HRVapiyj+ZGfUcpms+SRgDKFIy0ztaFUf3X6IHh+vsysMvn+tpV/Ej3gyutPp4n9tgH6ZkkCAelSvP5zmQ==
+pino@^7.9.2:
+  version "7.9.2"
+  resolved "https://registry.yarnpkg.com/pino/-/pino-7.9.2.tgz#0519ac79b9db17f0c63bb4267f7e8133f5c517ad"
+  integrity sha512-c8wmB2PuhdJurYPRl/eo3+PosHe7Ep6GZvBJFIrp9oV1YRZQ3qm3MujaEolaKUfwX8cDL96WKCWWMedB2drXqw==
   dependencies:
     fast-redact "^3.0.0"
     on-exit-leak-free "^0.2.0"
@@ -4253,7 +4253,7 @@ pino@^7.8.0:
     real-require "^0.1.0"
     safe-stable-stringify "^2.1.0"
     sonic-boom "^2.2.1"
-    thread-stream "^0.13.0"
+    thread-stream "^0.15.0"
 
 pirates@^4.0.4:
   version "4.0.4"
@@ -4755,10 +4755,10 @@ text-table@^0.2.0:
   resolved "https://registry.yarnpkg.com/text-table/-/text-table-0.2.0.tgz#7f5ee823ae805207c00af2df4a84ec3fcfa570b4"
   integrity sha1-f17oI66AUgfACvLfSoTsP8+lcLQ=
 
-thread-stream@^0.13.0:
-  version "0.13.1"
-  resolved "https://registry.yarnpkg.com/thread-stream/-/thread-stream-0.13.1.tgz#724e4c6ebaf6f5752a5dce54bef9153ecfdcb6df"
-  integrity sha512-+KNCqNxOSwYfXLtCIRDKQq29x9jvqnOFjYCPdB38sf4pT3QanPSNc8vRqMj+Q3z4tYIctb5opNZrMK/GwmgsAQ==
+thread-stream@^0.15.0:
+  version "0.15.1"
+  resolved "https://registry.yarnpkg.com/thread-stream/-/thread-stream-0.15.1.tgz#5aba24a35aa5e9e4eb66173826443d7167b34b07"
+  integrity sha512-SCnuIT27gc2h/F/RY2peuC7brgLy+1oXU+7yOIAITz1z5stDpXCF5rAoFcykjuK6ifbTlKAHL7Ccq8oc5Btv1w==
   dependencies:
     real-require "^0.1.0"
 
