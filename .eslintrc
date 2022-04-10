@@ -2,7 +2,7 @@
   "root": true,
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
-    "ecmaVersion": 2020
+    "ecmaVersion": 2021
   },
   "plugins": [
     "@typescript-eslint",
@@ -17,6 +17,18 @@
   "rules": {
     "no-console": "error",
     "prettier/prettier": "error",
-    "@typescript-eslint/no-non-null-assertion": "off"
-  }
+    "@typescript-eslint/no-non-null-assertion": "off",
+    "@typescript-eslint/no-empty-interface": "off",
+    "@typescript-eslint/explicit-function-return-type": [
+      "error",
+      {
+        "allowExpressions": true
+      }
+    ]
+  },
+  "ignorePatterns": [
+    "node_modules",
+    "dist",
+    ".aws-sam"
+  ]
 }

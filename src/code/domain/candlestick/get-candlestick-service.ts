@@ -71,7 +71,7 @@ export class GetCandlestickService {
     };
   }
 
-  async #getAllBySymbol(exchange: CandlestickExchange, symbol: string, interval: CandlestickInterval, startDate: number, endDate: number) {
+  async #getAllBySymbol(exchange: CandlestickExchange, symbol: string, interval: CandlestickInterval, startDate: number, endDate: number): Promise<Candlestick[]> {
     const candlesticks = await this.candlestickRepository.getAllBySymbol(exchange, symbol, interval, startDate, endDate);
 
     return candlesticks.sort((current, next) => current.openingDate - next.openingDate);
