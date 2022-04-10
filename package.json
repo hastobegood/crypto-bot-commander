@@ -21,7 +21,7 @@
     "deploy:prod": "sam build && sam deploy --config-env prod --tags Environment=prod Application=CryptoBotCommander"
   },
   "dependencies": {
-    "@aws-sdk/client-dynamodb": "^3.53.0",
+    "@aws-sdk/client-dynamodb": "^3.67.0",
     "@aws-sdk/client-secrets-manager": "^3.67.0",
     "@aws-sdk/client-sqs": "^3.67.0",
     "@aws-sdk/lib-dynamodb": "^3.67.0",
