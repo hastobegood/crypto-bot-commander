@@ -8,6 +8,7 @@
   },
   "type": "module",
   "scripts": {
+    "prepare": "yarn husky install",
     "clean": "rm -rf dist .aws-sam reports",
     "build": "yarn tsc",
     "bundle": "yarn webpack",
@@ -47,6 +48,7 @@
     "eslint": "^8.13.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-prettier": "^4.0.0",
+    "husky": "^7.0.4",
     "jest": "^27.5.1",
     "jest-sonar-reporter": "^2.0.0",
     "mockdate": "^3.0.5",
