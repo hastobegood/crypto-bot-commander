@@ -1814,19 +1814,19 @@
   dependencies:
     "@hapi/hoek" "^9.0.0"
 
-"@hastobegood/crypto-bot-artillery@^0.10.0":
-  version "0.10.0"
-  resolved "https://registry.yarnpkg.com/@hastobegood/crypto-bot-artillery/-/crypto-bot-artillery-0.10.0.tgz#89acdb9acad634e47d3d6a6404370848d4da0dec"
-  integrity sha512-wGMDHOok4eyzR3K3AyiqVyR9FgqgQulUghCqq2dYBuhJVkVYoRPoPZoMHP9CmTnZis7U0KTwisjst2dL9rD9Xw==
+"@hastobegood/crypto-bot-artillery@^0.12.0":
+  version "0.12.0"
+  resolved "https://registry.yarnpkg.com/@hastobegood/crypto-bot-artillery/-/crypto-bot-artillery-0.12.0.tgz#0aa2200d80c4623e15af7d82ff432277d47eca31"
+  integrity sha512-Mb1niKVJmihEAN6VZrG+voJHQQUjJbLBqQr5ql1WiWp2n4lv/OLYe9/42IsaUJ6Z6sQ8TtSBG3FmbTKdP80BLA==
   dependencies:
-    "@hastobegood/crypto-clients-binance" "^0.6.0"
+    "@hastobegood/crypto-clients-binance" "^0.7.0"
     joi "^17.6.0"
-    pino "^7.9.2"
+    pino "^7.10.0"
 
-"@hastobegood/crypto-clients-binance@^0.6.0":
-  version "0.6.0"
-  resolved "https://registry.yarnpkg.com/@hastobegood/crypto-clients-binance/-/crypto-clients-binance-0.6.0.tgz#48fc003d37f7c0c465a3691d760759f6dbd02f3a"
-  integrity sha512-mYVsKpni6Tn4ijK04Vn6kNDT9O7Qg6rNjfSs28J7A+vLntaGQRlD+tqcEkq1cZ/oB4Z9DQgBQCbKHiYJPU+0AQ==
+"@hastobegood/crypto-clients-binance@^0.7.0":
+  version "0.7.0"
+  resolved "https://registry.yarnpkg.com/@hastobegood/crypto-clients-binance/-/crypto-clients-binance-0.7.0.tgz#f4c3f2870d7518f111ac299275a9650373352e96"
+  integrity sha512-V7vAspX+7QDYFjiNrJP7cD8zG6n8f21V1NsR4dA3LzC0Pr+OxJIgWDNMP7PAdvuI6wPLUQOKektJIm9Jfzc23w==
   dependencies:
     axios "^0.26.1"
 
@@ -4778,11 +4778,12 @@ pino-std-serializers@^4.0.0:
   resolved "https://registry.yarnpkg.com/pino-std-serializers/-/pino-std-serializers-4.0.0.tgz#1791ccd2539c091ae49ce9993205e2cd5dbba1e2"
   integrity sha512-cK0pekc1Kjy5w9V2/n+8MkZwusa6EyyxfeQCB799CQRhRt/CqYKiWs5adeu8Shve2ZNffvfC/7J64A2PJo1W/Q==
 
-pino@^7.9.2:
-  version "7.9.2"
-  resolved "https://registry.yarnpkg.com/pino/-/pino-7.9.2.tgz#0519ac79b9db17f0c63bb4267f7e8133f5c517ad"
-  integrity sha512-c8wmB2PuhdJurYPRl/eo3+PosHe7Ep6GZvBJFIrp9oV1YRZQ3qm3MujaEolaKUfwX8cDL96WKCWWMedB2drXqw==
+pino@^7.10.0:
+  version "7.10.0"
+  resolved "https://registry.yarnpkg.com/pino/-/pino-7.10.0.tgz#c621a3acf3b7aa50a6156c1b3989d1703666b2b1"
+  integrity sha512-T6R92jy/APDElEuOk0gqa4nds3ZgqFbHde2X0g8XorlyPlVGlr9T5KQphtp72a3ByKOdZMg/gM/0IprpGQfTWg==
   dependencies:
+    atomic-sleep "^1.0.0"
     fast-redact "^3.0.0"
     on-exit-leak-free "^0.2.0"
     pino-abstract-transport v0.5.0
@@ -4792,7 +4793,7 @@ pino@^7.9.2:
     real-require "^0.1.0"
     safe-stable-stringify "^2.1.0"
     sonic-boom "^2.2.1"
-    thread-stream "^0.15.0"
+    thread-stream "^0.15.1"
 
 pirates@^4.0.4:
   version "4.0.4"
@@ -5294,7 +5295,7 @@ text-table@^0.2.0:
   resolved "https://registry.yarnpkg.com/text-table/-/text-table-0.2.0.tgz#7f5ee823ae805207c00af2df4a84ec3fcfa570b4"
   integrity sha1-f17oI66AUgfACvLfSoTsP8+lcLQ=
 
-thread-stream@^0.15.0:
+thread-stream@^0.15.1:
   version "0.15.1"
   resolved "https://registry.yarnpkg.com/thread-stream/-/thread-stream-0.15.1.tgz#5aba24a35aa5e9e4eb66173826443d7167b34b07"
   integrity sha512-SCnuIT27gc2h/F/RY2peuC7brgLy+1oXU+7yOIAITz1z5stDpXCF5rAoFcykjuK6ifbTlKAHL7Ccq8oc5Btv1w==
