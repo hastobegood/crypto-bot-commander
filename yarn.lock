@@ -578,15 +578,10 @@
     "@aws-sdk/types" "3.55.0"
     tslib "^2.3.1"
 
-"@aws-sdk/service-error-classification@3.55.0":
+"@aws-sdk/service-error-classification@3.55.0", "@aws-sdk/service-error-classification@^3.4.1":
   version "3.55.0"
   resolved "https://registry.yarnpkg.com/@aws-sdk/service-error-classification/-/service-error-classification-3.55.0.tgz#4a85d2d947102c50076bd2af295f62abd74e26ab"
   integrity sha512-HdjnDyarsa1Avq1MJurkLyEe9c3eRa76dPmK4TmRGgwJ+tInEzGHL0rBW7V8xBK+PDF+fJQ71hvm8jPYmzvBwQ==
-
-"@aws-sdk/service-error-classification@^3.4.1":
-  version "3.40.0"
-  resolved "https://registry.yarnpkg.com/@aws-sdk/service-error-classification/-/service-error-classification-3.40.0.tgz#c98cbb781bd50e5d90649742ff954d754201c44d"
-  integrity sha512-c8btKmkvjXczWudXubGdbO3JgmjySBUVC/gCrZDNfwNGsG8RYJJQYYcnmt1gWjelUZsgMDl/2PIzxTlxVF91rA==
 
 "@aws-sdk/shared-ini-file-loader@3.58.0":
   version "3.58.0"
@@ -2187,10 +2182,10 @@ atomic-sleep@^1.0.0:
   resolved "https://registry.yarnpkg.com/atomic-sleep/-/atomic-sleep-1.0.0.tgz#eb85b77a601fc932cfe432c5acd364a9e2c9075b"
   integrity sha512-kNOjDqAh7px0XWNI+4QbzoiR/nTkHAWNud2uvnJquD1/x5a7EQZMJT0AczqK0Qn67oY/TTQ1LbUKajZpp3I9tQ==
 
-aws-xray-sdk-core@^3.3.4:
-  version "3.3.4"
-  resolved "https://registry.yarnpkg.com/aws-xray-sdk-core/-/aws-xray-sdk-core-3.3.4.tgz#9530fe557b0cb5324b26273e33dcc71036017d64"
-  integrity sha512-GGnYAQgtclLHIBReOtsUgbDDCar0LR2TaHCWlQhPrEVVayrSAZQ4y+SlXN5YIadxMec4/f5dbF69wMbug9D5Ww==
+aws-xray-sdk-core@^3.3.5:
+  version "3.3.5"
+  resolved "https://registry.yarnpkg.com/aws-xray-sdk-core/-/aws-xray-sdk-core-3.3.5.tgz#1a88d3f8c8ffd83dd66abfa54d191dba0c4c30b9"
+  integrity sha512-oJ/zPZc0foeeA4G64SonN3Fw9jJetzcMc98QY0V8qc7G9Gp9WhPMEHU2mI2uP05hwYf63FJO22K4UmSKtKza+Q==
   dependencies:
     "@aws-sdk/service-error-classification" "^3.4.1"
     "@aws-sdk/types" "^3.4.1"
