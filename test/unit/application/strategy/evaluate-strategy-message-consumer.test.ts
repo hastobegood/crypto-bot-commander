@@ -1,14 +1,15 @@
 import { mocked } from 'ts-jest/utils';
-import { GetStrategyService } from '../../../../src/code/domain/strategy/get-strategy-service';
-import { UpdateStrategyService } from '../../../../src/code/domain/strategy/update-strategy-service';
-import { EvaluateStrategyService } from '../../../../src/code/domain/strategy/evaluate-strategy-service';
-import { buildDefaultActiveStrategyMessage } from '../../../builders/infrastructure/strategy/strategy-message-builder';
-import { Strategy } from '../../../../src/code/domain/strategy/model/strategy';
-import { buildDefaultStrategy } from '../../../builders/domain/strategy/strategy-test-builder';
-import { StrategyEvaluation } from '../../../../src/code/domain/strategy/model/strategy-evaluation';
-import { buildStrategyEvaluation } from '../../../builders/domain/strategy/strategy-evaluation-test-builder';
+
 import { EvaluateStrategyMessageConsumer } from '../../../../src/code/application/strategy/evaluate-strategy-message-consumer';
+import { EvaluateStrategyService } from '../../../../src/code/domain/strategy/evaluate-strategy-service';
+import { GetStrategyService } from '../../../../src/code/domain/strategy/get-strategy-service';
+import { Strategy } from '../../../../src/code/domain/strategy/model/strategy';
+import { StrategyEvaluation } from '../../../../src/code/domain/strategy/model/strategy-evaluation';
+import { UpdateStrategyService } from '../../../../src/code/domain/strategy/update-strategy-service';
 import { ActiveStrategyMessage } from '../../../../src/code/infrastructure/strategy/sqs-strategy-publisher';
+import { buildStrategyEvaluation } from '../../../builders/domain/strategy/strategy-evaluation-test-builder';
+import { buildDefaultStrategy } from '../../../builders/domain/strategy/strategy-test-builder';
+import { buildDefaultActiveStrategyMessage } from '../../../builders/infrastructure/strategy/strategy-message-builder';
 
 const getStrategyServiceMock = mocked(jest.genMockFromModule<GetStrategyService>('../../../../src/code/domain/strategy/get-strategy-service'), true);
 const updateStrategyServiceMock = mocked(jest.genMockFromModule<UpdateStrategyService>('../../../../src/code/domain/strategy/update-strategy-service'), true);

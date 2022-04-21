@@ -1,9 +1,10 @@
-import MockDate from 'mockdate';
-import { mocked } from 'ts-jest/utils';
 import { Candlestick } from '@hastobegood/crypto-bot-artillery/candlestick';
 import { buildCandlesticksFromTo, buildDefaultCandlestick } from '@hastobegood/crypto-bot-artillery/test/builders';
-import { GetCandlestickService } from '../../../../src/code/domain/candlestick/get-candlestick-service';
+import MockDate from 'mockdate';
+import { mocked } from 'ts-jest/utils';
+
 import { CandlestickRepository } from '../../../../src/code/domain/candlestick/candlestick-repository';
+import { GetCandlestickService } from '../../../../src/code/domain/candlestick/get-candlestick-service';
 
 const candlestickRepositoryMock = mocked(jest.genMockFromModule<CandlestickRepository>('../../../../src/code/domain/candlestick/candlestick-repository'), true);
 

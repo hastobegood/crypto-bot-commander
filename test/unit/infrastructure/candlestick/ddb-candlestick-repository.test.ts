@@ -1,8 +1,9 @@
-import { expect } from '@jest/globals';
 import { DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb';
-import { mocked } from 'ts-jest/utils';
 import { Candlestick, Candlesticks } from '@hastobegood/crypto-bot-artillery/candlestick';
 import { buildCandlesticksFromTo, buildDefaultCandlestick, buildDefaultCandlesticks } from '@hastobegood/crypto-bot-artillery/test/builders';
+import { expect } from '@jest/globals';
+import { mocked } from 'ts-jest/utils';
+
 import { CandlestickRepository } from '../../../../src/code/domain/candlestick/candlestick-repository';
 import { CandlestickEntity, DdbCandlestickRepository } from '../../../../src/code/infrastructure/candlestick/ddb-candlestick-repository';
 import { buildDefaultCandlestickEntity } from '../../../builders/infrastructure/candlestick/candlestick-entity-builder';

@@ -1,10 +1,12 @@
 import { Candlestick } from '@hastobegood/crypto-bot-artillery/candlestick';
-import { Point } from '../../technical-analysis/model/point';
-import { MovingAverageCrossover, MovingAverageCrossoverStepInput, MovingAverageCrossoverStepOutput, MovingAverageSignal, StrategyStepType } from '../model/strategy-step';
-import { StrategyStepService } from './strategy-step-service';
-import { Strategy } from '../model/strategy';
+
 import { GetCandlestickService } from '../../candlestick/get-candlestick-service';
+import { Point } from '../../technical-analysis/model/point';
 import { MovingAverageService } from '../../technical-analysis/moving-average-service';
+import { Strategy } from '../model/strategy';
+import { MovingAverageCrossover, MovingAverageCrossoverStepInput, MovingAverageCrossoverStepOutput, MovingAverageSignal, StrategyStepType } from '../model/strategy-step';
+
+import { StrategyStepService } from './strategy-step-service';
 
 export class MovingAverageCrossoverStepService implements StrategyStepService {
   constructor(private getCandlestickService: GetCandlestickService, private movingAverageService: MovingAverageService) {}

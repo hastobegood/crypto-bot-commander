@@ -1,5 +1,6 @@
 import { DynamoDBDocumentClient, PutCommand, PutCommandInput, UpdateCommand, UpdateCommandInput } from '@aws-sdk/lib-dynamodb';
 import { Order, OrderStatus } from '@hastobegood/crypto-bot-artillery/order';
+
 import { OrderRepository } from '../../domain/order/order-repository';
 
 export class DdbOrderRepository implements OrderRepository {

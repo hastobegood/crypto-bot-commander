@@ -1,6 +1,7 @@
 import { mocked } from 'ts-jest/utils';
-import { PublishStrategyService } from '../../../../src/code/domain/strategy/publish-strategy-service';
+
 import { PublishAllActiveStrategiesMessageConsumer } from '../../../../src/code/application/strategy/publish-all-active-strategies-message-consumer';
+import { PublishStrategyService } from '../../../../src/code/domain/strategy/publish-strategy-service';
 import { UpdatedCandlesticksMessage } from '../../../../src/code/infrastructure/candlestick/sqs-candlestick-publisher';
 import { buildDefaultUpdatedCandlesticksMessage } from '../../../builders/infrastructure/candlestick/candlestick-message-builder';
 

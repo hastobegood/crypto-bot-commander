@@ -1,6 +1,6 @@
-import { captureAWSv3Client } from 'aws-xray-sdk-core';
-import { DynamoDBDocumentClient, TranslateConfig } from '@aws-sdk/lib-dynamodb';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
+import { DynamoDBDocumentClient, TranslateConfig } from '@aws-sdk/lib-dynamodb';
+import { captureAWSv3Client } from 'aws-xray-sdk-core';
 
 const translateConfig: TranslateConfig = {
   marshallOptions: {

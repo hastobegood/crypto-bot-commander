@@ -1,4 +1,5 @@
 import { randomFromList, randomSymbol } from '@hastobegood/crypto-bot-artillery/test/builders';
+
 import { TriggeredCandlesticksMessage, UpdatedCandlesticksMessage } from '../../../../src/code/infrastructure/candlestick/sqs-candlestick-publisher';
 
 export const buildDefaultTriggeredCandlesticksMessage = (): TriggeredCandlesticksMessage => {

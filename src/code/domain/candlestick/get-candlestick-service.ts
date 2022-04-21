@@ -1,4 +1,5 @@
 import { Candlestick, CandlestickExchange, CandlestickInterval } from '@hastobegood/crypto-bot-artillery/candlestick';
+
 import { CandlestickRepository } from './candlestick-repository';
 
 const intervalDataMap = new Map<CandlestickInterval, number>();

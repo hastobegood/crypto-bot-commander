@@ -1,11 +1,12 @@
-import { CheckOrderStepOutput, SendOrderStepInput, SendOrderStepOutput, StrategyStepType } from '../model/strategy-step';
-import { StrategyStepService } from './strategy-step-service';
-import { Strategy, StrategyWallet } from '../model/strategy';
-import { StrategyStepRepository } from './strategy-step-repository';
-import { CreateOrderService } from '../../order/create-order-service';
 import { GetCandlestickService } from '../../candlestick/get-candlestick-service';
-import { GetStrategyService } from '../get-strategy-service';
+import { CreateOrderService } from '../../order/create-order-service';
 import { CreateOrder } from '../../order/model/order';
+import { GetStrategyService } from '../get-strategy-service';
+import { Strategy, StrategyWallet } from '../model/strategy';
+import { CheckOrderStepOutput, SendOrderStepInput, SendOrderStepOutput, StrategyStepType } from '../model/strategy-step';
+
+import { StrategyStepRepository } from './strategy-step-repository';
+import { StrategyStepService } from './strategy-step-service';
 
 export class SendOrderStepService implements StrategyStepService {
   constructor(private getStrategyService: GetStrategyService, private createOrderService: CreateOrderService, private getCandlestickService: GetCandlestickService, private strategyStepRepository: StrategyStepRepository) {}

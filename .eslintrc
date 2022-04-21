@@ -1,24 +1,54 @@
 {
   "root": true,
-  "parser": "@typescript-eslint/parser",
   "parserOptions": {
     "ecmaVersion": 2021
   },
-  "plugins": [
-    "@typescript-eslint",
-    "prettier"
-  ],
   "extends": [
     "eslint:recommended",
-    "plugin:@typescript-eslint/eslint-recommended",
+    "plugin:promise/recommended",
+    "plugin:import/recommended",
+    "plugin:import/typescript",
     "plugin:@typescript-eslint/recommended",
-    "prettier"
+    // must be the last extension
+    "plugin:prettier/recommended"
+  ],
+  "settings": {
+    "import/resolver": {
+      "typescript": {
+        "alwaysTryTypes": true
+      }
+    }
+  },
+  "overrides": [
+    {
+      "files": [
+        ".ts"
+      ],
+      "parserOptions": {
+        "project": "./tsconfig.json"
+      }
+    }
   ],
   "rules": {
     "no-console": "error",
-    "prettier/prettier": "error",
-    "@typescript-eslint/no-non-null-assertion": "off",
-    "@typescript-eslint/no-empty-interface": "off",
+    "import/no-unresolved": [
+      "error",
+      {
+        "ignore": [
+          "@hastobegood/crypto-bot-artillery"
+        ]
+      }
+    ],
+    "import/order": [
+      "error",
+      {
+        "newlines-between": "always",
+        "alphabetize": {
+          "order": "asc",
+          "caseInsensitive": true
+        }
+      }
+    ],
     "@typescript-eslint/explicit-function-return-type": [
       "error",
       {

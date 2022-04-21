@@ -1,7 +1,8 @@
 import { mocked } from 'ts-jest/utils';
+
 import { UpdateAllCandlesticksMessageConsumer } from '../../../../src/code/application/candlestick/update-all-candlesticks-message-consumer';
-import { UpdateCandlestickService } from '../../../../src/code/domain/candlestick/update-candlestick-service';
 import { PublishCandlestickService } from '../../../../src/code/domain/candlestick/publish-candlestick-service';
+import { UpdateCandlestickService } from '../../../../src/code/domain/candlestick/update-candlestick-service';
 import { TriggeredCandlesticksMessage } from '../../../../src/code/infrastructure/candlestick/sqs-candlestick-publisher';
 import { buildDefaultTriggeredCandlesticksMessage } from '../../../builders/infrastructure/candlestick/candlestick-message-builder';
 

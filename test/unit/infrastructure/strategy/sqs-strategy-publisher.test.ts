@@ -1,9 +1,10 @@
 import { SQSClient } from '@aws-sdk/client-sqs';
-import { ActiveStrategyMessage, SqsStrategyPublisher } from '../../../../src/code/infrastructure/strategy/sqs-strategy-publisher';
-import { StrategyPublisher } from '../../../../src/code/domain/strategy/strategy-publisher';
-import { mocked } from 'ts-jest/utils';
-import { buildDefaultActiveStrategyMessage } from '../../../builders/infrastructure/strategy/strategy-message-builder';
 import MockDate from 'mockdate';
+import { mocked } from 'ts-jest/utils';
+
+import { StrategyPublisher } from '../../../../src/code/domain/strategy/strategy-publisher';
+import { ActiveStrategyMessage, SqsStrategyPublisher } from '../../../../src/code/infrastructure/strategy/sqs-strategy-publisher';
+import { buildDefaultActiveStrategyMessage } from '../../../builders/infrastructure/strategy/strategy-message-builder';
 
 const sqsClientMock = mocked(jest.genMockFromModule<SQSClient>('@aws-sdk/client-sqs'), true);
 

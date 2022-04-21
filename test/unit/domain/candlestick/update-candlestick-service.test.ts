@@ -1,7 +1,8 @@
-import MockDate from 'mockdate';
-import { mocked } from 'ts-jest/utils';
 import { Candlesticks, FetchCandlestickClient } from '@hastobegood/crypto-bot-artillery/candlestick';
 import { buildDefaultCandlesticks } from '@hastobegood/crypto-bot-artillery/test/builders';
+import MockDate from 'mockdate';
+import { mocked } from 'ts-jest/utils';
+
 import { CandlestickRepository } from '../../../../src/code/domain/candlestick/candlestick-repository';
 import { UpdateCandlestickService } from '../../../../src/code/domain/candlestick/update-candlestick-service';
 

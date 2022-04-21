@@ -1,6 +1,7 @@
 import { mocked } from 'ts-jest/utils';
-import { InitializeCandlestickService } from '../../../../src/code/domain/candlestick/initialize-candlestick-service';
+
 import { InitializeAllCandlesticksApiController } from '../../../../src/code/application/candlestick/initialize-all-candlesticks-api-controller';
+import { InitializeCandlestickService } from '../../../../src/code/domain/candlestick/initialize-candlestick-service';
 
 const initializeCandlestickServiceMock = mocked(jest.genMockFromModule<InitializeCandlestickService>('../../../../src/code/domain/candlestick/initialize-candlestick-service'), true);
 

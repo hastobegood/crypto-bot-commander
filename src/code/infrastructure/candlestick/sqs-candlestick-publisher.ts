@@ -1,5 +1,6 @@
 import { SendMessageCommand, SendMessageCommandInput, SQSClient } from '@aws-sdk/client-sqs';
 import { CandlestickExchange } from '@hastobegood/crypto-bot-artillery/candlestick';
+
 import { CandlestickPublisher } from '../../domain/candlestick/candlestick-publisher';
 
 export class SqsCandlestickPublisher implements CandlestickPublisher {

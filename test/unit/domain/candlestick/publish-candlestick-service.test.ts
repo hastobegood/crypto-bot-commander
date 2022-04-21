@@ -1,4 +1,5 @@
 import { mocked } from 'ts-jest/utils';
+
 import { CandlestickPublisher } from '../../../../src/code/domain/candlestick/candlestick-publisher';
 import { PublishCandlestickService } from '../../../../src/code/domain/candlestick/publish-candlestick-service';
 

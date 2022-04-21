@@ -1,10 +1,11 @@
 import { mocked } from 'ts-jest/utils';
+
 import { Strategy } from '../../../../../src/code/domain/strategy/model/strategy';
 import { MarketEvolutionStepOutput, OrConditionStep, OrConditionStepInput } from '../../../../../src/code/domain/strategy/model/strategy-step';
-import { buildDefaultStrategy } from '../../../../builders/domain/strategy/strategy-test-builder';
-import { buildDefaultMarketEvolutionStepInput, buildDefaultMarketEvolutionStepOutput, buildOrConditionStepInput, buildStrategyStepTemplate } from '../../../../builders/domain/strategy/strategy-step-test-builder';
-import { OrConditionStepService } from '../../../../../src/code/domain/strategy/step/or-condition-step-service';
 import { MarketEvolutionStepService } from '../../../../../src/code/domain/strategy/step/market-evolution-step-service';
+import { OrConditionStepService } from '../../../../../src/code/domain/strategy/step/or-condition-step-service';
+import { buildDefaultMarketEvolutionStepInput, buildDefaultMarketEvolutionStepOutput, buildOrConditionStepInput, buildStrategyStepTemplate } from '../../../../builders/domain/strategy/strategy-step-test-builder';
+import { buildDefaultStrategy } from '../../../../builders/domain/strategy/strategy-test-builder';
 
 const marketEvolutionStepServiceMock = mocked(jest.genMockFromModule<MarketEvolutionStepService>('../../../../../src/code/domain/strategy/step/market-evolution-step-service'), true);
 const strategyStepServicesMocks = [marketEvolutionStepServiceMock];

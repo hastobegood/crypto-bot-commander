@@ -1,16 +1,17 @@
-import { mocked } from 'ts-jest/utils';
 import { Candlestick } from '@hastobegood/crypto-bot-artillery/candlestick';
 import { Order } from '@hastobegood/crypto-bot-artillery/order';
 import { buildDefaultCandlestick, buildDefaultLimitOrder, buildDefaultOrder } from '@hastobegood/crypto-bot-artillery/test/builders';
-import { StrategyStepRepository } from '../../../../../src/code/domain/strategy/step/strategy-step-repository';
+import { mocked } from 'ts-jest/utils';
+
+import { GetCandlestickService } from '../../../../../src/code/domain/candlestick/get-candlestick-service';
+import { CreateOrderService } from '../../../../../src/code/domain/order/create-order-service';
+import { GetStrategyService } from '../../../../../src/code/domain/strategy/get-strategy-service';
 import { Strategy, StrategyWallet } from '../../../../../src/code/domain/strategy/model/strategy';
 import { CheckOrderStepOutput, SendOrderStepInput, StrategyStep } from '../../../../../src/code/domain/strategy/model/strategy-step';
-import { buildDefaultStrategy, buildDefaultStrategyWallet } from '../../../../builders/domain/strategy/strategy-test-builder';
 import { SendOrderStepService } from '../../../../../src/code/domain/strategy/step/send-order-step-service';
+import { StrategyStepRepository } from '../../../../../src/code/domain/strategy/step/strategy-step-repository';
 import { buildDefaultCheckOrderStepOutput, buildDefaultStrategyStepTemplate, buildSendOrderStepInput, buildStrategyStep } from '../../../../builders/domain/strategy/strategy-step-test-builder';
-import { CreateOrderService } from '../../../../../src/code/domain/order/create-order-service';
-import { GetCandlestickService } from '../../../../../src/code/domain/candlestick/get-candlestick-service';
-import { GetStrategyService } from '../../../../../src/code/domain/strategy/get-strategy-service';
+import { buildDefaultStrategy, buildDefaultStrategyWallet } from '../../../../builders/domain/strategy/strategy-test-builder';
 
 const createOrderServiceMock = mocked(jest.genMockFromModule<CreateOrderService>('../../../../../src/code/domain/order/create-order-service'), true);
 const getStrategyServiceMock = mocked(jest.genMockFromModule<GetStrategyService>('../../../../../src/code/domain/strategy/get-strategy-service'), true);

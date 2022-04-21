@@ -1,10 +1,11 @@
 import 'source-map-support/register';
-import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from 'aws-lambda';
-import { ddbClient } from '../code/configuration/aws/dynamodb';
 import { handleEvent } from '@hastobegood/crypto-bot-artillery/common';
-import { DdbCandlestickRepository } from '../code/infrastructure/candlestick/ddb-candlestick-repository';
-import { GetCandlestickService } from '../code/domain/candlestick/get-candlestick-service';
+import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from 'aws-lambda';
+
 import { GetAllCandlesticksApiController, GetAllCandlesticksApiValidator } from '../code/application/candlestick/get-all-candlesticks-api-controller';
+import { ddbClient } from '../code/configuration/aws/dynamodb';
+import { GetCandlestickService } from '../code/domain/candlestick/get-candlestick-service';
+import { DdbCandlestickRepository } from '../code/infrastructure/candlestick/ddb-candlestick-repository';
 
 const candlestickRepository = new DdbCandlestickRepository(process.env.CANDLESTICK_TABLE_NAME, ddbClient);
 const getCandlestickService = new GetCandlestickService(candlestickRepository);

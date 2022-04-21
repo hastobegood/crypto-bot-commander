@@ -1,8 +1,15 @@
+import { stringContaining } from 'expect/build/asymmetricMatchers';
+import MockDate from 'mockdate';
 import { mocked } from 'ts-jest/utils';
+
+import { EvaluateStrategyService } from '../../../../src/code/domain/strategy/evaluate-strategy-service';
 import { Strategy } from '../../../../src/code/domain/strategy/model/strategy';
-import { buildDefaultStrategy } from '../../../builders/domain/strategy/strategy-test-builder';
+import { CheckOrderStepOutput, MarketEvolutionStepOutput, OrConditionStepOutput, SendOrderStepOutput, StrategyStep } from '../../../../src/code/domain/strategy/model/strategy-step';
+import { CheckOrderStepService } from '../../../../src/code/domain/strategy/step/check-order-step-service';
 import { MarketEvolutionStepService } from '../../../../src/code/domain/strategy/step/market-evolution-step-service';
+import { OrConditionStepService } from '../../../../src/code/domain/strategy/step/or-condition-step-service';
 import { SendOrderStepService } from '../../../../src/code/domain/strategy/step/send-order-step-service';
+import { StrategyStepPublisher } from '../../../../src/code/domain/strategy/step/strategy-step-publisher';
 import { StrategyStepRepository } from '../../../../src/code/domain/strategy/step/strategy-step-repository';
 import {
   buildDefaultCheckOrderStepOutput,
@@ -15,13 +22,7 @@ import {
   buildStrategyStep,
   buildStrategyStepTemplate,
 } from '../../../builders/domain/strategy/strategy-step-test-builder';
-import { CheckOrderStepOutput, MarketEvolutionStepOutput, OrConditionStepOutput, SendOrderStepOutput, StrategyStep } from '../../../../src/code/domain/strategy/model/strategy-step';
-import MockDate from 'mockdate';
-import { EvaluateStrategyService } from '../../../../src/code/domain/strategy/evaluate-strategy-service';
-import { stringContaining } from 'expect/build/asymmetricMatchers';
-import { StrategyStepPublisher } from '../../../../src/code/domain/strategy/step/strategy-step-publisher';
-import { CheckOrderStepService } from '../../../../src/code/domain/strategy/step/check-order-step-service';
-import { OrConditionStepService } from '../../../../src/code/domain/strategy/step/or-condition-step-service';
+import { buildDefaultStrategy } from '../../../builders/domain/strategy/strategy-test-builder';
 
 const marketEvolutionStepServiceMock = mocked(jest.genMockFromModule<MarketEvolutionStepService>('../../../../src/code/domain/strategy/step/market-evolution-step-service'), true);
 const sendOrderStepServiceMock = mocked(jest.genMockFromModule<SendOrderStepService>('../../../../src/code/domain/strategy/step/send-order-step-service'), true);

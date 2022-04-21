@@ -1,4 +1,5 @@
 import { randomBoolean, randomFromList, randomNumber, randomPercentage, randomString } from '@hastobegood/crypto-bot-artillery/test/builders';
+
 import {
   CheckOrderStepInput,
   CheckOrderStepOutput,

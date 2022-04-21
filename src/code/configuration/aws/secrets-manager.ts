@@ -1,5 +1,5 @@
-import { captureAWSv3Client } from 'aws-xray-sdk-core';
 import { SecretsManagerClient } from '@aws-sdk/client-secrets-manager';
+import { captureAWSv3Client } from 'aws-xray-sdk-core';
 
 let client = new SecretsManagerClient({ region: process.env.REGION });
 if (process.env.TRACING) {

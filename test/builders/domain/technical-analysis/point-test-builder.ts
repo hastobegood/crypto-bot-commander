@@ -1,4 +1,5 @@
 import { randomNumber } from '@hastobegood/crypto-bot-artillery/test/builders';
+
 import { Point } from '../../../../src/code/domain/technical-analysis/model/point';
 
 export const buildDefaultPoints = (): Point[] => {

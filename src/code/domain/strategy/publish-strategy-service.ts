@@ -1,6 +1,7 @@
 import { logger } from '@hastobegood/crypto-bot-artillery/common';
-import { StrategyRepository } from './strategy-repository';
+
 import { StrategyPublisher } from './strategy-publisher';
+import { StrategyRepository } from './strategy-repository';
 
 export class PublishStrategyService {
   constructor(private strategyRepository: StrategyRepository, private strategyPublisher: StrategyPublisher) {}

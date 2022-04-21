@@ -1,5 +1,6 @@
-import { logger } from '@hastobegood/crypto-bot-artillery/common';
 import { CandlestickExchange, CandlestickInterval, FetchCandlestickClient } from '@hastobegood/crypto-bot-artillery/candlestick';
+import { logger } from '@hastobegood/crypto-bot-artillery/common';
+
 import { CandlestickRepository } from './candlestick-repository';
 
 const period = 1_000;

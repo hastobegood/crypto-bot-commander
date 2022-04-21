@@ -1,4 +1,5 @@
 import { SendMessageCommand, SendMessageCommandInput, SQSClient } from '@aws-sdk/client-sqs';
+
 import { StrategyPublisher } from '../../domain/strategy/strategy-publisher';
 
 export class SqsStrategyPublisher implements StrategyPublisher {
