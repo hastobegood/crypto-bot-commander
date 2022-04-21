@@ -29,7 +29,7 @@
     "@hastobegood/crypto-bot-artillery": "^0.13.0",
     "aws-xray-sdk-core": "^3.3.5",
     "lodash-es": "^4.17.21",
-    "serialize-error": "^8.1.0",
+    "serialize-error": "^10.0.0",
     "source-map-support": "^0.5.21"
   },
   "devDependencies": {
