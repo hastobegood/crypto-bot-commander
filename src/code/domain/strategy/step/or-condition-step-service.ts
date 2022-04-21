@@ -1,6 +1,7 @@
-import { OrConditionStep, OrConditionStepInput, OrConditionStepOutput, StrategyStepOutput, StrategyStepTemplate, StrategyStepType } from '../model/strategy-step';
-import { getStrategyStepService, StrategyStepService } from './strategy-step-service';
 import { getStepTemplateById, Strategy } from '../model/strategy';
+import { OrConditionStep, OrConditionStepInput, OrConditionStepOutput, StrategyStepOutput, StrategyStepTemplate, StrategyStepType } from '../model/strategy-step';
+
+import { getStrategyStepService, StrategyStepService } from './strategy-step-service';
 
 export class OrConditionStepService implements StrategyStepService {
   constructor(private strategyStepServices: StrategyStepService[]) {}

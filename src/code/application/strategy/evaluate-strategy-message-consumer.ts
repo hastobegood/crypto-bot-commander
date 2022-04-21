@@ -1,9 +1,10 @@
 import { logger } from '@hastobegood/crypto-bot-artillery/common';
-import { Strategy, StrategyStatus } from '../../domain/strategy/model/strategy';
-import { ActiveStrategyMessage } from '../../infrastructure/strategy/sqs-strategy-publisher';
-import { GetStrategyService } from '../../domain/strategy/get-strategy-service';
-import { UpdateStrategyService } from '../../domain/strategy/update-strategy-service';
+
 import { EvaluateStrategyService } from '../../domain/strategy/evaluate-strategy-service';
+import { GetStrategyService } from '../../domain/strategy/get-strategy-service';
+import { Strategy, StrategyStatus } from '../../domain/strategy/model/strategy';
+import { UpdateStrategyService } from '../../domain/strategy/update-strategy-service';
+import { ActiveStrategyMessage } from '../../infrastructure/strategy/sqs-strategy-publisher';
 
 export class EvaluateStrategyMessageConsumer {
   constructor(private getStrategyService: GetStrategyService, private updateStrategyService: UpdateStrategyService, private evaluateStrategyService: EvaluateStrategyService) {}

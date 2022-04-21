@@ -1,5 +1,6 @@
-import { logger } from '@hastobegood/crypto-bot-artillery/common';
 import { CandlestickExchange } from '@hastobegood/crypto-bot-artillery/candlestick';
+import { logger } from '@hastobegood/crypto-bot-artillery/common';
+
 import { InitializeCandlestickService } from '../../domain/candlestick/initialize-candlestick-service';
 
 export class InitializeAllCandlesticksApiController {

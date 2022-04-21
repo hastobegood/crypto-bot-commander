@@ -1,7 +1,7 @@
-import { Point } from '../../../../src/code/domain/technical-analysis/model/point';
-import { CalculateMarketEvolution } from '../../../../src/code/domain/technical-analysis/model/market-evolution';
-import { buildCalculateMarketEvolution } from '../../../builders/domain/technical-analysis/market-evolution-test-builder';
 import { MarketEvolutionService } from '../../../../src/code/domain/technical-analysis/market-evolution-service';
+import { CalculateMarketEvolution } from '../../../../src/code/domain/technical-analysis/model/market-evolution';
+import { Point } from '../../../../src/code/domain/technical-analysis/model/point';
+import { buildCalculateMarketEvolution } from '../../../builders/domain/technical-analysis/market-evolution-test-builder';
 
 let marketEvolutionService: MarketEvolutionService;
 beforeEach(() => {

@@ -1,4 +1,5 @@
 import { CandlestickExchange } from '@hastobegood/crypto-bot-artillery/candlestick';
+
 import { CandlestickPublisher } from './candlestick-publisher';
 
 export class PublishCandlestickService {

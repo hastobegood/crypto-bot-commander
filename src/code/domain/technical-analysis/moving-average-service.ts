@@ -1,6 +1,7 @@
 import { roundNumber } from '@hastobegood/crypto-bot-artillery/common';
-import { Point } from './model/point';
+
 import { CalculateMovingAverage, MovingAverage, MovingAverageType } from './model/moving-average';
+import { Point } from './model/point';
 import { sortPoints, TechnicalAnalysisService, TechnicalAnalysisType } from './technical-analysis-service';
 
 export class MovingAverageService implements TechnicalAnalysisService<CalculateMovingAverage, MovingAverage> {

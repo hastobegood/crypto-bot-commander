@@ -1,10 +1,12 @@
 import { OrderCheckup } from '@hastobegood/crypto-bot-artillery/order';
-import { CheckOrderStepInput, CheckOrderStepOutput, StrategyStepType } from '../model/strategy-step';
-import { StrategyStepService } from './strategy-step-service';
-import { Strategy } from '../model/strategy';
+
 import { CheckOrderService } from '../../order/check-order-service';
-import { UpdateStrategyService } from '../update-strategy-service';
 import { UpdateOrderService } from '../../order/update-order-service';
+import { Strategy } from '../model/strategy';
+import { CheckOrderStepInput, CheckOrderStepOutput, StrategyStepType } from '../model/strategy-step';
+import { UpdateStrategyService } from '../update-strategy-service';
+
+import { StrategyStepService } from './strategy-step-service';
 
 export class CheckOrderStepService implements StrategyStepService {
   constructor(private checkOrderService: CheckOrderService, private updateOrderService: UpdateOrderService, private updateStrategyService: UpdateStrategyService) {}

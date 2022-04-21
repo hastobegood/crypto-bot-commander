@@ -1,7 +1,8 @@
 import { logger } from '@hastobegood/crypto-bot-artillery/common';
 import { Order, SendOrder, SendOrderClient } from '@hastobegood/crypto-bot-artillery/order';
-import { OrderRepository } from './order-repository';
+
 import { CreateOrder } from './model/order';
+import { OrderRepository } from './order-repository';
 
 export class CreateOrderService {
   constructor(private sendOrderClient: SendOrderClient, private orderRepository: OrderRepository) {}

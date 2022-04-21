@@ -1,11 +1,13 @@
 import { Candlestick } from '@hastobegood/crypto-bot-artillery/candlestick';
+
+import { GetCandlestickService } from '../../candlestick/get-candlestick-service';
 import { MarketEvolutionService } from '../../technical-analysis/market-evolution-service';
 import { Point } from '../../technical-analysis/model/point';
-import { CheckOrderStepOutput, MarketEvolutionInterval, MarketEvolutionStepInput, MarketEvolutionStepOutput, StrategyStepType } from '../model/strategy-step';
-import { StrategyStepService } from './strategy-step-service';
-import { StrategyStepRepository } from './strategy-step-repository';
 import { Strategy } from '../model/strategy';
-import { GetCandlestickService } from '../../candlestick/get-candlestick-service';
+import { CheckOrderStepOutput, MarketEvolutionInterval, MarketEvolutionStepInput, MarketEvolutionStepOutput, StrategyStepType } from '../model/strategy-step';
+
+import { StrategyStepRepository } from './strategy-step-repository';
+import { StrategyStepService } from './strategy-step-service';
 
 export class MarketEvolutionStepService implements StrategyStepService {
   constructor(private getCandlestickService: GetCandlestickService, private marketEvolutionService: MarketEvolutionService, private strategyStepRepository: StrategyStepRepository) {}

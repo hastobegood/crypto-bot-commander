@@ -1,6 +1,7 @@
 import { SendMessageCommand, SendMessageCommandInput, SQSClient } from '@aws-sdk/client-sqs';
-import { StrategyStepPublisher } from '../../../domain/strategy/step/strategy-step-publisher';
+
 import { StrategyStep } from '../../../domain/strategy/model/strategy-step';
+import { StrategyStepPublisher } from '../../../domain/strategy/step/strategy-step-publisher';
 
 export class SqsStrategyStepPublisher implements StrategyStepPublisher {
   constructor(private queueUrl: string, private sqsClient: SQSClient) {}

@@ -1,4 +1,5 @@
 import { roundNumber } from '@hastobegood/crypto-bot-artillery/common';
+
 import { CalculateMarketEvolution, MarketEvolution } from './model/market-evolution';
 import { sortPoints, TechnicalAnalysisService, TechnicalAnalysisType } from './technical-analysis-service';
 

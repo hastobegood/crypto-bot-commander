@@ -1,5 +1,5 @@
-import { StrategyRepository } from './strategy-repository';
 import { StrategyStatus } from './model/strategy';
+import { StrategyRepository } from './strategy-repository';
 
 export class UpdateStrategyService {
   constructor(private strategyRepository: StrategyRepository) {}

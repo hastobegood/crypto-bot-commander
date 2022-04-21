@@ -1,4 +1,5 @@
 import { OrderStatus } from '@hastobegood/crypto-bot-artillery/order';
+
 import { OrderRepository } from './order-repository';
 
 export class UpdateOrderService {

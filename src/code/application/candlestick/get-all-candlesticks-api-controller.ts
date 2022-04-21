@@ -1,7 +1,8 @@
-import Joi, { ObjectSchema, SchemaMap, ValidationResult } from 'joi';
-import { APIGatewayProxyEvent, APIGatewayProxyEventQueryStringParameters, APIGatewayProxyResult } from 'aws-lambda';
-import { buildApiResponseFromData, buildApiResponseFromValidationError, logger, validate } from '@hastobegood/crypto-bot-artillery/common';
 import { CandlestickExchange, CandlestickInterval } from '@hastobegood/crypto-bot-artillery/candlestick';
+import { buildApiResponseFromData, buildApiResponseFromValidationError, logger, validate } from '@hastobegood/crypto-bot-artillery/common';
+import { APIGatewayProxyEvent, APIGatewayProxyEventQueryStringParameters, APIGatewayProxyResult } from 'aws-lambda';
+import Joi, { ObjectSchema, SchemaMap, ValidationResult } from 'joi';
+
 import { GetCandlestickService } from '../../domain/candlestick/get-candlestick-service';
 
 interface QueryParameters {

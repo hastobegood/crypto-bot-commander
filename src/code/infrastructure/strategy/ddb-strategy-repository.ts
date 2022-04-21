@@ -1,6 +1,7 @@
 import { DynamoDBDocumentClient, GetCommand, GetCommandInput, QueryCommand, QueryCommandInput, UpdateCommand, UpdateCommandInput } from '@aws-sdk/lib-dynamodb';
-import { StrategyRepository } from '../../domain/strategy/strategy-repository';
+
 import { Strategy, StrategyStatus, StrategyWallet } from '../../domain/strategy/model/strategy';
+import { StrategyRepository } from '../../domain/strategy/strategy-repository';
 
 export class DdbStrategyRepository implements StrategyRepository {
   constructor(private tableName: string, private ddbClient: DynamoDBDocumentClient) {}

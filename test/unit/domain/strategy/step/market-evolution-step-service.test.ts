@@ -1,16 +1,17 @@
-import { mocked } from 'ts-jest/utils';
 import { Candlestick } from '@hastobegood/crypto-bot-artillery/candlestick';
 import { buildDefaultCandlestick, buildDefaultCandlesticks } from '@hastobegood/crypto-bot-artillery/test/builders';
-import { StrategyStepRepository } from '../../../../../src/code/domain/strategy/step/strategy-step-repository';
-import { MarketEvolutionService } from '../../../../../src/code/domain/technical-analysis/market-evolution-service';
-import { MarketEvolutionStepService } from '../../../../../src/code/domain/strategy/step/market-evolution-step-service';
+import { mocked } from 'ts-jest/utils';
+
+import { GetCandlestickService } from '../../../../../src/code/domain/candlestick/get-candlestick-service';
 import { Strategy } from '../../../../../src/code/domain/strategy/model/strategy';
 import { CheckOrderStepOutput, MarketEvolutionStepInput, StrategyStep } from '../../../../../src/code/domain/strategy/model/strategy-step';
-import { buildDefaultStrategy } from '../../../../builders/domain/strategy/strategy-test-builder';
-import { buildDefaultCheckOrderStepOutput, buildDefaultStrategyStepTemplate, buildMarketEvolutionStepInput, buildStrategyStep } from '../../../../builders/domain/strategy/strategy-step-test-builder';
+import { MarketEvolutionStepService } from '../../../../../src/code/domain/strategy/step/market-evolution-step-service';
+import { StrategyStepRepository } from '../../../../../src/code/domain/strategy/step/strategy-step-repository';
+import { MarketEvolutionService } from '../../../../../src/code/domain/technical-analysis/market-evolution-service';
 import { MarketEvolution } from '../../../../../src/code/domain/technical-analysis/model/market-evolution';
+import { buildDefaultCheckOrderStepOutput, buildDefaultStrategyStepTemplate, buildMarketEvolutionStepInput, buildStrategyStep } from '../../../../builders/domain/strategy/strategy-step-test-builder';
+import { buildDefaultStrategy } from '../../../../builders/domain/strategy/strategy-test-builder';
 import { buildMarketEvolution } from '../../../../builders/domain/technical-analysis/market-evolution-test-builder';
-import { GetCandlestickService } from '../../../../../src/code/domain/candlestick/get-candlestick-service';
 
 const getCandlestickServiceMock = mocked(jest.genMockFromModule<GetCandlestickService>('../../../../../src/code/domain/candlestick/get-candlestick-service'), true);
 const marketEvolutionServiceMock = mocked(jest.genMockFromModule<MarketEvolutionService>('../../../../../src/code/domain/technical-analysis/market-evolution-service'), true);

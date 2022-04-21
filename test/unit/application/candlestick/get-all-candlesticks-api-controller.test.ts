@@ -1,10 +1,11 @@
-import { mocked } from 'ts-jest/utils';
-import { APIGatewayProxyEvent, APIGatewayProxyEventQueryStringParameters } from 'aws-lambda';
-import { buildDefaultGetAllCandlesticksEvent } from '../../../builders/application/candlestick/candlestick-api-test-builder';
-import { GetCandlestickService } from '../../../../src/code/domain/candlestick/get-candlestick-service';
-import { GetAllCandlesticksApiController, GetAllCandlesticksApiValidator } from '../../../../src/code/application/candlestick/get-all-candlesticks-api-controller';
 import { Candlestick } from '@hastobegood/crypto-bot-artillery/candlestick';
 import { buildDefaultCandlesticks } from '@hastobegood/crypto-bot-artillery/test/builders';
+import { APIGatewayProxyEvent, APIGatewayProxyEventQueryStringParameters } from 'aws-lambda';
+import { mocked } from 'ts-jest/utils';
+
+import { GetAllCandlesticksApiController, GetAllCandlesticksApiValidator } from '../../../../src/code/application/candlestick/get-all-candlesticks-api-controller';
+import { GetCandlestickService } from '../../../../src/code/domain/candlestick/get-candlestick-service';
+import { buildDefaultGetAllCandlesticksEvent } from '../../../builders/application/candlestick/candlestick-api-test-builder';
 
 const getAllCandlesticksApiValidatorMock = mocked(jest.genMockFromModule<GetAllCandlesticksApiValidator>('../../../../src/code/application/candlestick/get-all-candlesticks-api-controller'), true);
 const getCandlestickServiceMock = mocked(jest.genMockFromModule<GetCandlestickService>('../../../../src/code/domain/candlestick/get-candlestick-service'), true);

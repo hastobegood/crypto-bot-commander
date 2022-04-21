@@ -1,6 +1,8 @@
 import { randomFromList, randomNumber } from '@hastobegood/crypto-bot-artillery/test/builders';
-import { Point } from '../../../../src/code/domain/technical-analysis/model/point';
+
 import { CalculateMovingAverage, MovingAverage, MovingAverageType } from '../../../../src/code/domain/technical-analysis/model/moving-average';
+import { Point } from '../../../../src/code/domain/technical-analysis/model/point';
+
 import { buildDefaultPoints } from './point-test-builder';
 
 export const buildDefaultCalculateMovingAverage = (): CalculateMovingAverage => {

@@ -1,6 +1,7 @@
-import { chunk } from 'lodash-es';
 import { BatchWriteCommand, BatchWriteCommandInput, DynamoDBDocumentClient, GetCommand, GetCommandInput, PutCommand, PutCommandInput, QueryCommand, QueryCommandInput } from '@aws-sdk/lib-dynamodb';
 import { Candlestick, CandlestickExchange, CandlestickInterval, Candlesticks } from '@hastobegood/crypto-bot-artillery/candlestick';
+import { chunk } from 'lodash-es';
+
 import { CandlestickRepository } from '../../domain/candlestick/candlestick-repository';
 
 export class DdbCandlestickRepository implements CandlestickRepository {

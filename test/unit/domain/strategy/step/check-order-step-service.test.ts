@@ -1,14 +1,15 @@
-import { mocked } from 'ts-jest/utils';
 import { OrderCheckup } from '@hastobegood/crypto-bot-artillery/order';
 import { buildDefaultOrderCheckup } from '@hastobegood/crypto-bot-artillery/test/builders';
+import { mocked } from 'ts-jest/utils';
+
+import { CheckOrderService } from '../../../../../src/code/domain/order/check-order-service';
+import { UpdateOrderService } from '../../../../../src/code/domain/order/update-order-service';
 import { Strategy } from '../../../../../src/code/domain/strategy/model/strategy';
 import { CheckOrderStepInput } from '../../../../../src/code/domain/strategy/model/strategy-step';
-import { buildDefaultStrategy } from '../../../../builders/domain/strategy/strategy-test-builder';
-import { buildDefaultCheckOrderStepInput } from '../../../../builders/domain/strategy/strategy-step-test-builder';
 import { CheckOrderStepService } from '../../../../../src/code/domain/strategy/step/check-order-step-service';
-import { CheckOrderService } from '../../../../../src/code/domain/order/check-order-service';
 import { UpdateStrategyService } from '../../../../../src/code/domain/strategy/update-strategy-service';
-import { UpdateOrderService } from '../../../../../src/code/domain/order/update-order-service';
+import { buildDefaultCheckOrderStepInput } from '../../../../builders/domain/strategy/strategy-step-test-builder';
+import { buildDefaultStrategy } from '../../../../builders/domain/strategy/strategy-test-builder';
 
 const checkOrderServiceMock = mocked(jest.genMockFromModule<CheckOrderService>('../../../../../src/code/domain/order/check-order-service'), true);
 const updateOrderServiceMock = mocked(jest.genMockFromModule<UpdateOrderService>('../../../../../src/code/domain/order/update-order-service'), true);

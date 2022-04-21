@@ -1,6 +1,7 @@
 import { logger } from '@hastobegood/crypto-bot-artillery/common';
-import { UpdateCandlestickService } from '../../domain/candlestick/update-candlestick-service';
+
 import { PublishCandlestickService } from '../../domain/candlestick/publish-candlestick-service';
+import { UpdateCandlestickService } from '../../domain/candlestick/update-candlestick-service';
 import { TriggeredCandlesticksMessage } from '../../infrastructure/candlestick/sqs-candlestick-publisher';
 
 export class UpdateAllCandlesticksMessageConsumer {

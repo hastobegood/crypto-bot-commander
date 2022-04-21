@@ -1,14 +1,15 @@
 import 'source-map-support/register';
-import { Context } from 'aws-lambda';
-import { smClient } from '../code/configuration/aws/secrets-manager';
-import { ddbClient } from '../code/configuration/aws/dynamodb';
-import { BinanceAuthentication } from '../code/infrastructure/common/exchanges/binance/binance-authentication';
 import { loadExchangesClients } from '@hastobegood/crypto-bot-artillery';
-import { handleEvent } from '@hastobegood/crypto-bot-artillery/common';
 import { loadFetchCandlestickClient } from '@hastobegood/crypto-bot-artillery/candlestick';
-import { DdbCandlestickRepository } from '../code/infrastructure/candlestick/ddb-candlestick-repository';
-import { InitializeCandlestickService } from '../code/domain/candlestick/initialize-candlestick-service';
+import { handleEvent } from '@hastobegood/crypto-bot-artillery/common';
+import { Context } from 'aws-lambda';
+
 import { InitializeAllCandlesticksApiController } from '../code/application/candlestick/initialize-all-candlesticks-api-controller';
+import { ddbClient } from '../code/configuration/aws/dynamodb';
+import { smClient } from '../code/configuration/aws/secrets-manager';
+import { InitializeCandlestickService } from '../code/domain/candlestick/initialize-candlestick-service';
+import { DdbCandlestickRepository } from '../code/infrastructure/candlestick/ddb-candlestick-repository';
+import { BinanceAuthentication } from '../code/infrastructure/common/exchanges/binance/binance-authentication';
 
 const binanceAuthentication = new BinanceAuthentication(process.env.EXCHANGES_SECRET_NAME, smClient);
 const exchangesClients = loadExchangesClients({ binanceApiInfoProvider: binanceAuthentication });

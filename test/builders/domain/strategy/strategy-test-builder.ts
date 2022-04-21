@@ -1,6 +1,8 @@
-import { random } from 'lodash-es';
 import { randomFromList, randomNumber, randomString, randomSymbol } from '@hastobegood/crypto-bot-artillery/test/builders';
+import { random } from 'lodash-es';
+
 import { Strategy, StrategyTemplate, StrategyWallet } from '../../../../src/code/domain/strategy/model/strategy';
+
 import { buildDefaultMarketEvolutionStepInput, buildDefaultSendOrderStepInput, buildStrategyStepTemplate } from './strategy-step-test-builder';
 
 export const buildDefaultStrategy = (): Strategy => {

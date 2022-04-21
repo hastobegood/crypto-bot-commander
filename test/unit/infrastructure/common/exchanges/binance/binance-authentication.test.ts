@@ -1,6 +1,7 @@
-import { mocked } from 'ts-jest/utils';
-import { BinanceAuthentication } from '../../../../../../src/code/infrastructure/common/exchanges/binance/binance-authentication';
 import { SecretsManagerClient } from '@aws-sdk/client-secrets-manager';
+import { mocked } from 'ts-jest/utils';
+
+import { BinanceAuthentication } from '../../../../../../src/code/infrastructure/common/exchanges/binance/binance-authentication';
 
 const smClientMock = mocked(jest.genMockFromModule<SecretsManagerClient>('@aws-sdk/client-secrets-manager'), true);
 

@@ -1,6 +1,7 @@
 import { BatchWriteCommand, BatchWriteCommandInput, DynamoDBDocumentClient, GetCommand, GetCommandInput } from '@aws-sdk/lib-dynamodb';
-import { StrategyStepRepository } from '../../../domain/strategy/step/strategy-step-repository';
+
 import { StrategyStep, StrategyStepType } from '../../../domain/strategy/model/strategy-step';
+import { StrategyStepRepository } from '../../../domain/strategy/step/strategy-step-repository';
 
 export class DdbStrategyStepRepository implements StrategyStepRepository {
   constructor(private tableName: string, private ddbClient: DynamoDBDocumentClient) {}

@@ -1,14 +1,15 @@
-import { mocked } from 'ts-jest/utils';
 import { Candlestick } from '@hastobegood/crypto-bot-artillery/candlestick';
 import { buildDefaultCandlestick } from '@hastobegood/crypto-bot-artillery/test/builders';
+import { mocked } from 'ts-jest/utils';
+
+import { GetCandlestickService } from '../../../../../src/code/domain/candlestick/get-candlestick-service';
 import { Strategy } from '../../../../../src/code/domain/strategy/model/strategy';
 import { MovingAverageCrossover, MovingAverageCrossoverStepInput, MovingAverageSignal } from '../../../../../src/code/domain/strategy/model/strategy-step';
-import { buildDefaultStrategy } from '../../../../builders/domain/strategy/strategy-test-builder';
-import { GetCandlestickService } from '../../../../../src/code/domain/candlestick/get-candlestick-service';
-import { MovingAverageService } from '../../../../../src/code/domain/technical-analysis/moving-average-service';
 import { MovingAverageCrossoverStepService } from '../../../../../src/code/domain/strategy/step/moving-average-crossover-step-service';
-import { buildDefaultMovingAverageCrossoverStepInput } from '../../../../builders/domain/strategy/strategy-step-test-builder';
 import { MovingAverage } from '../../../../../src/code/domain/technical-analysis/model/moving-average';
+import { MovingAverageService } from '../../../../../src/code/domain/technical-analysis/moving-average-service';
+import { buildDefaultMovingAverageCrossoverStepInput } from '../../../../builders/domain/strategy/strategy-step-test-builder';
+import { buildDefaultStrategy } from '../../../../builders/domain/strategy/strategy-test-builder';
 import { buildDefaultMovingAverage, buildMovingAverage } from '../../../../builders/domain/technical-analysis/moving-average-test-builder';
 
 const getCandlestickServiceMock = mocked(jest.genMockFromModule<GetCandlestickService>('../../../../../src/code/domain/candlestick/get-candlestick-service'), true);

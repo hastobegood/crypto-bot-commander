@@ -1,5 +1,5 @@
-import { APIGatewayProxyEvent } from 'aws-lambda';
 import { randomFromList, randomNumber, randomString, randomSymbol } from '@hastobegood/crypto-bot-artillery/test/builders';
+import { APIGatewayProxyEvent } from 'aws-lambda';
 
 export const buildDefaultGetAllCandlesticksEvent = (): APIGatewayProxyEvent => {
   return {

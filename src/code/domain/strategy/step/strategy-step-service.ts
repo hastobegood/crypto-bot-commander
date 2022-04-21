@@ -1,5 +1,5 @@
-import { StrategyStepInput, StrategyStepOutput, StrategyStepTemplate, StrategyStepType } from '../model/strategy-step';
 import { Strategy } from '../model/strategy';
+import { StrategyStepInput, StrategyStepOutput, StrategyStepTemplate, StrategyStepType } from '../model/strategy-step';
 
 export interface StrategyStepService {
   getType(): StrategyStepType;

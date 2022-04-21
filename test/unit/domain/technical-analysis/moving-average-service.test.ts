@@ -1,7 +1,7 @@
-import { Point } from '../../../../src/code/domain/technical-analysis/model/point';
 import { CalculateMovingAverage, MovingAverageType } from '../../../../src/code/domain/technical-analysis/model/moving-average';
-import { buildCalculateMovingAverage } from '../../../builders/domain/technical-analysis/moving-average-test-builder';
+import { Point } from '../../../../src/code/domain/technical-analysis/model/point';
 import { MovingAverageService } from '../../../../src/code/domain/technical-analysis/moving-average-service';
+import { buildCalculateMovingAverage } from '../../../builders/domain/technical-analysis/moving-average-test-builder';
 
 let movingAverageService: MovingAverageService;
 beforeEach(() => {

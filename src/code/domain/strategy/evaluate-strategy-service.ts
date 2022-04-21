@@ -1,11 +1,12 @@
 import { logger } from '@hastobegood/crypto-bot-artillery/common';
-import { getStepTemplateById, Strategy } from './model/strategy';
-import { CheckOrderStepInput, OrConditionStepOutput, SendOrderStepOutput, StrategyStep, StrategyStepTemplate } from './model/strategy-step';
-import { getStrategyStepService, StrategyStepService } from './step/strategy-step-service';
-import { StrategyStepRepository } from './step/strategy-step-repository';
 import { serializeError } from 'serialize-error';
+
+import { getStepTemplateById, Strategy } from './model/strategy';
 import { StrategyEvaluation } from './model/strategy-evaluation';
+import { CheckOrderStepInput, OrConditionStepOutput, SendOrderStepOutput, StrategyStep, StrategyStepTemplate } from './model/strategy-step';
 import { StrategyStepPublisher } from './step/strategy-step-publisher';
+import { StrategyStepRepository } from './step/strategy-step-repository';
+import { getStrategyStepService, StrategyStepService } from './step/strategy-step-service';
 
 export class EvaluateStrategyService {
   constructor(private strategyStepServices: StrategyStepService[], private strategyStepRepository: StrategyStepRepository, private strategyStepPublisher: StrategyStepPublisher) {}

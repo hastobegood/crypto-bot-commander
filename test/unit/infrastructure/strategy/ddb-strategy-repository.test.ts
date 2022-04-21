@@ -1,8 +1,9 @@
 import { DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb';
 import { mocked } from 'ts-jest/utils';
-import { DdbStrategyRepository } from '../../../../src/code/infrastructure/strategy/ddb-strategy-repository';
-import { StrategyRepository } from '../../../../src/code/domain/strategy/strategy-repository';
+
 import { Strategy, StrategyWallet } from '../../../../src/code/domain/strategy/model/strategy';
+import { StrategyRepository } from '../../../../src/code/domain/strategy/strategy-repository';
+import { DdbStrategyRepository } from '../../../../src/code/infrastructure/strategy/ddb-strategy-repository';
 import { buildDefaultStrategy, buildDefaultStrategyWallet } from '../../../builders/domain/strategy/strategy-test-builder';
 
 const ddbClientMock = mocked(jest.genMockFromModule<DynamoDBDocumentClient>('@aws-sdk/lib-dynamodb'), true);

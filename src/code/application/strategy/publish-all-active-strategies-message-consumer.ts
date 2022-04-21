@@ -1,4 +1,5 @@
 import { logger } from '@hastobegood/crypto-bot-artillery/common';
+
 import { PublishStrategyService } from '../../domain/strategy/publish-strategy-service';
 import { UpdatedCandlesticksMessage } from '../../infrastructure/candlestick/sqs-candlestick-publisher';
 

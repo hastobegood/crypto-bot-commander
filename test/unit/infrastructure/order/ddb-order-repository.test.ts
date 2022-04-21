@@ -1,9 +1,10 @@
 import { DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb';
-import { mocked } from 'ts-jest/utils';
 import { Order } from '@hastobegood/crypto-bot-artillery/order';
 import { buildDefaultOrder } from '@hastobegood/crypto-bot-artillery/test/builders';
-import { DdbOrderRepository } from '../../../../src/code/infrastructure/order/ddb-order-repository';
+import { mocked } from 'ts-jest/utils';
+
 import { OrderRepository } from '../../../../src/code/domain/order/order-repository';
+import { DdbOrderRepository } from '../../../../src/code/infrastructure/order/ddb-order-repository';
 
 const ddbClientMock = mocked(jest.genMockFromModule<DynamoDBDocumentClient>('@aws-sdk/lib-dynamodb'), true);
 

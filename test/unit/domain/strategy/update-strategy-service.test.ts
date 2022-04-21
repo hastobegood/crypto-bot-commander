@@ -1,4 +1,5 @@
 import { mocked } from 'ts-jest/utils';
+
 import { StrategyRepository } from '../../../../src/code/domain/strategy/strategy-repository';
 import { UpdateStrategyService } from '../../../../src/code/domain/strategy/update-strategy-service';
 
