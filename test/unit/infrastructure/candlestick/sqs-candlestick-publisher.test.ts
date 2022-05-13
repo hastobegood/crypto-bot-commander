@@ -1,12 +1,11 @@
 import { SQSClient } from '@aws-sdk/client-sqs';
 import MockDate from 'mockdate';
-import { mocked } from 'ts-jest/utils';
 
 import { CandlestickPublisher } from '../../../../src/code/domain/candlestick/candlestick-publisher';
 import { SqsCandlestickPublisher, TriggeredCandlesticksMessage, UpdatedCandlesticksMessage } from '../../../../src/code/infrastructure/candlestick/sqs-candlestick-publisher';
 import { buildDefaultTriggeredCandlesticksMessage, buildDefaultUpdatedCandlesticksMessage } from '../../../builders/infrastructure/candlestick/candlestick-message-builder';
 
-const sqsClientMock = mocked(jest.genMockFromModule<SQSClient>('@aws-sdk/client-sqs'), true);
+const sqsClientMock = jest.mocked(jest.genMockFromModule<SQSClient>('@aws-sdk/client-sqs'), true);
 
 let candlestickPublisher: CandlestickPublisher;
 beforeEach(() => {

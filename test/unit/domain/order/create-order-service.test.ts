@@ -1,14 +1,13 @@
 import { Order, SendOrderClient } from '@hastobegood/crypto-bot-artillery/order';
 import { buildDefaultLimitOrder, buildDefaultMarketOrder } from '@hastobegood/crypto-bot-artillery/test/builders';
-import { mocked } from 'ts-jest/utils';
 
 import { CreateOrderService } from '../../../../src/code/domain/order/create-order-service';
 import { CreateOrder } from '../../../../src/code/domain/order/model/order';
 import { OrderRepository } from '../../../../src/code/domain/order/order-repository';
 import { buildDefaultCreateLimitOrder, buildDefaultCreateMarketOrder } from '../../../builders/domain/order/order-test-builder';
 
-const sendOrderClientMock = mocked(jest.genMockFromModule<SendOrderClient>('@hastobegood/crypto-bot-artillery'), true);
-const orderRepositoryMock = mocked(jest.genMockFromModule<OrderRepository>('../../../../src/code/domain/order/order-repository'), true);
+const sendOrderClientMock = jest.mocked(jest.genMockFromModule<SendOrderClient>('@hastobegood/crypto-bot-artillery'), true);
+const orderRepositoryMock = jest.mocked(jest.genMockFromModule<OrderRepository>('../../../../src/code/domain/order/order-repository'), true);
 
 let createOrderService: CreateOrderService;
 beforeEach(() => {

@@ -1,9 +1,7 @@
-import { mocked } from 'ts-jest/utils';
-
 import { TriggerAllCandlesticksEventScheduler } from '../../../../src/code/application/candlestick/trigger-all-candlesticks-event-scheduler';
 import { PublishCandlestickService } from '../../../../src/code/domain/candlestick/publish-candlestick-service';
 
-const publishCandlestickServiceMock = mocked(jest.genMockFromModule<PublishCandlestickService>('../../../../src/code/domain/candlestick/publish-candlestick-service'), true);
+const publishCandlestickServiceMock = jest.mocked(jest.genMockFromModule<PublishCandlestickService>('../../../../src/code/domain/candlestick/publish-candlestick-service'), true);
 
 let triggerAllCandlesticksEventScheduler: TriggerAllCandlesticksEventScheduler;
 beforeEach(() => {

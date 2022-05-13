@@ -1,6 +1,5 @@
 import { Candlestick } from '@hastobegood/crypto-bot-artillery/candlestick';
 import { buildDefaultCandlestick, buildDefaultCandlesticks } from '@hastobegood/crypto-bot-artillery/test/builders';
-import { mocked } from 'ts-jest/utils';
 
 import { GetCandlestickService } from '../../../../../src/code/domain/candlestick/get-candlestick-service';
 import { Strategy } from '../../../../../src/code/domain/strategy/model/strategy';
@@ -13,9 +12,9 @@ import { buildDefaultCheckOrderStepOutput, buildDefaultStrategyStepTemplate, bui
 import { buildDefaultStrategy } from '../../../../builders/domain/strategy/strategy-test-builder';
 import { buildMarketEvolution } from '../../../../builders/domain/technical-analysis/market-evolution-test-builder';
 
-const getCandlestickServiceMock = mocked(jest.genMockFromModule<GetCandlestickService>('../../../../../src/code/domain/candlestick/get-candlestick-service'), true);
-const marketEvolutionServiceMock = mocked(jest.genMockFromModule<MarketEvolutionService>('../../../../../src/code/domain/technical-analysis/market-evolution-service'), true);
-const strategyStepRepositoryMock = mocked(jest.genMockFromModule<StrategyStepRepository>('../../../../../src/code/domain/strategy/step/strategy-step-repository'), true);
+const getCandlestickServiceMock = jest.mocked(jest.genMockFromModule<GetCandlestickService>('../../../../../src/code/domain/candlestick/get-candlestick-service'), true);
+const marketEvolutionServiceMock = jest.mocked(jest.genMockFromModule<MarketEvolutionService>('../../../../../src/code/domain/technical-analysis/market-evolution-service'), true);
+const strategyStepRepositoryMock = jest.mocked(jest.genMockFromModule<StrategyStepRepository>('../../../../../src/code/domain/strategy/step/strategy-step-repository'), true);
 
 let marketEvolutionStepService: MarketEvolutionStepService;
 beforeEach(() => {

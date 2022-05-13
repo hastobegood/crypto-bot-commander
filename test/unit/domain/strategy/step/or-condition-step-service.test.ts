@@ -1,5 +1,3 @@
-import { mocked } from 'ts-jest/utils';
-
 import { Strategy } from '../../../../../src/code/domain/strategy/model/strategy';
 import { MarketEvolutionStepOutput, OrConditionStep, OrConditionStepInput } from '../../../../../src/code/domain/strategy/model/strategy-step';
 import { MarketEvolutionStepService } from '../../../../../src/code/domain/strategy/step/market-evolution-step-service';
@@ -7,7 +5,7 @@ import { OrConditionStepService } from '../../../../../src/code/domain/strategy/
 import { buildDefaultMarketEvolutionStepInput, buildDefaultMarketEvolutionStepOutput, buildOrConditionStepInput, buildStrategyStepTemplate } from '../../../../builders/domain/strategy/strategy-step-test-builder';
 import { buildDefaultStrategy } from '../../../../builders/domain/strategy/strategy-test-builder';
 
-const marketEvolutionStepServiceMock = mocked(jest.genMockFromModule<MarketEvolutionStepService>('../../../../../src/code/domain/strategy/step/market-evolution-step-service'), true);
+const marketEvolutionStepServiceMock = jest.mocked(jest.genMockFromModule<MarketEvolutionStepService>('../../../../../src/code/domain/strategy/step/market-evolution-step-service'), true);
 const strategyStepServicesMocks = [marketEvolutionStepServiceMock];
 
 let orConditionStepService: OrConditionStepService;

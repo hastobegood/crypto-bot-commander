@@ -1,11 +1,10 @@
 import { SQSClient } from '@aws-sdk/client-sqs';
-import { mocked } from 'ts-jest/utils';
 
 import { StrategyStepPublisher } from '../../../../../src/code/domain/strategy/step/strategy-step-publisher';
 import { ProcessedStrategyStepMessage, SqsStrategyStepPublisher } from '../../../../../src/code/infrastructure/strategy/step/sqs-strategy-step-publisher';
 import { buildDefaultProcessedStrategyStepMessage } from '../../../../builders/infrastructure/strategy/step/strategy-step-message-builder';
 
-const sqsClientMock = mocked(jest.genMockFromModule<SQSClient>('@aws-sdk/client-sqs'), true);
+const sqsClientMock = jest.mocked(jest.genMockFromModule<SQSClient>('@aws-sdk/client-sqs'), true);
 
 let strategyStepPublisher: StrategyStepPublisher;
 beforeEach(() => {

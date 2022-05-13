@@ -1,6 +1,5 @@
 import { Candlestick } from '@hastobegood/crypto-bot-artillery/candlestick';
 import { buildDefaultCandlestick } from '@hastobegood/crypto-bot-artillery/test/builders';
-import { mocked } from 'ts-jest/utils';
 
 import { GetCandlestickService } from '../../../../../src/code/domain/candlestick/get-candlestick-service';
 import { Strategy } from '../../../../../src/code/domain/strategy/model/strategy';
@@ -12,8 +11,8 @@ import { buildDefaultMovingAverageCrossoverStepInput } from '../../../../builder
 import { buildDefaultStrategy } from '../../../../builders/domain/strategy/strategy-test-builder';
 import { buildDefaultMovingAverage, buildMovingAverage } from '../../../../builders/domain/technical-analysis/moving-average-test-builder';
 
-const getCandlestickServiceMock = mocked(jest.genMockFromModule<GetCandlestickService>('../../../../../src/code/domain/candlestick/get-candlestick-service'), true);
-const movingAverageServiceMock = mocked(jest.genMockFromModule<MovingAverageService>('../../../../../src/code/domain/technical-analysis/moving-average-service'), true);
+const getCandlestickServiceMock = jest.mocked(jest.genMockFromModule<GetCandlestickService>('../../../../../src/code/domain/candlestick/get-candlestick-service'), true);
+const movingAverageServiceMock = jest.mocked(jest.genMockFromModule<MovingAverageService>('../../../../../src/code/domain/technical-analysis/moving-average-service'), true);
 
 let movingAverageCrossoverStepService: MovingAverageCrossoverStepService;
 beforeEach(() => {
