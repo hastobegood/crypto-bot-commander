@@ -1,9 +1,7 @@
-import { mocked } from 'ts-jest/utils';
-
 import { CandlestickPublisher } from '../../../../src/code/domain/candlestick/candlestick-publisher';
 import { PublishCandlestickService } from '../../../../src/code/domain/candlestick/publish-candlestick-service';
 
-const candlestickPublisherMock = mocked(jest.genMockFromModule<CandlestickPublisher>('../../../../src/code/domain/candlestick/candlestick-publisher'), true);
+const candlestickPublisherMock = jest.mocked(jest.genMockFromModule<CandlestickPublisher>('../../../../src/code/domain/candlestick/candlestick-publisher'), true);
 
 let publishStrategyService: PublishCandlestickService;
 beforeEach(() => {

@@ -1,6 +1,4 @@
-import { stringContaining } from 'expect/build/asymmetricMatchers';
 import MockDate from 'mockdate';
-import { mocked } from 'ts-jest/utils';
 
 import { EvaluateStrategyService } from '../../../../src/code/domain/strategy/evaluate-strategy-service';
 import { Strategy } from '../../../../src/code/domain/strategy/model/strategy';
@@ -24,13 +22,13 @@ import {
 } from '../../../builders/domain/strategy/strategy-step-test-builder';
 import { buildDefaultStrategy } from '../../../builders/domain/strategy/strategy-test-builder';
 
-const marketEvolutionStepServiceMock = mocked(jest.genMockFromModule<MarketEvolutionStepService>('../../../../src/code/domain/strategy/step/market-evolution-step-service'), true);
-const sendOrderStepServiceMock = mocked(jest.genMockFromModule<SendOrderStepService>('../../../../src/code/domain/strategy/step/send-order-step-service'), true);
-const checkOrderStepServiceMock = mocked(jest.genMockFromModule<CheckOrderStepService>('../../../../src/code/domain/strategy/step/check-order-step-service'), true);
-const orConditionStepServiceMock = mocked(jest.genMockFromModule<OrConditionStepService>('../../../../src/code/domain/strategy/step/or-condition-step-service'), true);
+const marketEvolutionStepServiceMock = jest.mocked(jest.genMockFromModule<MarketEvolutionStepService>('../../../../src/code/domain/strategy/step/market-evolution-step-service'), true);
+const sendOrderStepServiceMock = jest.mocked(jest.genMockFromModule<SendOrderStepService>('../../../../src/code/domain/strategy/step/send-order-step-service'), true);
+const checkOrderStepServiceMock = jest.mocked(jest.genMockFromModule<CheckOrderStepService>('../../../../src/code/domain/strategy/step/check-order-step-service'), true);
+const orConditionStepServiceMock = jest.mocked(jest.genMockFromModule<OrConditionStepService>('../../../../src/code/domain/strategy/step/or-condition-step-service'), true);
 const strategyStepServicesMocks = [marketEvolutionStepServiceMock, sendOrderStepServiceMock, checkOrderStepServiceMock, orConditionStepServiceMock];
-const strategyStepRepositoryMock = mocked(jest.genMockFromModule<StrategyStepRepository>('../../../../src/code/domain/strategy/step/strategy-step-repository'), true);
-const strategyStepPublisherMock = mocked(jest.genMockFromModule<StrategyStepPublisher>('../../../../src/code/domain/strategy/step/strategy-step-publisher'), true);
+const strategyStepRepositoryMock = jest.mocked(jest.genMockFromModule<StrategyStepRepository>('../../../../src/code/domain/strategy/step/strategy-step-repository'), true);
+const strategyStepPublisherMock = jest.mocked(jest.genMockFromModule<StrategyStepPublisher>('../../../../src/code/domain/strategy/step/strategy-step-publisher'), true);
 
 let evaluateStrategyService: EvaluateStrategyService;
 beforeEach(() => {
@@ -120,7 +118,7 @@ describe('EvaluateStrategyService', () => {
             },
             error: {
               message: `Unsupported '${strategy.template['1'].type}' strategy step type`,
-              details: stringContaining(`Unsupported '${strategy.template['1'].type}' strategy step type`),
+              details: expect.stringContaining(`Unsupported '${strategy.template['1'].type}' strategy step type`),
             },
             creationDate: date,
             executionStartDate: date,

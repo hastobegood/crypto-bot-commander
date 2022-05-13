@@ -1,9 +1,7 @@
-import { mocked } from 'ts-jest/utils';
-
 import { OrderRepository } from '../../../../src/code/domain/order/order-repository';
 import { UpdateOrderService } from '../../../../src/code/domain/order/update-order-service';
 
-const orderRepositoryMock = mocked(jest.genMockFromModule<OrderRepository>('../../../../src/code/domain/order/order-repository'), true);
+const orderRepositoryMock = jest.mocked(jest.genMockFromModule<OrderRepository>('../../../../src/code/domain/order/order-repository'), true);
 
 let updateOrderService: UpdateOrderService;
 beforeEach(() => {

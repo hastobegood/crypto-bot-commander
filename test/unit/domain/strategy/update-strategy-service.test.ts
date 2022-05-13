@@ -1,9 +1,7 @@
-import { mocked } from 'ts-jest/utils';
-
 import { StrategyRepository } from '../../../../src/code/domain/strategy/strategy-repository';
 import { UpdateStrategyService } from '../../../../src/code/domain/strategy/update-strategy-service';
 
-const strategyRepositoryMock = mocked(jest.genMockFromModule<StrategyRepository>('../../../../src/code/domain/strategy/strategy-repository'), true);
+const strategyRepositoryMock = jest.mocked(jest.genMockFromModule<StrategyRepository>('../../../../src/code/domain/strategy/strategy-repository'), true);
 
 let updateStrategyService: UpdateStrategyService;
 beforeEach(() => {

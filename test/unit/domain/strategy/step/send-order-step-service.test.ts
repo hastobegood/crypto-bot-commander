@@ -1,7 +1,6 @@
 import { Candlestick } from '@hastobegood/crypto-bot-artillery/candlestick';
 import { Order } from '@hastobegood/crypto-bot-artillery/order';
 import { buildDefaultCandlestick, buildDefaultLimitOrder, buildDefaultOrder } from '@hastobegood/crypto-bot-artillery/test/builders';
-import { mocked } from 'ts-jest/utils';
 
 import { GetCandlestickService } from '../../../../../src/code/domain/candlestick/get-candlestick-service';
 import { CreateOrderService } from '../../../../../src/code/domain/order/create-order-service';
@@ -13,10 +12,10 @@ import { StrategyStepRepository } from '../../../../../src/code/domain/strategy/
 import { buildDefaultCheckOrderStepOutput, buildDefaultStrategyStepTemplate, buildSendOrderStepInput, buildStrategyStep } from '../../../../builders/domain/strategy/strategy-step-test-builder';
 import { buildDefaultStrategy, buildDefaultStrategyWallet } from '../../../../builders/domain/strategy/strategy-test-builder';
 
-const createOrderServiceMock = mocked(jest.genMockFromModule<CreateOrderService>('../../../../../src/code/domain/order/create-order-service'), true);
-const getStrategyServiceMock = mocked(jest.genMockFromModule<GetStrategyService>('../../../../../src/code/domain/strategy/get-strategy-service'), true);
-const getCandlestickServiceMock = mocked(jest.genMockFromModule<GetCandlestickService>('../../../../../src/code/domain/candlestick/get-candlestick-service'), true);
-const strategyStepRepositoryMock = mocked(jest.genMockFromModule<StrategyStepRepository>('../../../../../src/code/domain/strategy/step/strategy-step-repository'), true);
+const createOrderServiceMock = jest.mocked(jest.genMockFromModule<CreateOrderService>('../../../../../src/code/domain/order/create-order-service'), true);
+const getStrategyServiceMock = jest.mocked(jest.genMockFromModule<GetStrategyService>('../../../../../src/code/domain/strategy/get-strategy-service'), true);
+const getCandlestickServiceMock = jest.mocked(jest.genMockFromModule<GetCandlestickService>('../../../../../src/code/domain/candlestick/get-candlestick-service'), true);
+const strategyStepRepositoryMock = jest.mocked(jest.genMockFromModule<StrategyStepRepository>('../../../../../src/code/domain/strategy/step/strategy-step-repository'), true);
 
 let sendOrderStepService: SendOrderStepService;
 beforeEach(() => {

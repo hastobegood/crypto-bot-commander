@@ -1,10 +1,9 @@
 import { CheckOrderClient, OrderCheckup } from '@hastobegood/crypto-bot-artillery/order';
 import { buildDefaultOrderCheckup } from '@hastobegood/crypto-bot-artillery/test/builders';
-import { mocked } from 'ts-jest/utils';
 
 import { CheckOrderService } from '../../../../src/code/domain/order/check-order-service';
 
-const checkOrderClientMock = mocked(jest.genMockFromModule<CheckOrderClient>('@hastobegood/crypto-bot-artillery'), true);
+const checkOrderClientMock = jest.mocked(jest.genMockFromModule<CheckOrderClient>('@hastobegood/crypto-bot-artillery'), true);
 
 let checkOrderService: CheckOrderService;
 beforeEach(() => {

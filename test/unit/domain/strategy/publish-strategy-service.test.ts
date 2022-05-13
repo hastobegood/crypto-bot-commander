@@ -1,11 +1,9 @@
-import { mocked } from 'ts-jest/utils';
-
 import { PublishStrategyService } from '../../../../src/code/domain/strategy/publish-strategy-service';
 import { StrategyPublisher } from '../../../../src/code/domain/strategy/strategy-publisher';
 import { StrategyRepository } from '../../../../src/code/domain/strategy/strategy-repository';
 
-const strategyRepositoryMock = mocked(jest.genMockFromModule<StrategyRepository>('../../../../src/code/domain/strategy/strategy-repository'), true);
-const strategyPublisherMock = mocked(jest.genMockFromModule<StrategyPublisher>('../../../../src/code/domain/strategy/strategy-publisher'), true);
+const strategyRepositoryMock = jest.mocked(jest.genMockFromModule<StrategyRepository>('../../../../src/code/domain/strategy/strategy-repository'), true);
+const strategyPublisherMock = jest.mocked(jest.genMockFromModule<StrategyPublisher>('../../../../src/code/domain/strategy/strategy-publisher'), true);
 
 let publishStrategyService: PublishStrategyService;
 beforeEach(() => {

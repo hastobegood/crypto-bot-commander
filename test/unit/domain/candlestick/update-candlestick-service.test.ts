@@ -1,13 +1,12 @@
 import { Candlesticks, FetchCandlestickClient } from '@hastobegood/crypto-bot-artillery/candlestick';
 import { buildDefaultCandlesticks } from '@hastobegood/crypto-bot-artillery/test/builders';
 import MockDate from 'mockdate';
-import { mocked } from 'ts-jest/utils';
 
 import { CandlestickRepository } from '../../../../src/code/domain/candlestick/candlestick-repository';
 import { UpdateCandlestickService } from '../../../../src/code/domain/candlestick/update-candlestick-service';
 
-const fetchCandlestickClientMock = mocked(jest.genMockFromModule<FetchCandlestickClient>('@hastobegood/crypto-bot-artillery'), true);
-const candlestickRepositoryMock = mocked(jest.genMockFromModule<CandlestickRepository>('../../../../src/code/domain/candlestick/candlestick-repository'), true);
+const fetchCandlestickClientMock = jest.mocked(jest.genMockFromModule<FetchCandlestickClient>('@hastobegood/crypto-bot-artillery'), true);
+const candlestickRepositoryMock = jest.mocked(jest.genMockFromModule<CandlestickRepository>('../../../../src/code/domain/candlestick/candlestick-repository'), true);
 
 let updateCandlestickService: UpdateCandlestickService;
 beforeEach(() => {

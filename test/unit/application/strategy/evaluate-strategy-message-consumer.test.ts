@@ -1,5 +1,3 @@
-import { mocked } from 'ts-jest/utils';
-
 import { EvaluateStrategyMessageConsumer } from '../../../../src/code/application/strategy/evaluate-strategy-message-consumer';
 import { EvaluateStrategyService } from '../../../../src/code/domain/strategy/evaluate-strategy-service';
 import { GetStrategyService } from '../../../../src/code/domain/strategy/get-strategy-service';
@@ -11,9 +9,9 @@ import { buildStrategyEvaluation } from '../../../builders/domain/strategy/strat
 import { buildDefaultStrategy } from '../../../builders/domain/strategy/strategy-test-builder';
 import { buildDefaultActiveStrategyMessage } from '../../../builders/infrastructure/strategy/strategy-message-builder';
 
-const getStrategyServiceMock = mocked(jest.genMockFromModule<GetStrategyService>('../../../../src/code/domain/strategy/get-strategy-service'), true);
-const updateStrategyServiceMock = mocked(jest.genMockFromModule<UpdateStrategyService>('../../../../src/code/domain/strategy/update-strategy-service'), true);
-const evaluateStrategyServiceMock = mocked(jest.genMockFromModule<EvaluateStrategyService>('../../../../src/code/domain/strategy/evaluate-strategy-service'), true);
+const getStrategyServiceMock = jest.mocked(jest.genMockFromModule<GetStrategyService>('../../../../src/code/domain/strategy/get-strategy-service'), true);
+const updateStrategyServiceMock = jest.mocked(jest.genMockFromModule<UpdateStrategyService>('../../../../src/code/domain/strategy/update-strategy-service'), true);
+const evaluateStrategyServiceMock = jest.mocked(jest.genMockFromModule<EvaluateStrategyService>('../../../../src/code/domain/strategy/evaluate-strategy-service'), true);
 
 let evaluateStrategyMessageConsumer: EvaluateStrategyMessageConsumer;
 beforeEach(() => {

@@ -1,12 +1,11 @@
 import { DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb';
-import { mocked } from 'ts-jest/utils';
 
 import { StrategyStep } from '../../../../../src/code/domain/strategy/model/strategy-step';
 import { StrategyStepRepository } from '../../../../../src/code/domain/strategy/step/strategy-step-repository';
 import { DdbStrategyStepRepository } from '../../../../../src/code/infrastructure/strategy/step/ddb-strategy-step-repository';
 import { buildDefaultMarketEvolutionStep, buildDefaultSendOrderStep, buildDefaultStrategyStep } from '../../../../builders/domain/strategy/strategy-step-test-builder';
 
-const ddbClientMock = mocked(jest.genMockFromModule<DynamoDBDocumentClient>('@aws-sdk/lib-dynamodb'), true);
+const ddbClientMock = jest.mocked(jest.genMockFromModule<DynamoDBDocumentClient>('@aws-sdk/lib-dynamodb'), true);
 
 let strategyStepRepository: StrategyStepRepository;
 beforeEach(() => {

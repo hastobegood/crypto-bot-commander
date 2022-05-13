@@ -1,13 +1,11 @@
-import { mocked } from 'ts-jest/utils';
-
 import { UpdateAllCandlesticksMessageConsumer } from '../../../../src/code/application/candlestick/update-all-candlesticks-message-consumer';
 import { PublishCandlestickService } from '../../../../src/code/domain/candlestick/publish-candlestick-service';
 import { UpdateCandlestickService } from '../../../../src/code/domain/candlestick/update-candlestick-service';
 import { TriggeredCandlesticksMessage } from '../../../../src/code/infrastructure/candlestick/sqs-candlestick-publisher';
 import { buildDefaultTriggeredCandlesticksMessage } from '../../../builders/infrastructure/candlestick/candlestick-message-builder';
 
-const updateCandlestickServiceMock = mocked(jest.genMockFromModule<UpdateCandlestickService>('../../../../src/code/domain/candlestick/update-candlestick-service'), true);
-const publishCandlestickServiceMock = mocked(jest.genMockFromModule<PublishCandlestickService>('../../../../src/code/domain/candlestick/publish-candlestick-service'), true);
+const updateCandlestickServiceMock = jest.mocked(jest.genMockFromModule<UpdateCandlestickService>('../../../../src/code/domain/candlestick/update-candlestick-service'), true);
+const publishCandlestickServiceMock = jest.mocked(jest.genMockFromModule<PublishCandlestickService>('../../../../src/code/domain/candlestick/publish-candlestick-service'), true);
 
 let updateAllCandlesticksMessageConsumer: UpdateAllCandlesticksMessageConsumer;
 beforeEach(() => {
