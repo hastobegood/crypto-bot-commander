@@ -35,7 +35,7 @@
   "devDependencies": {
     "@types/aws-lambda": "^8.10.97",
     "@types/copy-webpack-plugin": "^10.1.0",
-    "@types/jest": "^27.4.1",
+    "@types/jest": "^27.5.1",
     "@types/lodash-es": "^4.17.6",
     "@types/node": "14",
     "@types/randomstring": "^1.1.8",
