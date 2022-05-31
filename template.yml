@@ -1,4 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
+
 Description: >-
   crypto-bot-commander
 
@@ -51,7 +52,7 @@ Globals:
     OpenApiVersion: 3.0.3
     TracingEnabled: !Ref TracingParameter
   Function:
-    Runtime: nodejs14.x
+    Runtime: nodejs16.x
     MemorySize: 128
     Timeout: 10
     AutoPublishAlias: Live
@@ -68,8 +69,8 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Description: Initialize all candlesticks function
-      CodeUri: dist/webpack/initialize-all-candlesticks-handler
-      Handler: app.handler
+      CodeUri: src/handlers
+      Handler: initialize-all-candlesticks-handler.handler
       Timeout: 300
       ReservedConcurrentExecutions: 1
       EventInvokeConfig:
@@ -89,13 +90,21 @@ Resources:
               Resource: !Sub arn:aws:kms:${AWS::Region}:${AWS::AccountId}:${ExchangesSecretEncryptionKeyParameter}
         - DynamoDBWritePolicy:
             TableName: !Ref CandlestickTable
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Target: es2021
+        Minify: true
+        SourceMap: true
+        EntryPoints:
+          - initialize-all-candlesticks-handler.ts
 
   TriggerAllCandlesticksFunction:
     Type: AWS::Serverless::Function
     Properties:
       Description: Trigger all candlesticks function
-      CodeUri: dist/webpack/trigger-all-candlesticks-handler
-      Handler: app.handler
+      CodeUri: src/handlers
+      Handler: trigger-all-candlesticks-handler.handler
       EventInvokeConfig:
         MaximumRetryAttempts: 0
       Environment:
@@ -111,13 +120,21 @@ Resources:
       Policies:
         - SQSSendMessagePolicy:
             QueueName: !GetAtt TriggeredCandlesticksQueue.QueueName
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Target: es2021
+        Minify: true
+        SourceMap: true
+        EntryPoints:
+          - trigger-all-candlesticks-handler.ts
 
   UpdateAllCandlesticksFunction:
     Type: AWS::Serverless::Function
     Properties:
       Description: Update all candlesticks function
-      CodeUri: dist/webpack/update-all-candlesticks-handler
-      Handler: app.handler
+      CodeUri: src/handlers
+      Handler: update-all-candlesticks-handler.handler
       EventInvokeConfig:
         MaximumRetryAttempts: 0
       Environment:
@@ -145,13 +162,21 @@ Resources:
             TableName: !Ref CandlestickTable
         - SQSSendMessagePolicy:
             QueueName: !GetAtt UpdatedCandlesticksQueue.QueueName
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Target: es2021
+        Minify: true
+        SourceMap: true
+        EntryPoints:
+          - update-all-candlesticks-handler.ts
 
   PublishAllActiveStrategiesFunction:
     Type: AWS::Serverless::Function
     Properties:
       Description: Publish all active strategies function
-      CodeUri: dist/webpack/publish-all-active-strategies-handler
-      Handler: app.handler
+      CodeUri: src/handlers
+      Handler: publish-all-active-strategies-handler.handler
       EventInvokeConfig:
         MaximumRetryAttempts: 0
       Environment:
@@ -172,13 +197,21 @@ Resources:
             QueueName: !GetAtt UpdatedCandlesticksQueue.QueueName
         - SQSSendMessagePolicy:
             QueueName: !GetAtt ActiveStrategiesQueue.QueueName
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Target: es2021
+        Minify: true
+        SourceMap: true
+        EntryPoints:
+          - publish-all-active-strategies-handler.ts
 
   EvaluateStrategyFunction:
     Type: AWS::Serverless::Function
     Properties:
       Description: Evaluate strategy function
-      CodeUri: dist/webpack/evaluate-strategy-handler
-      Handler: app.handler
+      CodeUri: src/handlers
+      Handler: evaluate-strategy-handler.handler
       MemorySize: 1024
       EventInvokeConfig:
         MaximumRetryAttempts: 0
@@ -217,6 +250,14 @@ Resources:
             QueueName: !GetAtt ActiveStrategiesQueue.QueueName
         - SQSSendMessagePolicy:
             QueueName: !GetAtt ProcessedStrategyStepQueue.QueueName
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Target: es2021
+        Minify: true
+        SourceMap: true
+        EntryPoints:
+          - evaluate-strategy-handler.ts
 
   ApiV1:
     Type: AWS::Serverless::Api
@@ -241,8 +282,8 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Description: Get all candlesticks function
-      CodeUri: dist/webpack/get-all-candlesticks-handler
-      Handler: app.handler
+      CodeUri: src/handlers
+      Handler: get-all-candlesticks-handler.handler
       MemorySize: 1024
       Environment:
         Variables:
@@ -258,6 +299,14 @@ Resources:
       Policies:
         - DynamoDBReadPolicy:
             TableName: !Ref CandlestickTable
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Target: es2021
+        Minify: true
+        SourceMap: true
+        EntryPoints:
+          - get-all-candlesticks-handler.ts
 
   CandlestickTable:
     Type: AWS::DynamoDB::Table

@@ -4,7 +4,7 @@
 
 # NodeJS
 node_modules
-dist
+out
 reports
 
 # AWS SAM

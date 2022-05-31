@@ -57,8 +57,6 @@
     ]
   },
   "ignorePatterns": [
-    "node_modules",
-    "dist",
-    ".aws-sam"
+    "out"
   ]
 }

@@ -3,30 +3,33 @@
   "version": "0.1.0",
   "license": "MIT",
   "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hastobegood/crypto-bot-commander.git"
+  },
   "engines": {
-    "node": "14"
+    "node": "16"
   },
   "type": "module",
   "scripts": {
     "prepare": "yarn husky install",
-    "clean": "rm -rf dist .aws-sam reports",
+    "clean": "rm -rf .aws-sam out reports",
     "build": "yarn tsc",
-    "bundle": "yarn webpack",
-    "bundle:analyze": "yarn webpack && yarn webpack-bundle-analyzer dist/webpack/stats.json",
+    "bundle": "sam build --parallel --beta-features",
     "test": "yarn jest",
     "test:coverage": "yarn jest --collectCoverage",
-    "lint": "yarn eslint . --ext .ts",
-    "lint:fix": "yarn eslint . --ext .ts --fix",
-    "lint:report": "yarn eslint . --ext .ts --format json -o reports/eslint-report.json ",
-    "deploy:test": "sam build && sam deploy --config-env test --tags Environment=test Application=CryptoBotCommander",
-    "deploy:prod": "sam build && sam deploy --config-env prod --tags Environment=prod Application=CryptoBotCommander"
+    "lint": "yarn eslint . --ext .ts,.js",
+    "lint:fix": "yarn eslint . --ext .ts,.js --fix",
+    "lint:report": "yarn eslint . --ext .ts,.js --format json -o reports/eslint-report.json ",
+    "deploy:test": "sam deploy --config-env test --tags Environment=test Application=CryptoBotCommander",
+    "deploy:prod": "sam deploy --config-env prod --tags Environment=prod Application=CryptoBotCommander"
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.87.0",
     "@aws-sdk/client-secrets-manager": "^3.87.0",
     "@aws-sdk/client-sqs": "^3.87.0",
     "@aws-sdk/lib-dynamodb": "^3.87.0",
-    "@hastobegood/crypto-bot-artillery": "^0.14.0",
+    "@hastobegood/crypto-bot-artillery": "^0.15.1",
     "aws-xray-sdk-core": "^3.3.5",
     "lodash-es": "^4.17.21",
     "serialize-error": "^8.1.0",
@@ -34,17 +37,14 @@
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.97",
-    "@types/copy-webpack-plugin": "^10.1.0",
     "@types/jest": "^27.5.1",
     "@types/lodash-es": "^4.17.6",
-    "@types/node": "14",
+    "@types/node": "16",
     "@types/randomstring": "^1.1.8",
     "@types/source-map-support": "^0.5.4",
-    "@types/webpack-bundle-analyzer": "^4.4.1",
-    "@types/webpack-node-externals": "^2.5.3",
     "@typescript-eslint/eslint-plugin": "^5.23.0",
     "@typescript-eslint/parser": "^5.23.0",
-    "copy-webpack-plugin": "^10.2.4",
+    "esbuild": "^0.14.42",
     "eslint": "^8.15.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-import-resolver-typescript": "^2.7.1",
@@ -58,13 +58,8 @@
     "prettier": "^2.6.2",
     "randomstring": "^1.2.2",
     "ts-jest": "^28.0.2",
-    "ts-loader": "^9.3.0",
     "ts-node": "^10.7.0",
-    "typescript": "^4.6.4",
-    "webpack": "^5.72.1",
-    "webpack-bundle-analyzer": "^4.5.0",
-    "webpack-cli": "^4.9.2",
-    "webpack-node-externals": "^3.0.0"
+    "typescript": "^4.6.4"
   },
   "jestSonar": {
     "reportPath": "reports"
