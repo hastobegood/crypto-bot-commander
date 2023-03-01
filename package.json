@@ -28,7 +28,7 @@
     "@aws-sdk/client-dynamodb": "^3.100.0",
     "@aws-sdk/client-secrets-manager": "^3.100.0",
     "@aws-sdk/client-sqs": "^3.100.0",
-    "@aws-sdk/lib-dynamodb": "^3.100.0",
+    "@aws-sdk/lib-dynamodb": "^3.281.0",
     "@hastobegood/crypto-bot-artillery": "^0.15.1",
     "aws-xray-sdk-core": "^3.3.5",
     "lodash-es": "^4.17.21",
